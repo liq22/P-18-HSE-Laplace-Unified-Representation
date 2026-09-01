@@ -1,40 +1,36 @@
-# PaperTrace 仓库级配置。键名和布尔值由程序读取，必须保持英文；未知项保留 TODO。
 schema_version: 1
+project_name: HSE-Laplace-Unified-Representation
+stage: theory_contract
+language: English
 
-# 仓库内部项目名，用于识别工作区；不必与最终论文标题完全一致。
-project_name: TODO
-created_on: 2026-06-22
+central_question: >-
+  How can heterogeneous time-series observations be represented in a common
+  physical space when their observable information only partially overlaps?
 
-# 一个仓库维护一篇论文；科研代码、实验结果和正文围绕同一问题闭环。
-workspaces:
-  source_code: src/
-  paper: paper/
-  scratchpad: obsidian/
-  agent_rules: .agent/
+representation:
+  shared_observable: flow_canonicalized
+  observed_private: identity_preserved
+  unobserved_private: diffusion_posterior
+  coordinate_system: stable_laplace_modal
 
-# 正文事实源策略：冻结前以 Markdown 为主，冻结后以 TeX 为主。
-paper_policy:
-  single_paper_directory: true
-  graph_structure: false
-  draft_source: paper/draft/
-  formal_source: paper/tex/
-  require_markdown_to_tex_freeze: true
+current_claim: >-
+  Under explicit observability, regularity, and finite-modal assumptions, a
+  distribution-valued unified representation can be constructed by combining
+  source-only transport on common observable modes, identity on observed
+  private modes, and a conditional diffusion posterior on unobserved modes.
 
-# Agent 边界只保护真实后果，不阻塞日常科研迭代。
-agent_policy:
-  # 方向正式选定、Markdown→TeX 和外部投稿由作者确认；
-  # 问题探索、claim 修改、代码实验和 Markdown 草拟可直接推进。
-  human_in_the_loop_for_consequential_actions: true
-  # 本地可逆修改可直接执行并检查 diff；远程删除、覆盖、发布或投稿需明确授权。
-  destructive_remote_changes_require_confirmation: true
-  # 不得编造结果、引用、统计、作者决定或代码行为。
-  fabricate_results_or_citations: false
-  # 不得把密钥、token 或私人凭据写入仓库。
-  store_credentials_in_repo: false
-  max_primary_skills_per_task: 1
-  max_supporting_skills_per_task: 1
+claim_status: theoretical_candidate
+formal_claim_supported: false
+evidence_level: analytic_derivations_and_semantic_tests
 
-# 最终 PR 阶段执行一次；日常修改只跑最相关检查。
-validation:
-  command: python src/S03_Scripts/validate_project.py
-  tests: python -m unittest discover -s src/S04_Tests
+largest_uncertainties:
+  - whether the observable decomposition is identifiable from realistic metadata
+  - whether a finite local Laplace dictionary is adequate for PHM transients
+  - whether source-only canonical transport preserves fault semantics
+  - whether diffusion uncertainty is calibrated on unobserved private modes
+
+next_decisive_experiment: known_pole_paired_acquisition_falsification
+stopping_condition: >-
+  Stop or simplify the method if metadata-conditioned diffusion or ordinary
+  optimal transport matches posterior calibration, private retention, and
+  common-mode comparability under the same information and compute budget.

@@ -1,96 +1,110 @@
-# PaperTrace
+# HSE–Laplace Unified Representation
 
-PaperTrace 是面向单篇科研论文的轻量工作区。它从当前最重要的科学或实现问题出发，选择一次能够改变判断的最小动作，并直接产出代码、实验结果、图表、正文或投稿文件。
+This repository studies one question:
+
+> How can heterogeneous time-series observations be represented in a common physical space when their observable information only partially overlaps?
+
+The proposed representation acts differently on three observable subspaces:
 
 ```text
-问题或失败
-→ 最小区分动作
-→ 真实产物与结果
-→ 更新主张、机制或边界
+common observable modes     -> flow-based canonical coordinates
+observed private modes      -> identity preservation
+unobserved private modes    -> diffusion posterior
 ```
 
-## 开始使用
+The common state is a stable Laplace-modal representation. Diffusion and flow are therefore not two stacked models. They are two blocks of one observability-conditioned stochastic transport operator.
 
-需要 Python 3.10+。默认安装 Core，不下载可选 ARIS 后端：
+## Current status
+
+```text
+stage: theory contract + analytic prototype
+formal_claim_supported: false
+evidence: mathematical derivations and deterministic semantic tests
+real PHM evidence: not started
+```
+
+The repository does not yet claim improved diagnosis, forecasting, imputation, or domain generalization.
+
+## Mathematical object
+
+For acquisition domain `d`, the modal space is decomposed as
+
+\[
+\mathcal H
+=
+\mathcal H_c
+\oplus
+\mathcal H_{p,d}
+\oplus
+\mathcal H_{u,d}.
+\]
+
+The unified representation is distribution-valued:
+
+\[
+\mu_d^U
+=
+\operatorname{Law}
+\left(
+T_d\Theta_c,
+\Theta_{p,d},
+\Theta_{u,d}\mid\mathcal O_d
+\right),
+\]
+
+where `T_d` transports common observable modes to source-only canonical coordinates, observed private modes are unchanged, and unobserved modes remain a conditional posterior rather than a fabricated point estimate.
+
+## Start here
 
 ```bash
-python scripts/setup_papertrace.py --non-interactive
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+python -m pip install -e .
+python examples/analytic_unified_representation.py
+python -m unittest discover -s tests -v
 ```
 
-已有代码、实验或草稿时，直接告诉 Agent：
+The permanent CI runs the same analytic witness and 15 scientific-semantic tests. These checks validate the mathematical software contract and theory-corpus structure; they are not learned-model or real-PHM evidence.
 
-```text
-读取 paper/paper.yaml 和当前任务所需文件，找出最重要的一个科学或实现问题，
-直接修改主要产物并运行一次最相关验证；不要只输出计划、状态报告或审查材料。
-```
+## Repository map
 
-研究方向尚未收敛时使用：
-
-```text
-@初始化入口
-读取当前仓库和已有材料，从真实问题、失败或未决矛盾出发，生成少量机制不同且可证伪的候选；
-核验最强近邻，选择一个暂定方向，并直接更新核心创新材料。未知项保留 TODO/unknown。
-```
-
-不需要预先填写完整论文、实验、图表、TeX 或投稿模板。
-
-## 常用请求
-
-| 目标 | 直接请求 |
+| Path | Purpose |
 |---|---|
-| 收敛研究问题 | `根据当前失败、证据和最强竞争解释，修订中心问题与最小 claim tree。` |
-| 设计方法 | `提出区分两个机制的最小 intervention、预测、拒绝条件和 boundary test。` |
-| 修改代码 | `复现并修复这个语义错误，修改源码和最近的 regression test。` |
-| 运行实验 | `执行 matched comparison，返回真实指标、不确定性和 claim decision。` |
-| 分析结果 | `先确认 estimand 和 independent unit，再给出最简单有效的分析。` |
-| 生成图表 | `基于真实结果生成可编辑图表和自包含 caption。` |
-| 修改论文 | `按当前证据重写目标段落，保留数字、引用和结论边界。` |
-| 避免防御性写作 | `去掉重复 caveat、免责声明和叠加 hedge，保留真实不确定性与局限。` |
-| 审稿返修 | `先完成必要实验、分析或正文修改，再写 point-by-point response。` |
-| 准备投稿 | `按目标期刊官方要求生成可上传文件，不执行正式投稿。` |
+| `src/hse_laplace/` | Minimal mathematical implementation |
+| `theory/` | One theorem or theory analysis per Markdown file |
+| `tests/` | Tests of scientific invariants, not coverage targets |
+| `examples/` | Deterministic analytic prototype |
+| `paper/` | Single manuscript authority and experiment design |
+| `literature/` | Closest prior work and reproducible download list |
 
-## 工作区
+## Theory index
 
-| 路径 | 职责 |
-|---|---|
-| `paper/paper.yaml` | 当前研究问题、主张风险、最大不确定性、下一动作和 active source |
-| `paper/draft/main.md` | Markdown 阶段的当前正文入口 |
-| `paper/logs/research_log.md` | 改变研究判断的历史记录 |
-| `paper/logs/paper_log.md` | 改变论文主张或正文的历史记录 |
-| `.agent/skills/00-router/SKILL.md` | 默认路由入口 |
+1. [`00_axioms_and_notation.md`](theory/00_axioms_and_notation.md)
+2. [`01_observable_subspace_decomposition.md`](theory/01_observable_subspace_decomposition.md)
+3. [`02_constructive_existence.md`](theory/02_constructive_existence.md)
+4. [`03_diffusion_flow_marginal_equivalence.md`](theory/03_diffusion_flow_marginal_equivalence.md)
+5. [`04_observed_private_invariance.md`](theory/04_observed_private_invariance.md)
+6. [`05_global_invariance_risk_lower_bound.md`](theory/05_global_invariance_risk_lower_bound.md)
+7. [`06_posterior_representation_sufficiency.md`](theory/06_posterior_representation_sufficiency.md)
+8. [`07_laplace_modal_stability.md`](theory/07_laplace_modal_stability.md)
+9. [`08_shared_estimation_perturbation_bound.md`](theory/08_shared_estimation_perturbation_bound.md)
+10. [`09_unified_representation_risk_bound.md`](theory/09_unified_representation_risk_bound.md)
+11. [`10_sampling_gap_shift_bound.md`](theory/10_sampling_gap_shift_bound.md)
+12. [`11_private_preserving_optimal_transport.md`](theory/11_private_preserving_optimal_transport.md)
+13. [`12_commuting_block_generators.md`](theory/12_commuting_block_generators.md)
+14. [`13_identifiability_and_failure_boundaries.md`](theory/13_identifiability_and_failure_boundaries.md)
 
-方法、文献、实验、图表、TeX、review 和 submission 文件只在任务实际需要时创建。详细说明见 [`paper/README.md`](paper/README.md)。
+Each proof states its assumptions, lemmas, theorem, derivation, failure boundary, and measurable experimental consequence. A result is valid only under the assumptions written in its own document.
 
-## 执行边界
+## Research order
 
-- 科学语义不一致时明确失败，不猜测数据、标签、split、task、objective、metric 或 claim 含义。
-- 主要产物优先；记录、manifest、checklist 和报告不能替代源码、结果、图表或正文。
-- null、negative、unstable 和 contradictory result 必须如实改变判断。
-- 不主动增加 hash、receipt、ledger、tree digest 或完整性证明。
-- Python 用于计算、代码、实验、统计、绘图、文件生成和针对性测试，不用于普通 Markdown 或文风评分。
-- 一次任务使用一个 primary Skill、至多一个 supporting Skill，并运行一次最相关验证。
-
-完整规则见 [`AGENTS.md`](AGENTS.md)，操作示例见 [`QUICKSTART_NEW_PROJECT.md`](QUICKSTART_NEW_PROJECT.md)。
-
-## 可选执行后端
-
-只有明确需要额外检索、实验、图表或编译能力时才启用固定版本的 ARIS：
-
-```bash
-python scripts/setup_papertrace.py --profile execution
+```text
+1. freeze observable decomposition and stable modal chart
+2. verify analytic flow–diffusion representation
+3. build a known-pole paired-acquisition falsification experiment
+4. learn the unobserved-mode posterior
+5. test source-only shared canonical transport
+6. enter recording-level paired-rate PHM experiments
 ```
 
-ARIS 始终位于 PaperTrace Router 之后，不新增用户入口。详见 [`integrations/aris/README.md`](integrations/aris/README.md)。
-
-## 最终检查
-
-```bash
-python scripts/check_aris_backend.py --profile core
-python src/S03_Scripts/validate_project.py
-python .agent/scripts/validate_agent_skills.py --skills-dir .agent/skills
-python .agent/scripts/validate_agent_skill_wrappers.py
-python .agent/scripts/validate_skill_evals.py
-python -m unittest discover -s src/S04_Tests -v
-```
-
-`validate_skill_evals.py` 在未提供 `--results` 时只校验 case definitions，不执行 Claude、Codex 或其他模型。
+Do not add event routers, codebooks, learned poles, or foundation-model pretraining before the known-pole experiment distinguishes this representation from simpler metadata-conditioned baselines.
