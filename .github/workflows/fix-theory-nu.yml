@@ -1,0 +1,57 @@
+name: Repair broken transport notation
+
+on:
+  push:
+    branches:
+      - agent/unified-representation-theory-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Repair the observed broken nu symbol
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("theory/11_private_preserving_optimal_transport.md")
+          text = path.read_text(encoding="utf-8")
+          broken = "Then \\(\\Pi^*\\in\\Pi(\\mu,\nu)\\), and"
+          corrected = r"Then \(\Pi^*\in\Pi(\mu,\nu)\), and"
+          if text.count(broken) != 1:
+              raise SystemExit("the expected single broken transport expression was not found")
+          path.write_text(text.replace(broken, corrected), encoding="utf-8")
+
+          for theory_path in sorted(Path("theory").glob("*.md")):
+              lines = theory_path.read_text(encoding="utf-8").splitlines()
+              for index, line in enumerate(lines[:-1]):
+                  if line.rstrip().endswith(",") and lines[index + 1].strip() == "u)\\), and":
+                      raise SystemExit(f"broken nu expression remains in {theory_path}:{index + 1}")
+          PY
+
+      - name: Run scientific semantic tests
+        run: |
+          python -m pip install -e .
+          python examples/analytic_unified_representation.py
+          python -m unittest discover -s tests -v
+
+      - name: Commit repair and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/fix-theory-nu.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'fix: restore private-transport target notation'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
