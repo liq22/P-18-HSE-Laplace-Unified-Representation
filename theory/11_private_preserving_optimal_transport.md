@@ -117,8 +117,7 @@ independently and setting
 Q=P.
 \]
 
-Then \(\Pi^*\in\Pi(\mu,
-u)\), and
+Then \(\Pi^*\in\Pi(\mu,\nu)\), and
 
 \[
 \int c\,d\Pi^*
