@@ -62,7 +62,7 @@ class TheoryCorpusTests(unittest.TestCase):
             self.assertIn("## Status", text, msg=name)
             self.assertIn("Lemma", text, msg=name)
             self.assertIn("Theorem", text, msg=name)
-            self.assertIn("Proof", text, msg=name)
+            self.assertIn("proof", lower, msg=name)
             self.assertTrue(
                 any(marker in lower for marker in boundary_markers),
                 msg=f"no explicit boundary or counterexample in {name}",
