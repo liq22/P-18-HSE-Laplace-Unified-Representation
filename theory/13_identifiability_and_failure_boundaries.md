@@ -145,7 +145,7 @@ Let query times lie on a regular grid \(t_n=n\Delta\). Frequencies \(\omega\) an
 
 \[
 \omega'=
-\omega+rac{2\pi k}{\Delta}
+\omega+\frac{2\pi k}{\Delta}
 \]
 
 produce identical complex phases:

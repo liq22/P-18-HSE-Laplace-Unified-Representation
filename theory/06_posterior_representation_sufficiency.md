@@ -181,7 +181,7 @@ Let the latent state be scalar. Consider two observations \(O=a\) and \(O=b\) wi
 \[
 \Theta\mid O=a
 \sim
-\frac12\delta_{-1}+rac12\delta_{1},
+\frac12\delta_{-1}+\frac12\delta_{1},
 \]
 
 \[
