@@ -64,6 +64,8 @@ python examples/analytic_unified_representation.py
 python -m unittest discover -s tests -v
 ```
 
+The permanent CI runs the same analytic witness and 15 scientific-semantic tests. These checks validate the mathematical software contract and theory-corpus structure; they are not learned-model or real-PHM evidence.
+
 ## Repository map
 
 | Path | Purpose |
