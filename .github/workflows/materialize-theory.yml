@@ -1,0 +1,64 @@
+name: Materialize theory documents
+
+on:
+  push:
+    branches:
+      - agent/unified-representation-theory-foundation
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Extract theory bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .bootstrap/theory_*.b64 | base64 --decode > /tmp/theory.tgz
+          tar -xzf /tmp/theory.tgz
+
+          expected=(
+            theory/00_axioms_and_notation.md
+            theory/01_observable_subspace_decomposition.md
+            theory/02_constructive_existence.md
+            theory/03_diffusion_flow_marginal_equivalence.md
+            theory/04_observed_private_invariance.md
+            theory/05_global_invariance_risk_lower_bound.md
+            theory/06_posterior_representation_sufficiency.md
+            theory/07_laplace_modal_stability.md
+            theory/08_shared_estimation_perturbation_bound.md
+            theory/09_unified_representation_risk_bound.md
+            theory/10_sampling_gap_shift_bound.md
+            theory/11_private_preserving_optimal_transport.md
+            theory/12_commuting_block_generators.md
+            theory/13_identifiability_and_failure_boundaries.md
+          )
+
+          for file in "${expected[@]}"; do
+            test -s "$file"
+          done
+          test "$(find theory -maxdepth 1 -type f -name '*.md' | wc -l)" -eq 14
+          grep -q '## Status' theory/01_observable_subspace_decomposition.md
+          grep -q '##.*Lemma' theory/03_diffusion_flow_marginal_equivalence.md
+          grep -q '##.*Theorem' theory/05_global_invariance_risk_lower_bound.md
+          grep -q 'failure' theory/13_identifiability_and_failure_boundaries.md
+
+      - name: Commit materialized theory and remove bootstrap files
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .bootstrap
+          rm -f .github/workflows/materialize-theory.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'docs: add complete unified representation theory corpus'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
