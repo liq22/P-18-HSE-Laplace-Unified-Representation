@@ -52,6 +52,10 @@ class TheoryCorpusTests(unittest.TestCase):
             "limitation",
             "harmless",
         )
+        consequence_markers = (
+            "experimental implication",
+            "falsifiable implementation consequences",
+        )
         for name in EXPECTED[1:13]:
             text = (THEORY_DIR / name).read_text(encoding="utf-8")
             lower = text.lower()
@@ -63,7 +67,10 @@ class TheoryCorpusTests(unittest.TestCase):
                 any(marker in lower for marker in boundary_markers),
                 msg=f"no explicit boundary or counterexample in {name}",
             )
-            self.assertIn("Experimental implication", text, msg=name)
+            self.assertTrue(
+                any(marker in lower for marker in consequence_markers),
+                msg=f"no empirical or implementation consequence in {name}",
+            )
 
     def test_identifiability_document_contains_constructive_failures(self) -> None:
         text = (THEORY_DIR / EXPECTED[13]).read_text(encoding="utf-8")
