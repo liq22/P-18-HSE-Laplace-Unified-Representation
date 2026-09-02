@@ -1,36 +1,52 @@
-schema_version: 1
-project_name: HSE-Laplace-Unified-Representation
-stage: theory_contract
+schema_version: 2
+project_name: HSE-Laplace-Source-Supported-Representation
+stage: corrected_theory_contract
 language: English
 
+scope: >-
+  Cross-acquisition representation of one shared local dynamical process under
+  partially overlapping structural modal support. The project does not cover
+  arbitrary unrelated heterogeneous time series.
+
 central_question: >-
-  How can heterogeneous time-series observations be represented in a common
-  physical space when their observable information only partially overlaps?
+  How should multiple acquisition operators represent a shared local dynamical
+  process when some modal components are common, some are observed only in the
+  current domain, some are missing locally but supported by other source
+  domains, and some are unsupported by all source domains?
 
 representation:
-  shared_observable: flow_canonicalized
+  shared_observable: source_population_flow_canonicalized
   observed_private: identity_preserved
-  unobserved_private: diffusion_posterior
-  coordinate_system: stable_laplace_modal
+  recoverable_missing: conditional_posterior
+  global_null: unsupported_no_data_driven_recovery
+  dependency: triangular_shared_then_missing
+  coordinate_system: local_stable_laplace_modal
+  structural_observability: domain_level
+  instance_reliability: sample_level
 
 current_claim: >-
-  Under explicit observability, regularity, and finite-modal assumptions, a
-  distribution-valued unified representation can be constructed by combining
-  source-only transport on common observable modes, identity on observed
-  private modes, and a conditional diffusion posterior on unobserved modes.
+  Under explicit structural-observability, finite-modal and regularity
+  assumptions, a source-supported distribution-valued representation can be
+  constructed by canonicalizing common observable modes at the source
+  population level, preserving observed-private modes, representing
+  recoverable-missing modes by a conditional posterior, and excluding
+  source-global-null modes from learned recovery claims.
 
 claim_status: theoretical_candidate
 formal_claim_supported: false
 evidence_level: analytic_derivations_and_semantic_tests
 
 largest_uncertainties:
-  - whether the observable decomposition is identifiable from realistic metadata
-  - whether a finite local Laplace dictionary is adequate for PHM transients
-  - whether source-only canonical transport preserves fault semantics
-  - whether diffusion uncertainty is calibrated on unobserved private modes
+  - whether structural modal roles can be identified from realistic acquisition metadata
+  - whether paired source data identify the recoverable-missing conditional
+  - whether a local damped-modal dictionary is adequate for event-local PHM transients
+  - whether a Gaussian or mixture posterior already matches Diffusion
+  - whether affine calibration or ordinary optimal transport already matches Flow
+  - whether source-only canonicalization preserves fault semantics
 
-next_decisive_experiment: known_pole_paired_acquisition_falsification
+next_decisive_experiment: known_pole_2x2x2_oracle_falsification
 stopping_condition: >-
-  Stop or simplify the method if metadata-conditioned diffusion or ordinary
-  optimal transport matches posterior calibration, private retention, and
-  common-mode comparability under the same information and compute budget.
+  Stop or simplify a mechanism when the corresponding simple baseline matches
+  it under the same information and compute budget: Gaussian or mixture models
+  for missing posterior, affine/CORAL/ordinary OT for shared canonicalization,
+  and a direct time-domain latent for the Laplace representation.

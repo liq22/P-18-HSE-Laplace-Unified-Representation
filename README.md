@@ -1,33 +1,29 @@
-# HSE–Laplace Unified Representation
+# HSE–Laplace Source-Supported Representation
 
-This repository studies one question:
+This repository studies one bounded question:
 
-> How can heterogeneous time-series observations be represented in a common physical space when their observable information only partially overlaps?
+> How should different acquisition operators represent the same local dynamical
+> process when their observable modal supports only partially overlap?
 
-The proposed representation acts differently on three observable subspaces:
+The project does **not** claim a universal representation for arbitrary
+heterogeneous time series. The current scope is one physical system family, one
+declared local Laplace-modal dictionary, and multiple acquisition operators
+such as sampling rates, sensor responses, channel sets and missingness patterns.
+
+## Core idea
+
+A three-block split is insufficient because it mixes recoverable missing
+information with information unsupported by every source. The revised
+representation uses four structural roles:
 
 ```text
-common observable modes     -> flow-based canonical coordinates
-observed private modes      -> identity preservation
-unobserved private modes    -> diffusion posterior
+common observable modes       -> source-population canonical Flow
+observed-private modes        -> exact identity preservation
+recoverable-missing modes     -> conditional posterior, optionally Diffusion
+source-global-null modes      -> unsupported; no data-driven recovery claim
 ```
 
-The common state is a stable Laplace-modal representation. Diffusion and flow are therefore not two stacked models. They are two blocks of one observability-conditioned stochastic transport operator.
-
-## Current status
-
-```text
-stage: theory contract + analytic prototype
-formal_claim_supported: false
-evidence: mathematical derivations and deterministic semantic tests
-real PHM evidence: not started
-```
-
-The repository does not yet claim improved diagnosis, forecasting, imputation, or domain generalization.
-
-## Mathematical object
-
-For acquisition domain `d`, the modal space is decomposed as
+Mathematically,
 
 \[
 \mathcal H
@@ -36,23 +32,107 @@ For acquisition domain `d`, the modal space is decomposed as
 \oplus
 \mathcal H_{p,d}
 \oplus
-\mathcal H_{u,d}.
+\mathcal H_{m,d}
+\oplus
+\mathcal H_0.
 \]
 
-The unified representation is distribution-valued:
+Here
 
 \[
-\mu_d^U
+\mathcal H_c
+=
+\bigcap_j\mathcal H_j^o,
+\qquad
+\mathcal H_\cup
+=
+\sum_j\mathcal H_j^o,
+\]
+
+\[
+\mathcal H_{p,d}
+=
+\mathcal H_d^o\cap\mathcal H_c^\perp,
+\]
+
+\[
+\mathcal H_{m,d}
+=
+\mathcal H_\cup\cap(\mathcal H_d^o)^\perp,
+\]
+
+\[
+\mathcal H_0
+=
+\mathcal H_\cup^\perp.
+\]
+
+The source-supported distribution-valued representation is
+
+\[
+\mu_d^U(\cdot\mid o)
 =
 \operatorname{Law}
 \left(
 T_d\Theta_c,
 \Theta_{p,d},
-\Theta_{u,d}\mid\mathcal O_d
+\Theta_{m,d}
+\mid
+\mathcal O_d=o
 \right),
 \]
 
-where `T_d` transports common observable modes to source-only canonical coordinates, observed private modes are unchanged, and unobserved modes remain a conditional posterior rather than a fabricated point estimate.
+with \(P_0\) returned only as an unsupported-support marker.
+
+## Why Flow and Diffusion have different roles
+
+The candidate final dependency is triangular:
+
+\[
+C^*=T_d(C),
+\]
+
+\[
+P'=P,
+\]
+
+\[
+M'\sim
+q_\theta(M\mid C^*,P,\mathcal O_d).
+\]
+
+Flow is considered only when affine calibration, CORAL and ordinary OT cannot
+canonicalize the shared modal state. Diffusion is considered only when
+Gaussian or mixture posteriors cannot represent the recoverable-missing
+conditional. Neither component is included merely because it is a modern
+generative model.
+
+## Structural observability versus sample reliability
+
+The acquisition design defines structural modal support. A particular sample
+also carries an instance reliability from timestamps, masks, coverage and SNR.
+
+```text
+structural observability
+-> assigns the scientific role of a modal slot
+
+instance reliability
+-> controls confidence or posterior precision for that sample
+```
+
+The distinction preserves fixed modal slots and avoids a different latent
+dimension for every missingness pattern.
+
+## Current status
+
+```text
+stage: corrected theory contract + analytic witness
+formal_claim_supported: false
+evidence: mathematical derivations and deterministic semantic tests
+learned posterior: not started
+learned flow: not started
+real PHM evidence: not started
+```
 
 ## Start here
 
@@ -64,20 +144,22 @@ python examples/analytic_unified_representation.py
 python -m unittest discover -s tests -v
 ```
 
-The permanent CI runs the same analytic witness and 15 scientific-semantic tests. These checks validate the mathematical software contract and theory-corpus structure; they are not learned-model or real-PHM evidence.
+The analytic witness checks the four-way decomposition, observed-private
+identity, global-null exclusion and stable Laplace coordinates. It is not
+learned-model evidence.
 
 ## Repository map
 
 | Path | Purpose |
 |---|---|
 | `src/hse_laplace/` | Minimal mathematical implementation |
-| `theory/` | One theorem or theory analysis per Markdown file |
-| `tests/` | Tests of scientific invariants, not coverage targets |
-| `examples/` | Deterministic analytic prototype |
-| `paper/` | Single manuscript authority and experiment design |
-| `literature/` | Closest prior work and reproducible download list |
+| `theory/` | One theorem or boundary analysis per Markdown file |
+| `tests/` | Behavioral scientific invariants |
+| `examples/` | Deterministic analytic witness |
+| `paper/` | Manuscript argument, closest-work boundary and experiment plan |
+| `literature/` | References and reproducible open-access source list |
 
-## Theory index
+## Main theory
 
 1. [`00_axioms_and_notation.md`](theory/00_axioms_and_notation.md)
 2. [`01_observable_subspace_decomposition.md`](theory/01_observable_subspace_decomposition.md)
@@ -94,17 +176,35 @@ The permanent CI runs the same analytic witness and 15 scientific-semantic tests
 13. [`12_commuting_block_generators.md`](theory/12_commuting_block_generators.md)
 14. [`13_identifiability_and_failure_boundaries.md`](theory/13_identifiability_and_failure_boundaries.md)
 
-Each proof states its assumptions, lemmas, theorem, derivation, failure boundary, and measurable experimental consequence. A result is valid only under the assumptions written in its own document.
+## Next decisive experiment
 
-## Research order
+The next PR is an oracle known-pole experiment, not a learned architecture:
+
+\[
+2\times2\times2
+\]
+
+factorial cells for:
 
 ```text
-1. freeze observable decomposition and stable modal chart
-2. verify analytic flow–diffusion representation
-3. build a known-pole paired-acquisition falsification experiment
-4. learn the unobserved-mode posterior
-5. test source-only shared canonical transport
-6. enter recording-level paired-rate PHM experiments
+full / partial support overlap
+×
+private task-irrelevant / task-relevant
+×
+unimodal / multimodal recoverable-missing posterior
 ```
 
-Do not add event routers, codebooks, learned poles, or foundation-model pretraining before the known-pole experiment distinguishes this representation from simpler metadata-conditioned baselines.
+A source-global-null mode is added as a negative control. The experiment first
+asks whether decomposition, identity and probability-valued recovery are
+necessary. Learned Diffusion and Flow are blocked until simpler baselines fail.
+
+## Non-claims
+
+The repository does not yet claim:
+
+- universal heterogeneous time-series representation;
+- recovery of source-global-null modes;
+- unique identification of acquisition operators or modal states;
+- superiority over metadata conditioning, Gaussian posteriors or affine
+  calibration;
+- improved diagnosis, forecasting, imputation or domain generalization.

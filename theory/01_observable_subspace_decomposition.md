@@ -1,84 +1,92 @@
-# Theorem 1 — Observable subspace decomposition
+# Theorem 1 — Four-way observable-support decomposition
 
 ## Status
 
-**Proved under Axioms A0–A3.**
+**Proved under Axioms A0–A3 for fixed structural acquisition operators.**
 
 ## Purpose
 
-The unified representation requires a mathematically unambiguous split between:
+A three-block split into shared, observed-private and unobserved components is
+too coarse. Its unobserved block mixes:
 
-1. modes observable in every source acquisition domain;
-2. modes observable in the current domain but not in all domains;
-3. modes unobservable in the current domain.
+1. modes hidden in the current domain but observed by another source domain;
+2. modes unsupported by every source domain.
 
-This file proves that the split is an orthogonal direct sum and therefore unique.
+Only the first class can receive a data-supported recovery claim. This document
+proves the four-way orthogonal decomposition used by the revised method.
 
 ## 1. Definitions
 
-For each source domain \(d\), let
+For every source domain \(d\), let
 
 \[
 P_d^o
 =
 \mathbf 1_{[\tau_o,\infty)}(G_d),
 \qquad
-G_d=A_d^\top\Sigma_d^{-1}A_d.
-\]
-
-Because \(G_d\) is symmetric positive semidefinite, \(P_d^o\) is an orthogonal projector. Define
-
-\[
 \mathcal H_d^o=\operatorname{Range}(P_d^o).
 \]
 
-The common subspace is
+Define
 
 \[
-\mathcal H_c=\bigcap_{j\in\mathcal D_s}\mathcal H_j^o.
+\mathcal H_c
+=
+\bigcap_{j=1}^{D}\mathcal H_j^o
 \]
 
-For a fixed domain \(d\), define
+and
 
 \[
-\mathcal H_{p,d}=\mathcal H_d^o\cap\mathcal H_c^\perp,
+\mathcal H_\cup
+=
+\sum_{j=1}^{D}\mathcal H_j^o,
+\]
+
+where the sum denotes the linear span of the union.
+
+For a fixed domain \(d\),
+
+\[
+\mathcal H_{p,d}
+=
+\mathcal H_d^o\cap\mathcal H_c^\perp,
 \]
 
 \[
-\mathcal H_{u,d}=(\mathcal H_d^o)^\perp.
+\mathcal H_{m,d}
+=
+\mathcal H_\cup\cap(\mathcal H_d^o)^\perp,
 \]
 
-## 2. Lemma 1.1 — the common subspace is contained in each observable subspace
+\[
+\mathcal H_0
+=
+\mathcal H_\cup^\perp.
+\]
 
-### Statement
+The symbol \(p\) denotes observed-private, \(m\) denotes
+recoverable-missing, and \(0\) denotes source-global null support.
 
-For every \(d\in\mathcal D_s\),
+## 2. Lemma 1.1 — nested structural subspaces
+
+For every domain \(d\),
 
 \[
-\mathcal H_c\subseteq\mathcal H_d^o.
+\mathcal H_c
+\subseteq
+\mathcal H_d^o
+\subseteq
+\mathcal H_\cup.
 \]
 
 ### Proof
 
-By definition,
+The first inclusion follows from the definition of an intersection. The second
+follows because \(\mathcal H_\cup\) is the span of all source observable
+subspaces and therefore contains each term in the span. ∎
 
-\[
-\mathcal H_c=\bigcap_{j\in\mathcal D_s}\mathcal H_j^o.
-\]
-
-An element \(x\) belongs to an intersection only if it belongs to each set in the intersection. Hence, for every fixed \(d\),
-
-\[
-x\in\mathcal H_c
-\implies
-x\in\mathcal H_d^o.
-\]
-
-Therefore \(\mathcal H_c\subseteq\mathcal H_d^o\). ∎
-
-## 3. Lemma 1.2 — an observable subspace splits into common and observed-private parts
-
-### Statement
+## 3. Lemma 1.2 — observable support splits into common and private parts
 
 For every domain \(d\),
 
@@ -87,36 +95,21 @@ For every domain \(d\),
 =
 \mathcal H_c
 \oplus
-\left(\mathcal H_d^o\cap\mathcal H_c^\perp\right).
+\mathcal H_{p,d}.
 \]
 
 ### Proof
 
-Take any \(x\in\mathcal H_d^o\). Because \(\mathcal H_c\) is a finite-dimensional closed subspace, the orthogonal projection \(P_cx\) exists. Write
+Take \(x\in\mathcal H_d^o\). Because \(\mathcal H_c\) is a closed
+finite-dimensional subspace, write
 
 \[
 x=P_cx+(I-P_c)x.
 \]
 
-The first term satisfies
-
-\[
-P_cx\in\mathcal H_c.
-\]
-
-By Lemma 1.1, \(\mathcal H_c\subseteq\mathcal H_d^o\), so \(P_cx\in\mathcal H_d^o\). Since both \(x\) and \(P_cx\) belong to \(\mathcal H_d^o\), their difference satisfies
-
-\[
-(I-P_c)x=x-P_cx\in\mathcal H_d^o.
-\]
-
-By the defining property of an orthogonal projection,
-
-\[
-(I-P_c)x\in\mathcal H_c^\perp.
-\]
-
-Therefore
+By Lemma 1.1, \(P_cx\in\mathcal H_d^o\). Hence the residual also belongs to
+\(\mathcal H_d^o\). Orthogonal projection gives
+\((I-P_c)x\in\mathcal H_c^\perp\), so
 
 \[
 (I-P_c)x
@@ -126,21 +119,42 @@ Therefore
 \mathcal H_{p,d}.
 \]
 
-Thus every \(x\in\mathcal H_d^o\) is the sum of an element of \(\mathcal H_c\) and an element of \(\mathcal H_{p,d}\).
+The intersection of the two summands is \(\{0\}\), and they are orthogonal by
+construction. ∎
 
-The sum is direct because
+## 4. Lemma 1.3 — source-observable span splits into current support and missing support
+
+For every domain \(d\),
 
 \[
-\mathcal H_c\cap\mathcal H_c^\perp=\{0\}.
+\mathcal H_\cup
+=
+\mathcal H_d^o
+\oplus
+\mathcal H_{m,d}.
 \]
 
-It is orthogonal by construction. ∎
+### Proof
 
-## 4. Theorem 1 — unique three-way decomposition
+Lemma 1.1 gives \(\mathcal H_d^o\subseteq\mathcal H_\cup\). Apply the
+standard orthogonal decomposition of the larger subspace relative to its closed
+subspace:
 
-### Statement
+\[
+\mathcal H_\cup
+=
+\mathcal H_d^o
+\oplus
+\left[
+\mathcal H_\cup\cap(\mathcal H_d^o)^\perp
+\right].
+\]
 
-For every source acquisition domain \(d\),
+The second term is exactly \(\mathcal H_{m,d}\). ∎
+
+## 5. Theorem 1 — unique four-way direct sum
+
+For every source domain \(d\),
 
 \[
 \boxed{
@@ -150,34 +164,53 @@ For every source acquisition domain \(d\),
 \oplus
 \mathcal H_{p,d}
 \oplus
-\mathcal H_{u,d}
+\mathcal H_{m,d}
+\oplus
+\mathcal H_0
 }
 \]
 
-and every modal state \(\Theta\in\mathcal H\) has a unique representation
+and every modal state has a unique representation
 
 \[
 \Theta
 =
-\Theta_c+\Theta_{p,d}+\Theta_{u,d}.
+\Theta_c
++
+\Theta_{p,d}
++
+\Theta_{m,d}
++
+\Theta_0.
 \]
 
-### Proof
+### Detailed proof
 
-Because \(\mathcal H_d^o\) is a closed subspace of a finite-dimensional Hilbert space,
+The source-observable span is closed because the ambient space is finite
+dimensional. Therefore
 
 \[
 \mathcal H
 =
-\mathcal H_d^o
+\mathcal H_\cup
 \oplus
-(\mathcal H_d^o)^\perp.
+\mathcal H_\cup^\perp
+=
+\mathcal H_\cup
+\oplus
+\mathcal H_0.
+\tag{1.1}
 \]
 
-By definition,
+By Lemma 1.3,
 
 \[
-(\mathcal H_d^o)^\perp=\mathcal H_{u,d}.
+\mathcal H_\cup
+=
+\mathcal H_d^o
+\oplus
+\mathcal H_{m,d}.
+\tag{1.2}
 \]
 
 By Lemma 1.2,
@@ -185,96 +218,54 @@ By Lemma 1.2,
 \[
 \mathcal H_d^o
 =
-\mathcal H_c\oplus\mathcal H_{p,d}.
-\]
-
-Substituting the second equality into the first gives
-
-\[
-\mathcal H
-=
-\left(
-\mathcal H_c\oplus\mathcal H_{p,d}
-\right)
+\mathcal H_c
 \oplus
-\mathcal H_{u,d}.
+\mathcal H_{p,d}.
+\tag{1.3}
 \]
 
-The three subspaces are pairwise orthogonal:
+Substituting (1.3) into (1.2), then into (1.1), yields the displayed four-way
+sum.
 
-- \(\mathcal H_{p,d}\subseteq\mathcal H_c^\perp\), hence \(\mathcal H_c\perp\mathcal H_{p,d}\);
-- \(\mathcal H_c\subseteq\mathcal H_d^o\) and \(\mathcal H_{u,d}=(\mathcal H_d^o)^\perp\), hence \(\mathcal H_c\perp\mathcal H_{u,d}\);
-- \(\mathcal H_{p,d}\subseteq\mathcal H_d^o\), hence \(\mathcal H_{p,d}\perp\mathcal H_{u,d}\).
+The summands are pairwise orthogonal:
 
-For existence, set
+- \(\mathcal H_c\perp\mathcal H_{p,d}\) by definition;
+- both are contained in \(\mathcal H_d^o\), while
+  \(\mathcal H_{m,d}\subseteq(\mathcal H_d^o)^\perp\);
+- the first three are contained in \(\mathcal H_\cup\), while
+  \(\mathcal H_0=\mathcal H_\cup^\perp\).
 
-\[
-\Theta_c=P_c\Theta,
-\qquad
-\Theta_{p,d}=P_{p,d}\Theta,
-\qquad
-\Theta_{u,d}=P_{u,d}\Theta.
-\]
+Existence follows by applying the four orthogonal projectors. Uniqueness follows
+because an orthogonal direct-sum decomposition has unique coordinates: if two
+such decompositions exist, subtract them and take inner products with each
+summand. Every squared norm is zero. ∎
 
-Because the projectors sum to the identity,
+## 6. Lemma 1.4 — projector formulas
 
-\[
-\Theta
-=
-(P_c+P_{p,d}+P_{u,d})\Theta.
-\]
-
-For uniqueness, suppose
-
-\[
-\Theta=c+p+u=c'+p'+u'
-\]
-
-with the respective terms in the three subspaces. Subtracting gives
-
-\[
-(c-c')+(p-p')+(u-u')=0.
-\]
-
-Taking the inner product with \(c-c'\) and using pairwise orthogonality yields
-
-\[
-\|c-c'\|_2^2=0,
-\]
-
-so \(c=c'\). Repeating for the other blocks yields \(p=p'\) and \(u=u'\). ∎
-
-## 5. Lemma 1.3 — projector formulas
-
-### Statement
-
-For each domain \(d\),
+Let \(P_\cup\) be the orthogonal projector onto \(\mathcal H_\cup\). Then
 
 \[
 P_{p,d}=P_d^o-P_c,
-\qquad
-P_{u,d}=I-P_d^o.
+\]
+
+\[
+P_{m,d}=P_\cup-P_d^o,
+\]
+
+\[
+P_0=I-P_\cup.
 \]
 
 ### Proof
 
-Since \(\mathcal H_c\subseteq\mathcal H_d^o\), the orthogonal projectors commute and satisfy
+For nested closed subspaces \(\mathcal U\subseteq\mathcal V\), their
+orthogonal projectors commute and \(P_\mathcal V-P_\mathcal U\) is the
+projector onto \(\mathcal V\cap\mathcal U^\perp\). Apply this fact to
+\(\mathcal H_c\subseteq\mathcal H_d^o\) and
+\(\mathcal H_d^o\subseteq\mathcal H_\cup\). The final formula is the standard
+orthogonal-complement projector. ∎
 
-\[
-P_d^oP_c=P_cP_d^o=P_c.
-\]
-
-Then
-
-\[
-(P_d^o-P_c)^2
-=(P_d^o)^2-P_d^oP_c-P_cP_d^o+P_c^2
-=P_d^o-P_c.
-\]
-
-The matrix is symmetric, so it is an orthogonal projector. Its range is the portion of \(\mathcal H_d^o\) orthogonal to \(\mathcal H_c\), namely \(\mathcal H_{p,d}\). The formula for \(P_{u,d}\) is the standard orthogonal complement projector. ∎
-
-## 6. Computational characterization of the intersection
+## 7. Lemma 1.5 — spectral characterizations
 
 Let
 
@@ -282,19 +273,26 @@ Let
 S=\sum_{d=1}^{D}P_d^o.
 \]
 
-### Lemma 1.4
-
-A vector \(x\) belongs to \(\mathcal H_c\) if and only if
+Then
 
 \[
-Sx=Dx.
+\mathcal H_c
+=
+\operatorname{Eig}(S,D),
+\]
+
+and
+
+\[
+\mathcal H_\cup
+=
+\operatorname{Range}(S).
 \]
 
 ### Proof
 
-If \(x\in\mathcal H_c\), then \(P_d^ox=x\) for every \(d\), so \(Sx=Dx\).
-
-Conversely, suppose \(Sx=Dx\). Taking the inner product with \(x\),
+If \(x\in\mathcal H_c\), then \(P_d^ox=x\) for all \(d\), hence \(Sx=Dx\).
+Conversely, if \(Sx=Dx\), then
 
 \[
 D\|x\|^2
@@ -304,36 +302,90 @@ D\|x\|^2
 \sum_d\|P_d^ox\|^2.
 \]
 
-For an orthogonal projector, \(\|P_d^ox\|\leq\|x\|\). The sum of \(D\) non-negative terms reaches its maximum \(D\|x\|^2\) only if every term equals \(\|x\|^2\). Equality for an orthogonal projection holds exactly when \(P_d^ox=x\). Thus \(x\in\mathcal H_d^o\) for all \(d\), so \(x\in\mathcal H_c\). ∎
+Each term is at most \(\|x\|^2\); equality of the sum requires
+\(P_d^ox=x\) for every \(d\). Thus \(x\in\mathcal H_c\).
 
-This is the basis of the numerical implementation: the shared basis is the eigenspace of \(\sum_dP_d^o\) with eigenvalue \(D\).
-
-## 7. Boundary cases
-
-### Empty shared support
-
-It is possible that
+For the union, the null space of \(S\) is
 
 \[
-\mathcal H_c=\{0\}.
+\ker S
+=
+\bigcap_d\ker P_d^o
+=
+\left(
+\sum_d\operatorname{Range}(P_d^o)
+\right)^\perp.
 \]
 
-The theorem still holds, but there is no non-trivial common representation. An implementation must report a zero-dimensional shared block rather than manufacture one.
+Therefore \(\operatorname{Range}(S)=\mathcal H_\cup\). ∎
 
-### Threshold dependence
+## 8. Fixed modal-slot special case
 
-Changing \(\tau_o\) changes each \(\mathcal H_d^o\), and therefore all three blocks. The theorem proves decomposition for a fixed threshold; it does not identify the scientifically correct threshold.
+For the first learned model, the project uses a declared modal dictionary in
+which the structural Gramian is approximately diagonal:
 
-### Unknown observation operator
+\[
+G_d
+\approx
+\operatorname{diag}(g_{d,1},\ldots,g_{d,K}).
+\]
 
-If \(A_d\) is misspecified, the decomposition is a decomposition under the assumed operator, not necessarily under the physical acquisition system. This uncertainty is addressed by perturbation bounds and experiments, not by this theorem.
+Each slot can then be categorized without rotating the token basis:
 
-## 8. Experimental implication
+- shared when every source has structural support;
+- observed-private when the current source has support but at least one source
+  does not;
+- recoverable-missing when the current source lacks support but another source
+  has it;
+- global-null when no source has support.
 
-A minimal test must verify:
+Near the threshold, use the soft weight
 
-1. \(P_c,P_{p,d},P_{u,d}\) are symmetric and idempotent;
-2. pairwise products are zero;
-3. their sum is the identity;
-4. a domain with no common support returns \(P_c=0\);
-5. target-domain data are not used to define \(P_c\) or \(\tau_o\).
+\[
+o_{d,k}
+=
+\sigma((g_{d,k}-\tau_o)/T_o)
+\]
+
+and report the margin \(|g_{d,k}-\tau_o|\). The exact theorem remains the
+hard-support reference.
+
+## 9. Structural support versus instance reliability
+
+The decomposition is based on domain-level acquisition capability \(A_d\).
+A sample-level mask or low SNR instead changes
+
+\[
+r_{d,i,k}\in[0,1].
+\]
+
+A low reliability may broaden the posterior of a structurally observable slot,
+but it does not convert the scientific definition into a different
+sample-specific subspace. This separation keeps token slots fixed and avoids a
+different representation dimension for every sample.
+
+## 10. Failure boundaries
+
+1. Exact intersections of estimated dense projectors are numerically fragile.
+2. Adding a very narrow acquisition domain can shrink \(\mathcal H_c\).
+3. A misspecified \(A_d\) yields the wrong four-way assignment.
+4. Hard threshold assignments can flip near \(\tau_o\).
+5. Recoverable-missing means supported somewhere in the declared source set; it
+   does not by itself prove paired data or a learnable conditional posterior.
+6. Global-null is protocol dependent. Additional sensors can move a mode from
+   \(\mathcal H_0\) into \(\mathcal H_\cup\).
+
+## 11. Experimental implication
+
+The analytic and known-pole experiments must cover:
+
+1. complete overlap;
+2. partial overlap;
+3. empty common support;
+4. current-domain missing but another-source observable support;
+5. support absent from every source domain;
+6. a near-threshold slot;
+7. perturbation of the estimated projector.
+
+The implementation must return a zero-dimensional block when any category is
+empty. It must never manufacture a positive shared or recoverable dimension.

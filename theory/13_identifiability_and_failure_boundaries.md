@@ -2,17 +2,18 @@
 
 ## Status
 
-**Collection of proved counterexamples and explicit non-identifiability results.**
+**Collection of proved counterexamples and explicit non-identifiability
+results.**
 
 ## Purpose
 
-Existence of a representation is weaker than recoverability. This document records situations in which the proposed decomposition or canonicalization cannot be uniquely identified. These are method boundaries, not implementation corner cases.
+Existence of a representation is weaker than recoverability. This document
+records situations in which support classification, canonical transport or
+posterior recovery cannot be identified from the available data.
 
 ## 1. Proposition 13.1 — common support can be trivial
 
-### Statement
-
-There exist individually observable acquisition domains whose common observable subspace is
+There exist individually observable acquisition domains with
 
 \[
 \mathcal H_c=\{0\}.
@@ -20,7 +21,7 @@ There exist individually observable acquisition domains whose common observable 
 
 ### Construction and proof
 
-Let \(\mathcal H=\mathbb R^2\), with
+Let
 
 \[
 \mathcal H_1^o=\operatorname{span}(e_1),
@@ -28,33 +29,26 @@ Let \(\mathcal H=\mathbb R^2\), with
 \mathcal H_2^o=\operatorname{span}(e_2).
 \]
 
-Each domain observes one non-zero direction, but
-
-\[
-\mathcal H_1^o\cap\mathcal H_2^o=\{0\}.
-\]
-
-Hence no non-trivial shared coordinate exists. ∎
+Their intersection is \(\{0\}\). Both domains observe a non-zero direction,
+but no non-trivial common coordinate exists. ∎
 
 ### Consequence
 
-The model must support an empty shared block. A forced positive shared dimension introduces invented common information.
+A forced positive shared dimension invents common information.
 
-## 2. Proposition 13.2 — the observation operator is not identifiable from observations alone
+## 2. Proposition 13.2 — latent coordinates are not identified without anchors
 
-### Statement
-
-Without additional constraints, the factorization
+The factorization
 
 \[
 Y=A\Theta
 \]
 
-is invariant under any invertible latent change of coordinates.
+is invariant under every invertible coordinate change \(R\).
 
 ### Proof
 
-Let \(R\in\mathbb R^{m\times m}\) be invertible. Define
+Set
 
 \[
 \widetilde\Theta=R\Theta,
@@ -66,172 +60,203 @@ Then
 
 \[
 \widetilde A\widetilde\Theta
-=AR^{-1}R\Theta
-=A\Theta
-=Y.
+=
+A\Theta
+=
+Y.
 \]
 
-Thus the same observations admit infinitely many latent coordinate systems. ∎
+Thus observations alone admit infinitely many latent coordinate systems. ∎
 
 ### Consequence
 
-Physical modal slots, pole ordering, sensor metadata, or paired views are needed to anchor the coordinates. A generic autoencoder latent cannot by itself identify physical shared/private modes.
+Physical modal slots, pole ordering, paired events or calibrated acquisition
+metadata are needed to anchor the representation.
 
-## 3. Proposition 13.3 — marginal alignment does not identify semantic alignment
+## 3. Proposition 13.3 — marginal alignment can reverse semantics
 
-### Statement
-
-Two domains can have perfectly matched representation marginals while class semantics are reversed.
-
-### Construction and proof
-
-Let \(Y\in\{0,1\}\) be balanced. In domain 1, define
+Let \(Y\in\{0,1\}\) be balanced. Define
 
 \[
-Z_1=Y.
-\]
-
-In domain 2, define
-
-\[
+Z_1=Y,
+\qquad
 Z_2=1-Y.
 \]
 
-Both marginals are Bernoulli\((1/2)\), so
-
-\[
-\operatorname{Law}(Z_1)
-=
-\operatorname{Law}(Z_2).
-\]
-
-However, the label meaning is reversed. A classifier trained on domain 1 fails completely on domain 2. ∎
+Both marginals are Bernoulli\((1/2)\), but a classifier transferred from the
+first domain fails on the second. ∎
 
 ### Consequence
 
-MMD, adversarial domain confusion, or Wasserstein marginal matching is not enough. Canonical transport requires paired latent events, physical modal ordering, or source-only semantic constraints.
+MMD, domain confusion or Wasserstein marginal matching cannot establish
+semantic canonicalization.
 
-## 4. Proposition 13.4 — posterior mean is not an identifiable posterior
-
-### Statement
-
-Infinitely many posterior distributions share the same mean.
-
-### Proof
+## 4. Proposition 13.4 — posterior means do not identify posteriors
 
 For any \(a>0\),
 
 \[
-\mu_a=
-\frac12\delta_{-a}+
+\mu_a
+=
+\frac12\delta_{-a}
++
 \frac12\delta_a
 \]
 
-has mean zero. The point mass \(\delta_0\) also has mean zero. These measures have different variance, support, and decisions for nonlinear tasks. ∎
+and \(\delta_0\) have the same mean but different variance, support and
+nonlinear decisions. ∎
 
 ### Consequence
 
-A deterministic embedding containing only posterior means cannot represent unobserved uncertainty in general.
+A mean-only tensor cannot generally represent recoverable-missing uncertainty.
 
-## 5. Proposition 13.5 — finite-window modal representations are not globally unique
+## 5. Proposition 13.5 — sampled modal parameters can be aliased
 
-### Statement
-
-On a finite set of query times, different modal parameter sets can produce the same sampled trajectory.
-
-### Construction
-
-Let query times lie on a regular grid \(t_n=n\Delta\). Frequencies \(\omega\) and
+For regular query times \(t_n=n\Delta\), frequencies
 
 \[
-\omega'=
-\omega+\frac{2\pi k}{\Delta}
+\omega'
+=
+\omega+rac{2\pi k}{\Delta}
 \]
 
-produce identical complex phases:
+produce identical phases:
 
 \[
 e^{i\omega't_n}
-=e^{i\omega n\Delta}e^{i2\pi kn}
-=e^{i\omega t_n}.
+=
+e^{i\omega t_n}.
 \]
 
-With equal damping and adjusted residues, sampled trajectories coincide. ∎
+With equal damping and compatible residues, the sampled trajectories coincide.
+∎
 
 ### Consequence
 
-Frequency slots must respect acquisition support and anti-aliasing. Irregular timestamps reduce but do not automatically eliminate every modal ambiguity.
+Modal slots must respect anti-aliasing and acquisition support.
 
-## 6. Proposition 13.6 — private identity can conflict with a desired target joint law
+## 6. Proposition 13.6 — global-null coordinates have no source likelihood evidence
 
-Theorem 11 assumes product structure or a target compatible with identity private transport. If shared and private coordinates are correlated and the canonical target changes that dependence, the identity-private map may not reach the target. The counterexample in Theorem 11 provides a concrete construction.
-
-## 7. Proposition 13.7 — global Laplace linearity can fail under switching
-
-Consider a scalar switched system
+Assume
 
 \[
-\dot x=
+A_dP_0=0
+\qquad
+\text{for every }d\in\mathcal D_s.
+\]
+
+Then
+
+\[
+p(
+\{Y_d\}_d
+\mid
+\Theta_c,\Theta_p,\Theta_m,\Theta_0)
+=
+p(
+\{Y_d\}_d
+\mid
+\Theta_c,\Theta_p,\Theta_m).
+\]
+
+### Proof
+
+Every source observation depends on \(A_d\Theta\). The term
+\(A_dP_0\Theta_0\) is zero for every source, so changing \(\Theta_0\) leaves
+the source likelihood unchanged. ∎
+
+### Consequence
+
+Source data cannot identify \(\Theta_0\) through the likelihood. A posterior
+on this block is prior-driven or induced by additional structural assumptions;
+it must not be reported as data-supported recovery.
+
+## 7. Proposition 13.7 — private identity can conflict with a target joint law
+
+If shared and private variables are correlated and the target changes their
+dependence, an identity-private map may not reach the target joint law. The
+counterexample in Theorem 11 supplies a construction.
+
+## 8. Proposition 13.8 — one global Laplace pole set can fail under switching
+
+Consider
+
+\[
+\dot x
+=
 \begin{cases}
 -a_1x,&t<t_s,\\
 -a_2x,&t\geq t_s,
 \end{cases}
+\qquad
+ a_1\neq a_2.
 \]
 
-with \(a_1\neq a_2\). Its trajectory is piecewise exponential:
-
-\[
-x(t)=
-\begin{cases}
-x_0e^{-a_1t},&t<t_s,\\
-x_0e^{-a_1t_s}e^{-a_2(t-t_s)},&t\geq t_s.
-\end{cases}
-\]
-
-No single scalar pole reproduces both decay rates exactly over an interval containing the switch. Therefore a fixed global pole model is misspecified. Window-local modes, switching variables, or residual error are required.
-
-## 8. Proposition 13.8 — support labels are threshold dependent
-
-Let a Gramian have eigenvalue \(\lambda\). The corresponding mode is observable when \(\lambda\geq\tau_o\) and unobservable when \(\lambda<\tau_o\). An arbitrarily small change in \(\tau_o\) around \(\lambda\) changes the discrete assignment.
+The trajectory is piecewise exponential. No single scalar pole reproduces both
+decay rates exactly on an interval containing the switch. ∎
 
 ### Consequence
 
-Hard support should be accompanied by:
+Use a local analysis window, a declared residual or an explicit switching
+extension. Do not present a fixed global pole dictionary as universally exact.
 
-- the eigenvalue margin to the threshold;
-- a sensitivity sweep;
-- posterior uncertainty or a soft observability score for near-threshold modes.
+## 9. Proposition 13.9 — hard support is threshold sensitive
 
-## 9. Identifiability conditions worth testing
+A Gramian eigenvalue \(\lambda\) is assigned observable when
+\(\lambda\geq\tau_o\) and unobservable otherwise. An arbitrarily small change
+in \(\tau_o\) around \(\lambda\) changes the discrete role.
 
-The following conditions are not guaranteed by architecture:
+### Consequence
 
-1. **paired excitation:** paired domains observe the same latent event;
-2. **spectral separation:** modal slots are separated enough to avoid permutation;
-3. **operator diversity:** source acquisition operators jointly constrain the shared state;
-4. **semantic anchoring:** canonical transport cannot permute task meanings;
-5. **posterior calibration:** unobserved modes have honest conditional uncertainty;
-6. **local adequacy:** modal residual remains bounded on the analysis window.
+Report threshold margin and a soft structural observability weight for
+near-threshold slots.
 
-## 10. Required negative controls
+## 10. Proposition 13.10 — recoverable support does not guarantee learnability
+
+A mode can belong to \(\mathcal H_{m,d}\) because another source operator can
+observe it while the training set contains no paired event linking that
+observation to the current-domain state.
+
+### Construction and proof
+
+Let source 1 observe \(C\), source 2 observe \(M\), and let their datasets be
+unpaired samples from the two marginals. Distinct joint laws
+\(p_1(C,M)\) and \(p_2(C,M)\) can have the same marginals
+\(p(C)\) and \(p(M)\), but different conditionals
+\(p_1(M\mid C)\neq p_2(M\mid C)\). The unpaired observations have the same
+distribution under both models, so no procedure based only on those marginals
+can identify which conditional is correct. ∎
+
+### Consequence
+
+Support elsewhere is necessary but not sufficient for conditional recovery.
+Paired events, a physical coupling model or another identification assumption
+is required.
+
+## 11. Required negative controls
 
 A credible experiment suite must include:
 
 - empty common support;
-- mislabeled acquisition operator;
+- a recoverable-missing slot;
+- a source-global-null slot;
 - class-permuted but marginally aligned domains;
-- same posterior mean with different posterior variance;
-- frequency aliasing without anti-alias filtering;
+- identical posterior means with different posterior shapes;
+- aliasing without anti-alias filtering;
 - a switching trajectory outside the fixed-pole model;
-- near-threshold observable modes;
-- correlated shared/private modes violating product OT assumptions.
+- a near-threshold slot;
+- correlated shared/private modes;
+- unpaired marginals with non-identifiable missing conditionals.
 
-## 11. Scientific boundary
+## 12. Scientific boundary
 
-The theory supports the statement:
+The theory supports:
 
-> A unified representation can be constructed and has explicit invariants under stated observability and regularity assumptions.
+> Under declared structural operators, a source-supported four-block
+> representation can be defined, with explicit invariants and failure
+> boundaries.
 
-It does not support the unconditional statement:
+It does not support:
 
-> Every heterogeneous time series admits a unique, learnable, semantically aligned unified representation.
+> Every heterogeneous time series admits a unique, learnable and semantically
+> aligned unified representation.

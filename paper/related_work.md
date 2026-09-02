@@ -1,31 +1,88 @@
-# Related-work boundary
+# Related-work and novelty boundary
+
+## Comparison principle
+
+The paper compares methods by the object they represent, the heterogeneity they
+model and the information they are permitted to change. Similar module names
+are not sufficient evidence of equivalence or novelty.
+
+| Direction | Representation object | Heterogeneity addressed | Observable-support roles | Private preservation | Global-null exclusion |
+|---|---|---|---|---|---|
+| Latent Laplace Diffusion | generic latent Laplace trajectory | irregular timestamps and forecasting uncertainty | no explicit four-way split | not structural | no |
+| Neural Laplace | Laplace-domain trajectory | differential-equation dynamics | no | not applicable | no |
+| Flow Matching / OT-CFM | generic data or latent probability path | source-target transport | no | not guaranteed | no |
+| Domain Separation Networks | generic shared/private features | domain variation | not acquisition-derived | model-dependent | no |
+| irregular-time ODE/CDE models | continuous-time hidden state | timestamps and missingness | no | not explicit | no |
+| proposed candidate | fixed physical modal slots | acquisition operators with partial support overlap | shared / observed-private / recoverable-missing / global-null | structural identity | explicit |
 
 ## Latent Laplace modeling
 
-Latent Laplace Diffusion models irregular targets as low-dimensional latent trajectories, imposes stable complex-conjugate modal poles, evaluates trajectories directly at arbitrary timestamps, and analyzes random sampling gaps through renewal averaging. The present project does not claim these elements as new. Its proposed difference is to condition the modal state space on acquisition observability and assign flow, identity, or diffusion to different observable blocks.
+Latent Laplace Diffusion supplies stable complex-conjugate modal dynamics,
+arbitrary-time queries and a gap-aware irregular-time mechanism. These are
+prior contributions. The present project changes the representation semantics:
+modal roles are determined by structural acquisition support, and only
+source-supported missing modes receive a learned posterior.
 
-Neural Laplace motivates solver-free Laplace-domain representations of differential-equation trajectories. It is relevant to the modal coordinate system, not to the shared/private/unobserved split.
+Neural Laplace motivates Laplace-domain trajectory modeling. It does not
+provide the acquisition-support partition or the Flow/identity/posterior role
+assignment.
 
-## Diffusion and probability-flow methods
+## Diffusion and probability-flow theory
 
-Score-based SDE theory establishes reverse-time diffusion and an equivalent probability-flow ODE with the same marginal densities. Stochastic interpolants provide a broader framework connecting deterministic flows and stochastic diffusions. Therefore the project does not claim to be the first to unify diffusion and flow.
+Score-SDE, probability-flow ODE, Flow Matching and stochastic-interpolant
+theories already connect deterministic and stochastic probability paths. The
+project therefore does not claim to be the first to combine or unify Flow and
+Diffusion.
 
-The proposed narrow distinction is an observability-projector-conditioned block process in a stable physical modal space.
+Diffusion is retained only if the recoverable-missing conditional is
+sufficiently non-Gaussian or multimodal that Gaussian and mixture baselines
+fail.
 
-## Flow matching and optimal transport
+## Flow and optimal transport
 
-Flow Matching trains continuous normalizing flows by vector-field regression along prescribed probability paths. Conditional and OT flow matching provide practical source-target couplings. These works motivate the shared canonical transport but do not by themselves protect acquisition-private coordinates or determine the transported subspace from physical observability.
+Flow Matching and OT-CFM motivate learned canonical transport. Ordinary
+marginal transport does not decide which physical support should move, and it
+can align marginals while permuting class semantics.
 
-## Irregular time-series baselines
-
-The empirical plan must compare observation-space diffusion, Latent ODE/CDE models, continuous-time Transformers, and graph/patch approaches when their tasks and inputs are compatible. A baseline is included in the main table only when it can use the same observed information and evaluation protocol.
+Flow is retained only if affine calibration, whitening, CORAL and minibatch OT
+cannot achieve the same paired shared-state error and task preservation.
 
 ## Shared/private representation learning
 
-Domain-separation methods already split shared and private features. The current research cannot claim that decomposition alone as novel. Its candidate contribution is to define the split through acquisition-dependent modal observability and to leave unobserved private modes distribution-valued.
+Shared/private feature decompositions are established. The proposed difference
+is not the existence of shared and private blocks. It is the structural
+acquisition rule that assigns fixed Laplace modal slots to:
+
+```text
+common support
+observed-private support
+recoverable-missing support
+source-global-null support
+```
+
+and assigns different permissible operations to those roles.
+
+## Partial-view and missing-view representation
+
+Partial-view methods motivate recovery from complementary observations.
+However, a coordinate being visible in another source domain does not identify
+its current-domain conditional without paired events or another coupling
+assumption. The project treats this as an explicit identifiability condition,
+not an architectural guarantee.
 
 ## Exact novelty statement under test
 
-> Heterogeneous acquisition should be represented by a stable Laplace-modal posterior whose common observable coordinates are transported to a source-only canonical space, whose observed-private coordinates are structurally unchanged, and whose unobserved coordinates remain probabilistic.
+> The candidate novelty is an acquisition-observability-conditioned,
+> source-supported modal representation in which common modes are
+> canonicalized at the source-population level, observed-private modes are
+> preserved, recoverable-missing modes remain probability-valued, and modes
+> unsupported by every source are excluded from learned recovery claims.
 
-This statement remains a hypothesis until the known-pole and real paired-acquisition experiments exclude simpler metadata-conditioned diffusion and ordinary transport explanations.
+The claim is rejected or narrowed when:
+
+- source metadata alone matches the method;
+- Gaussian or mixture posteriors match Diffusion;
+- affine or ordinary OT baselines match Flow;
+- the local Laplace representation has no advantage over a matched
+  time-domain latent;
+- paired source evidence is insufficient to identify the missing conditional.

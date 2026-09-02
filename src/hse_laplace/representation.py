@@ -1,4 +1,4 @@
-"""Data object for a distribution-valued unified representation."""
+"""Finite interface for the source-supported unified representation."""
 
 from __future__ import annotations
 
@@ -9,42 +9,62 @@ import numpy as np
 
 @dataclass(frozen=True)
 class UnifiedRepresentation:
-    """Finite representation of the blockwise posterior measure.
+    """Finite summary of a distribution-valued, four-block representation.
 
-    The Monte Carlo axis of ``unobserved_private_samples`` is explicit.  A
-    posterior mean is not silently substituted for a posterior distribution.
+    Global-null coordinates are marked but never represented as learned
+    recoveries. The Monte Carlo axis of ``recoverable_missing_samples`` is
+    explicit; a posterior mean is not silently substituted for a distribution.
     """
 
     shared_canonical: np.ndarray
     observed_private: np.ndarray
-    unobserved_private_samples: np.ndarray
-    observability_mask: np.ndarray
+    recoverable_missing_samples: np.ndarray
+    structural_observability: np.ndarray
+    instance_reliability: np.ndarray
+    global_null_mask: np.ndarray
 
     def validate(self) -> None:
         shared = np.asarray(self.shared_canonical, dtype=float)
         private = np.asarray(self.observed_private, dtype=float)
-        samples = np.asarray(self.unobserved_private_samples, dtype=float)
-        mask = np.asarray(self.observability_mask)
+        samples = np.asarray(self.recoverable_missing_samples, dtype=float)
+        structural = np.asarray(self.structural_observability, dtype=float)
+        reliability = np.asarray(self.instance_reliability, dtype=float)
+        global_null = np.asarray(self.global_null_mask)
+
         if shared.ndim != 1 or private.ndim != 1:
             raise ValueError("shared and observed-private coordinates must be vectors")
         if samples.ndim != 2:
-            raise ValueError("unobserved_private_samples must be [num_samples, dimension]")
+            raise ValueError(
+                "recoverable_missing_samples must be [num_samples, dimension]"
+            )
         if samples.shape[0] < 2:
             raise ValueError("at least two posterior samples are required")
-        if mask.ndim != 1:
-            raise ValueError("observability_mask must be a vector")
-        if mask.dtype != np.bool_:
-            raise ValueError("observability_mask must have boolean dtype")
-        arrays = (shared, private, samples)
+        if structural.ndim != 1 or reliability.ndim != 1:
+            raise ValueError(
+                "structural_observability and instance_reliability must be vectors"
+            )
+        if structural.shape != reliability.shape:
+            raise ValueError(
+                "structural_observability and instance_reliability must match"
+            )
+        if global_null.shape != structural.shape or global_null.dtype != np.bool_:
+            raise ValueError("global_null_mask must be a boolean vector of modal slots")
+        if np.any((structural < 0.0) | (structural > 1.0)):
+            raise ValueError("structural_observability must lie in [0, 1]")
+        if np.any((reliability < 0.0) | (reliability > 1.0)):
+            raise ValueError("instance_reliability must lie in [0, 1]")
+        if np.any(structural[global_null] > 0.0):
+            raise ValueError("global-null slots cannot be structurally observable")
+        arrays = (shared, private, samples, structural, reliability)
         if any(np.any(~np.isfinite(array)) for array in arrays):
             raise ValueError("representation coordinates must be finite")
 
     @property
-    def posterior_mean(self) -> np.ndarray:
+    def missing_posterior_mean(self) -> np.ndarray:
         self.validate()
-        return np.mean(self.unobserved_private_samples, axis=0)
+        return np.mean(self.recoverable_missing_samples, axis=0)
 
     @property
-    def posterior_variance(self) -> np.ndarray:
+    def missing_posterior_variance(self) -> np.ndarray:
         self.validate()
-        return np.var(self.unobserved_private_samples, axis=0, ddof=1)
+        return np.var(self.recoverable_missing_samples, axis=0, ddof=1)

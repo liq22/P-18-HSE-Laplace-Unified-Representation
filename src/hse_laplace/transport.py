@@ -1,10 +1,12 @@
-"""Blockwise deterministic and stochastic transport utilities."""
+"""Analytic block-transport utilities."""
 
 from __future__ import annotations
 
 from collections.abc import Callable
 
 import numpy as np
+
+from .observability import ObservableDecomposition
 
 
 def compensated_gaussian_drift(
@@ -15,12 +17,7 @@ def compensated_gaussian_drift(
     standard_deviation_derivative: np.ndarray,
     diffusion: np.ndarray,
 ) -> np.ndarray:
-    """Drift that preserves a prescribed diagonal Gaussian probability path.
-
-    For each coordinate, the continuity velocity is
-    ``m_dot + sigma_dot / sigma * (x - m)``.  Adding ``D score`` and diffusion
-    covariance ``2D`` yields the same one-time marginals.
-    """
+    """Drift that preserves a prescribed diagonal Gaussian probability path."""
     x = np.asarray(x, dtype=float)
     mean = np.asarray(mean, dtype=float)
     mean_derivative = np.asarray(mean_derivative, dtype=float)
@@ -44,44 +41,64 @@ def compensated_gaussian_drift(
     return continuity_velocity + diffusion * score
 
 
-def block_euler_step(
+def block_update_witness(
     state: np.ndarray,
-    shared_projector: np.ndarray,
-    private_projector: np.ndarray,
-    unobserved_projector: np.ndarray,
+    decomposition: ObservableDecomposition,
     shared_velocity: Callable[[np.ndarray], np.ndarray],
-    unobserved_velocity: Callable[[np.ndarray], np.ndarray],
+    recoverable_missing_velocity: Callable[
+        [np.ndarray, np.ndarray, np.ndarray], np.ndarray
+    ],
     *,
     step_size: float,
-    unobserved_noise: np.ndarray | None = None,
+    recoverable_missing_increment: np.ndarray | None = None,
 ) -> np.ndarray:
-    """One transparent Euler step of the blockwise representation process."""
+    """Apply one transparent triangular block update.
+
+    This function is an analytic witness, not an Euler--Maruyama solver. The
+    optional stochastic increment must already contain its numerical scaling.
+    Shared coordinates are updated first; the recoverable-missing update may
+    condition on the updated shared coordinate and the unchanged private block.
+    Global-null coordinates are not modeled and remain unchanged.
+    """
     state = np.asarray(state, dtype=float)
-    projectors = [
-        np.asarray(shared_projector, dtype=float),
-        np.asarray(private_projector, dtype=float),
-        np.asarray(unobserved_projector, dtype=float),
-    ]
     if state.ndim != 1:
         raise ValueError("state must be a vector")
+    decomposition.validate()
+    projectors = (
+        decomposition.shared,
+        decomposition.observed_private,
+        decomposition.recoverable_missing,
+        decomposition.global_null,
+    )
     if any(projector.shape != (state.size, state.size) for projector in projectors):
         raise ValueError("projector shapes must match state dimension")
     if step_size <= 0 or not np.isfinite(step_size):
         raise ValueError("step_size must be finite and positive")
 
-    shared_state = projectors[0] @ state
-    unobserved_state = projectors[2] @ state
-    shared_update = projectors[0] @ np.asarray(shared_velocity(shared_state), dtype=float)
-    unobserved_update = projectors[2] @ np.asarray(
-        unobserved_velocity(unobserved_state), dtype=float
-    )
-    if shared_update.shape != state.shape or unobserved_update.shape != state.shape:
-        raise ValueError("velocity functions must return vectors matching state")
+    shared_state = decomposition.shared @ state
+    private_state = decomposition.observed_private @ state
+    missing_state = decomposition.recoverable_missing @ state
 
-    result = state + step_size * (shared_update + unobserved_update)
-    if unobserved_noise is not None:
-        noise = np.asarray(unobserved_noise, dtype=float)
-        if noise.shape != state.shape:
-            raise ValueError("unobserved_noise must match state")
-        result = result + projectors[2] @ noise
+    shared_update = decomposition.shared @ np.asarray(
+        shared_velocity(shared_state), dtype=float
+    )
+    if shared_update.shape != state.shape:
+        raise ValueError("shared_velocity must return a vector matching state")
+    shared_next = shared_state + step_size * shared_update
+
+    missing_update = decomposition.recoverable_missing @ np.asarray(
+        recoverable_missing_velocity(missing_state, shared_next, private_state),
+        dtype=float,
+    )
+    if missing_update.shape != state.shape:
+        raise ValueError(
+            "recoverable_missing_velocity must return a vector matching state"
+        )
+
+    result = state + step_size * (shared_update + missing_update)
+    if recoverable_missing_increment is not None:
+        increment = np.asarray(recoverable_missing_increment, dtype=float)
+        if increment.shape != state.shape:
+            raise ValueError("recoverable_missing_increment must match state")
+        result = result + decomposition.recoverable_missing @ increment
     return result
