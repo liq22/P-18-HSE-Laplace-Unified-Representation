@@ -1,214 +1,196 @@
-# Theorem 9 — Downstream risk bound for an approximate unified representation
+# Theorem 9 — Paired downstream-risk bound for an approximate representation
 
 ## Status
 
-**Proved for a Lipschitz conditional risk functional and Wasserstein-1 approximation errors.**
+**Proved for a same-event coupling and a downstream loss that is uniformly
+Lipschitz in the representation.**
 
 ## Purpose
 
-The ideal unified representation is not available exactly. The shared flow, unobserved posterior, modal dictionary, and observable support are all approximated. This theorem separates their contributions to downstream risk.
+A marginal Wasserstein distance alone cannot control task risk: two
+representations may have identical marginals while reversing their label
+semantics. The revised result is paired. Ideal and approximate representations
+must be coupled through the same latent event and target.
 
-## 1. Ideal and approximate representations
+## 1. Paired setup
 
-Let the ideal distribution-valued representation be
+Let
 
 \[
-\mu^U
-=
-\operatorname{Law}(Z_c^*,Z_p,Z_u).
+(Z,\widehat Z,Y)
 \]
 
-Let an implementation produce
+be defined on one probability space, where
 
 \[
-\widehat\mu^U
-=
-\operatorname{Law}(\widehat Z_c,\widehat Z_p,\widehat Z_u).
+Z=(Z_c,Z_p,Z_m)
 \]
 
-Equip the product space with the additive metric
+is the ideal source-supported representation and
 
 \[
-d(z,z')
+\widehat Z
 =
-\|z_c-z_c'\|_2
+(\widehat Z_c,\widehat Z_p,\widehat Z_m)
+\]
+
+is its approximation for the same latent event. Global-null coordinates are
+excluded from both.
+
+Use the additive physical metric
+
+\[
+d(z,\widehat z)
+=
+w_c\|z_c-\widehat z_c\|_2
 +
-\|z_p-z_p'\|_2
+w_p\|z_p-\widehat z_p\|_2
 +
-\|z_u-z_u'\|_2.
+w_m\|z_m-\widehat z_m\|_2,
 \tag{9.1}
 \]
 
-Let a fixed downstream decision rule \(h\) have conditional risk function
+with declared positive unit-normalizing weights.
+
+Let \(h\) be a fixed decision rule. Assume that for every target value \(y\),
 
 \[
-\varphi_h(z)
-=
-\mathbb E[\ell(h(z),Y)\mid Z=z].
-\]
-
-Assume \(\varphi_h\) is \(L\)-Lipschitz under (9.1):
-
-\[
-|\varphi_h(z)-\varphi_h(z')|
+|
+\ell(h(\widehat z),y)
+-
+\ell(h(z),y)
+|
 \leq
-L d(z,z').
+L\,d(\widehat z,z).
 \tag{9.2}
 \]
 
-This is the key task-regularity assumption.
+## 2. Lemma 9.1 — paired loss difference
 
-## 2. Lemma 9.1 — risk difference is bounded by Wasserstein distance
-
-### Statement
+Under Equation (9.2),
 
 \[
 \left|
-\int\varphi_h\,d\widehat\mu^U
+\mathbb E[
+\ell(h(\widehat Z),Y)]
 -
-\int\varphi_h\,d\mu^U
+\mathbb E[
+\ell(h(Z),Y)]
 \right|
 \leq
-L W_1(\widehat\mu^U,\mu^U).
+L\,
+\mathbb E[d(\widehat Z,Z)].
+\tag{9.3}
 \]
 
 ### Proof
 
-The Kantorovich–Rubinstein duality states
+For every sample,
 
 \[
-W_1(\widehat\mu^U,\mu^U)
+|
+\ell(h(\widehat Z),Y)
+-
+\ell(h(Z),Y)
+|
+\leq
+L\,d(\widehat Z,Z).
+\]
+
+Take expectations and use
+\(|\mathbb E X|\leq\mathbb E|X|\). ∎
+
+## 3. Lemma 9.2 — blockwise paired error
+
+Define
+
+\[
+\varepsilon_{\mathrm{flow}}
 =
-\sup_{\|f\|_{\mathrm{Lip}}\leq1}
-\left|
-\int f\,d\widehat\mu^U
--
-\int f\,d\mu^U
-\right|.
-\]
-
-The function \(f=\varphi_h/L\) is 1-Lipschitz by Equation (9.2). Therefore
-
-\[
-\left|
-\int\frac{\varphi_h}{L}\,d\widehat\mu^U
--
-\int\frac{\varphi_h}{L}\,d\mu^U
-\right|
-\leq
-W_1(\widehat\mu^U,\mu^U).
-\]
-
-Multiplying by \(L\) proves the lemma. ∎
-
-## 3. Lemma 9.2 — componentwise coupling bound
-
-Suppose there exists a joint coupling of ideal and approximate blocks such that
-
-\[
+w_c\,
 \mathbb E\|
-\widehat Z_c-Z_c^*
-\|
-\leq
-\varepsilon_{\mathrm{flow}},
+\widehat Z_c-Z_c
+\|,
 \]
 
 \[
+\varepsilon_{\mathrm{private}}
+=
+w_p\,
 \mathbb E\|
 \widehat Z_p-Z_p
-\|
-\leq
-\varepsilon_{\mathrm{private}},
+\|,
 \]
 
 \[
+\varepsilon_{\mathrm{missing}}
+=
+w_m\,
 \mathbb E\|
-\widehat Z_u-Z_u
-\|
-\leq
-\varepsilon_{\mathrm{post}}.
+\widehat Z_m-Z_m
+\|.
 \]
 
 Then
 
 \[
-W_1(\widehat\mu^U,\mu^U)
+\mathbb E[d(\widehat Z,Z)]
+=
+\varepsilon_{\mathrm{flow}}
++
+\varepsilon_{\mathrm{private}}
++
+\varepsilon_{\mathrm{missing}}.
+\]
+
+### Proof
+
+Substitute the additive metric and use linearity of expectation. ∎
+
+## 4. Pre-transport approximation terms
+
+Let modal-analysis and support-assignment errors be
+\(\varepsilon_{\mathrm{modal}}\) and
+\(\varepsilon_{\mathrm{support}}\), both evaluated under the same-event
+coupling. Assume the implementation admits intermediate representations for
+which
+
+\[
+\mathbb E[d(\widehat Z,Z)]
 \leq
 \varepsilon_{\mathrm{flow}}
 +
 \varepsilon_{\mathrm{private}}
 +
-\varepsilon_{\mathrm{post}}.
-\]
-
-### Proof
-
-The Wasserstein distance is the infimum of expected transport cost over all couplings. Evaluate it at the stated coupling. By the additive metric,
-
-\[
-\begin{aligned}
-\mathbb E d(\widehat Z,Z)
-={}&
-\mathbb E\|\widehat Z_c-Z_c^*\|
+\varepsilon_{\mathrm{post}}
 +
-\mathbb E\|\widehat Z_p-Z_p\|
-+
-\mathbb E\|\widehat Z_u-Z_u\|\\
-\leq{}&
-\varepsilon_{\mathrm{flow}}
-+
-\varepsilon_{\mathrm{private}}
-+
-\varepsilon_{\mathrm{post}}.
-\end{aligned}
-\]
-
-Taking the infimum cannot increase the value. ∎
-
-## 4. Modal and support approximation
-
-Let \(S\) denote the ideal modal analysis map and \(\widehat S\) its approximation. Let \(P=(P_c,P_p,P_u)\) and \(\widehat P\) be the true and estimated projector triples.
-
-Define
-
-\[
 \varepsilon_{\mathrm{modal}}
-=
-\mathbb E\|
-\widehat S(O)-S(O)
-\|,
++
+\varepsilon_{\mathrm{support}}.
+\tag{9.4}
 \]
 
-and
+Here \(\varepsilon_{\mathrm{post}}\) is the recoverable-missing posterior error
+under a declared conditional coupling. It is not a marginal distance detached
+from event identity.
 
-\[
-\varepsilon_{\mathrm{support}}
-=
-\mathbb E\left[
-\sum_{b\in\{c,p,u\}}
-\|(
-\widehat P_b-P_b
-)S(O)\|
-\right].
-\]
+## 5. Theorem 9 — additive paired risk bound
 
-These errors occur before flow and posterior approximation.
-
-## 5. Theorem 9 — additive representation-risk bound
-
-### Statement
-
-If observed-private identity is exact, so \(\varepsilon_{\mathrm{private}}=0\), then
+Under Equations (9.2) and (9.4),
 
 \[
 \boxed{
 |
-\widehat{\mathcal R}(h)-\mathcal R(h)
+\mathcal R_{\widehat Z}(h)
+-
+\mathcal R_Z(h)
 |
 \leq
 L
 \left(
 \varepsilon_{\mathrm{flow}}
++
+\varepsilon_{\mathrm{private}}
 +
 \varepsilon_{\mathrm{post}}
 +
@@ -216,116 +198,80 @@ L
 +
 \varepsilon_{\mathrm{support}}
 \right)
-}
+}.
+\tag{9.5}
 \]
 
-for the coupled approximation described below.
+If observed-private identity is exact, then
+\(\varepsilon_{\mathrm{private}}=0\).
 
 ### Detailed proof
 
-1. Introduce an intermediate representation \(\widetilde Z\) obtained by applying the ideal projectors and ideal transport/posterior to the approximate modal state. By the triangle inequality,
+Lemma 9.1 bounds the task-risk difference by the paired representation error.
+Equation (9.4) decomposes that error into the declared mechanisms. Substitute
+Equation (9.4) into Equation (9.3). Exact private identity removes the private
+term. ∎
 
-   \[
-   W_1(\widehat\mu^U,\mu^U)
-   \leq
-   W_1(\widehat\mu^U,\widetilde\mu^U)
-   +
-   W_1(\widetilde\mu^U,\mu^U).
-   \]
+## 6. Counterexample 9.1 — equal marginals do not control semantic risk
 
-2. The first term collects flow, posterior, and support-assignment errors. Using Lemma 9.2 and exact private identity,
-
-   \[
-   W_1(\widehat\mu^U,\widetilde\mu^U)
-   \leq
-   \varepsilon_{\mathrm{flow}}
-   +
-   \varepsilon_{\mathrm{post}}
-   +
-   \varepsilon_{\mathrm{support}}.
-   \]
-
-3. The second term changes only the modal state from \(\widehat S(O)\) to \(S(O)\). Under the adopted coupling and a one-Lipschitz block extraction convention,
-
-   \[
-   W_1(\widetilde\mu^U,\mu^U)
-   \leq
-   \varepsilon_{\mathrm{modal}}.
-   \]
-
-   If the transport or decoder has Lipschitz constant greater than one, that constant must multiply this term; the displayed theorem assumes the error terms are measured after their respective maps or have already absorbed those constants.
-
-4. Therefore
-
-   \[
-   W_1(\widehat\mu^U,\mu^U)
-   \leq
-   \varepsilon_{\mathrm{flow}}
-   +
-   \varepsilon_{\mathrm{post}}
-   +
-   \varepsilon_{\mathrm{modal}}
-   +
-   \varepsilon_{\mathrm{support}}.
-   \]
-
-5. Apply Lemma 9.1. ∎
-
-## 6. Corollary 9.1 — private leakage adds a separate term
-
-If the implementation does not preserve the private block exactly, then
+Let \(Y\sim\operatorname{Bernoulli}(1/2)\), and define
 
 \[
-|
-\widehat{\mathcal R}-\mathcal R
-|
-\leq
-L
-\left(
-\varepsilon_{\mathrm{flow}}
-+
-\varepsilon_{\mathrm{private}}
-+
-\varepsilon_{\mathrm{post}}
-+
-\varepsilon_{\mathrm{modal}}
-+
-\varepsilon_{\mathrm{support}}
-\right).
+Z=Y,
+\qquad
+\widehat Z=1-Y.
 \]
 
-The structural identity theorem sets \(\varepsilon_{\mathrm{private}}=0\) in the ideal method.
+Both representation marginals are Bernoulli\((1/2)\), so
+
+\[
+W_1(
+\operatorname{Law}(Z),
+\operatorname{Law}(\widehat Z))
+=0.
+\]
+
+For \(h(z)=z\), the risk of \(Z\) is zero and the risk of \(\widehat Z\) is
+one under 0--1 loss. Marginal equality therefore cannot replace a same-event
+semantic coupling. ∎
 
 ## 7. Interpretation
 
-The bound is useful because every term maps to a distinct diagnostic:
-
-| Error | Observable diagnostic |
+| Error term | Primary diagnostic |
 |---|---|
-| \(\varepsilon_{\mathrm{flow}}\) | shared endpoint \(W_1/W_2\), paired retrieval |
-| \(\varepsilon_{\mathrm{post}}\) | CRPS, NLL, interval coverage, posterior \(W_1\) |
-| \(\varepsilon_{\mathrm{modal}}\) | waveform and spectral reconstruction error |
-| \(\varepsilon_{\mathrm{support}}\) | private-to-shared intervention leakage |
-| \(\varepsilon_{\mathrm{private}}\) | pre/post private-coordinate distance |
+| \(\varepsilon_{\mathrm{flow}}\) | paired shared modal error after canonicalization |
+| \(\varepsilon_{\mathrm{private}}\) | pre/post observed-private drift |
+| \(\varepsilon_{\mathrm{post}}\) | paired CRPS, NLL or conditional transport error |
+| \(\varepsilon_{\mathrm{modal}}\) | same-event modal reconstruction error |
+| \(\varepsilon_{\mathrm{support}}\) | true-versus-estimated slot-role error |
 
-The theorem does not justify averaging these diagnostics into a single score. They identify different failure mechanisms.
+Domain-level MMD, Wasserstein distance and acquisition-ID probes remain useful
+secondary diagnostics. They do not substitute for the paired primary errors.
 
 ## 8. Failure boundaries
 
-1. The conditional risk may not be Lipschitz, especially near a discontinuous hard decision boundary.
-2. A small marginal Wasserstein distance can coexist with semantic class permutation.
-3. The additive metric may assign scientifically inappropriate relative scales to damping, frequency, and residues; a weighted physical metric should be declared.
-4. Error terms can interact. The additive bound is conservative and not a causal attribution of observed performance loss.
-5. The theorem evaluates a fixed decision rule or regular conditional risk. Re-training a downstream model on each representation introduces optimization and estimation error.
+1. The theorem applies to a fixed \(h\); retraining adds estimation and
+   optimization error.
+2. Hard 0--1 decisions are not globally Lipschitz.
+3. A valid coupling requires the same latent event or another justified
+   semantic correspondence.
+4. Equation (9.4) is an assumed or separately proved approximation
+   decomposition; it must be measured rather than inferred from architecture.
+5. Unit normalization can make one modal component dominate the metric.
+6. Global-null coordinates are excluded because no source-supported paired
+   target exists for them.
 
 ## 9. Experimental implication
 
-An experiment should vary one error source at a time:
+Use \(\texttt{latent_event_id}\) as the independent paired unit. Report one
+primary metric for each mechanism:
 
-- perturb sensor response for support error;
-- reduce modal rank for modal error;
-- vary flow integration steps for flow error;
-- vary diffusion score quality for posterior error;
-- deliberately allow private mixing as a negative control.
+- paired shared modal error;
+- observed-private drift;
+- CRPS or NLL for recoverable-missing modes;
+- modal reconstruction error;
+- support-role error.
 
-The observed task degradation should be compared with the corresponding diagnostic. The bound is supported only if the measurement pipeline estimates all declared error terms on independent units.
+Estimate paired confidence intervals across latent events or, on real data,
+across independent recordings or machines. A marginal alignment score alone
+cannot support the task-risk claim.
