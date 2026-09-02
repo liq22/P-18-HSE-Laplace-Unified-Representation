@@ -1,52 +1,76 @@
-schema_version: 2
-project_name: HSE-Laplace-Source-Supported-Representation
-stage: corrected_theory_contract
+schema_version: 3
+project_name: HSE-Laplace-Source-Supported-Partial-Unified-Representation
+stage: refined_theory_contract
 language: English
 
 scope: >-
-  Cross-acquisition representation of one shared local dynamical process under
-  partially overlapping structural modal support. The project does not cover
-  arbitrary unrelated heterogeneous time series.
+  Cross-acquisition representation of one shared window-local dynamical process
+  or declared system family under partially overlapping structural modal
+  support. Unrelated heterogeneous time series are out of scope.
 
 central_question: >-
-  How should multiple acquisition operators represent a shared local dynamical
-  process when some modal components are common, some are observed only in the
-  current domain, some are missing locally but supported by other source
-  domains, and some are unsupported by all source domains?
+  Which modal coordinates may be canonicalized, which must be preserved, which
+  current-domain missing coordinates are identifiable from declared source
+  evidence, and which coordinates have no source likelihood support?
 
 representation:
-  shared_observable: source_population_flow_canonicalized
-  observed_private: identity_preserved
-  recoverable_missing: conditional_posterior
-  global_null: unsupported_no_data_driven_recovery
+  structural_roles:
+    common_observable: anchored_canonicalization
+    observed_private: exact_identity
+    source_supported_missing: conditional_inference_if_identified
+    source_global_null: unsupported_no_data_driven_recovery
+  gates:
+    role_gate: source_only_structural_observability
+    identifiability_gate: paired_or_physical_certificate
+    canonicalizer_complexity: identity_affine_ot_flow
+    posterior_complexity: point_gaussian_mixture_diffusion
   dependency: triangular_shared_then_missing
-  coordinate_system: local_stable_laplace_modal
+  coordinate_system: fixed_window_local_laplace_modal_slots
   structural_observability: domain_level
   instance_reliability: sample_level
 
 current_claim: >-
-  Under explicit structural-observability, finite-modal and regularity
-  assumptions, a source-supported distribution-valued representation can be
-  constructed by canonicalizing common observable modes at the source
-  population level, preserving observed-private modes, representing
-  recoverable-missing modes by a conditional posterior, and excluding
-  source-global-null modes from learned recovery claims.
+  Under explicit structural-observability, finite-modal, coupling and
+  regularity assumptions, a partially unified distribution-valued
+  representation can canonicalize common observable modes, preserve
+  observed-private modes, infer source-supported missing modes only when their
+  conditional is identified, and exclude source-global-null modes from
+  data-driven recovery claims.
 
 claim_status: theoretical_candidate
 formal_claim_supported: false
-evidence_level: analytic_derivations_and_semantic_tests
+evidence_level: analytic_derivations_and_behavioral_tests
+
+main_theory:
+  - four_way_source_supported_decomposition
+  - complete_invariance_task_risk_lower_bound
+  - source_support_not_conditional_identifiability
+  - paired_semantic_risk_bound
+  - triangular_stochastic_transport
+
+necessity_gates:
+  diffusion: >-
+    Promote only when Gaussian and finite-mixture conditionals leave a paired
+    proper-score and calibration gap.
+  flow: >-
+    Promote only when paired affine, CORAL and ordinary OT leave nonlinear
+    canonicalization headroom while semantics are preserved.
+  laplace: >-
+    Retain only when a window-local modal representation beats a matched direct
+    time-domain latent on the declared reconstruction and cross-acquisition
+    metrics.
 
 largest_uncertainties:
-  - whether structural modal roles can be identified from realistic acquisition metadata
-  - whether paired source data identify the recoverable-missing conditional
-  - whether a local damped-modal dictionary is adequate for event-local PHM transients
-  - whether a Gaussian or mixture posterior already matches Diffusion
-  - whether affine calibration or ordinary optimal transport already matches Flow
-  - whether source-only canonicalization preserves fault semantics
+  - whether realistic acquisition metadata identify stable modal roles
+  - whether paired or physical evidence identifies the missing conditional
+  - whether a local damped-modal dictionary is adequate for PHM transients
+  - whether simpler posterior families match Diffusion
+  - whether simpler canonicalizers match Flow
+  - whether source-only anchors preserve fault semantics
 
-next_decisive_experiment: known_pole_2x2x2_oracle_falsification
+next_decisive_experiment: known_pole_oracle_factorial_with_identifiability_and_complexity_controls
+
 stopping_condition: >-
-  Stop or simplify a mechanism when the corresponding simple baseline matches
-  it under the same information and compute budget: Gaussian or mixture models
-  for missing posterior, affine/CORAL/ordinary OT for shared canonicalization,
-  and a direct time-domain latent for the Laplace representation.
+  Stop or simplify any mechanism when its strongest predeclared simpler
+  baseline is equivalent under the same information, independent-unit split
+  and compute budget.

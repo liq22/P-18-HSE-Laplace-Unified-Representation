@@ -1,34 +1,31 @@
-# HSE–Laplace Source-Supported Representation
+# HSE–Laplace Source-Supported Partial Unified Representation
 
 ## Working title
 
-**Observability-Partitioned Laplace Stochastic Transport for
-Cross-Acquisition Representation of Shared Local Dynamics**
+**Observability- and Identifiability-Gated Laplace Stochastic Representation
+for Cross-Acquisition Time Series**
 
 ## Scope
 
 The paper studies multiple acquisition operators observing the same local
-dynamical process or one system family sharing a declared local modal
-dictionary. Heterogeneity may arise from sampling rate, sensor response,
-channel set, timestamps and missingness.
+dynamical process or one declared system family. The operators may differ in
+sampling rate, anti-alias response, sensor transfer function, channel set,
+timestamps and sample reliability.
 
-The paper does not claim a universal representation for unrelated time series,
-different state dimensions or incompatible label ontologies.
+The paper does not cover unrelated systems, incompatible state dimensions or
+arbitrary label ontologies.
 
-## Central question
+## Problem
 
-How should a representation treat modal information that is:
+Different acquisition operators do not merely shift a common distribution.
+They expose partially overlapping physical modal support. A full
+domain-invariant point embedding can therefore erase information that exists
+only in a higher-support view, while a generative model can fabricate confidence
+for coordinates unsupported by the source evidence.
 
-1. observable in every source acquisition domain;
-2. observable in the current domain but not in every domain;
-3. hidden in the current domain but observable in another source domain;
-4. unsupported by every source domain?
+## Core representation
 
-## Central claim under test
-
-A complete domain-invariant point embedding is inappropriate when acquisition
-supports only partially overlap. The structural modal space should be
-partitioned as
+For domain \(d\),
 
 \[
 \mathcal H
@@ -39,166 +36,190 @@ partitioned as
 \oplus
 \mathcal H_{m,d}
 \oplus
-\mathcal H_0,
+\mathcal H_0.
 \]
 
-where the blocks are common, observed-private, recoverable-missing and
-source-global-null.
+The four roles are:
 
-The candidate method assigns different semantics:
+| Role | Meaning | Permitted operation |
+|---|---|---|
+| \(\mathcal H_c\) | observable in every declared source domain | anchored canonicalization |
+| \(\mathcal H_{p,d}\) | observed now, but not common to every domain | exact identity |
+| \(\mathcal H_{m,d}\) | hidden now, supported by at least one other source | conditional inference only when identifiable |
+| \(\mathcal H_0\) | unsupported by every source | no data-driven recovery |
+
+The symbol \(\mathcal H_{m,d}\) means **source-supported missing**. It is
+not synonymous with statistically recoverable.
+
+## Three gates
+
+### Gate 1 — structural role
+
+A fixed modal slot receives one of the four roles from the source-only
+structural acquisition operators.
+
+### Gate 2 — identifiability
+
+A source-supported missing slot receives a learned posterior only if a declared
+certificate \(\chi_{d,k}=1\) is available. Acceptable certificates include:
+
+- the same `latent_event_id` observed by complementary acquisitions;
+- a known simulator state;
+- an injective physical coupling model;
+- another explicitly justified semantic anchor.
+
+Unpaired source marginals alone do not qualify.
+
+### Gate 3 — model complexity
+
+The operator class is escalated only when a simpler nested class fails:
 
 \[
-\begin{aligned}
-\mathcal H_c
-&:
-\text{source-population canonical Flow},\\
-\mathcal H_{p,d}
-&:
-\text{identity preservation},\\
-\mathcal H_{m,d}
-&:
-\text{conditional posterior, with Diffusion only if needed},\\
-\mathcal H_0
-&:
-\text{unsupported; no learned recovery claim}.
-\end{aligned}
+T_d:
+\text{identity}
+\rightarrow
+\text{affine}
+\rightarrow
+\text{OT}
+\rightarrow
+\text{Flow},
 \]
 
-The final dependency is triangular:
+\[
+q_d:
+\text{point}
+\rightarrow
+\text{Gaussian}
+\rightarrow
+\text{mixture}
+\rightarrow
+\text{Diffusion}.
+\]
+
+Thus the contribution is not the mechanical combination of Laplace, Flow and
+Diffusion. It is the rule that determines **which physical role may be changed,
+which evidence is sufficient to infer it, and which model complexity is
+actually needed**.
+
+## Candidate final factorization
+
+When the gates pass,
 
 \[
 C^*=T_d(C),
-\qquad
-P'=P,
-\qquad
-M'\sim q_\theta(M\mid C^*,P,\mathcal O_d).
 \]
 
-## Introduction argument
+\[
+P'=P,
+\]
 
-### Paragraph 1 — observed industrial failure
+\[
+M'\sim
+q_\theta(M\mid C^*,P,\mathcal O_d,\chi_d).
+\]
 
-The same local fault transient can be recorded through different sampling
-rates, anti-alias filters, sensor transfer functions and missingness patterns.
-These operators change which modal components are supported, not only their
-marginal statistics.
+The source-global-null block is excluded. The dependency is triangular:
+canonical shared state first, private identity second, conditional missing
+posterior third.
 
-### Paragraph 2 — failure of complete alignment
+## HSE token contract
 
-If high-support observations contain task-relevant private information, forcing
-their complete representation to equal a lower-support view removes that
-information. The task-risk lower bound in Theorem 5 makes this loss explicit.
+The learned implementation should retain fixed modal slots rather than a
+sample-dependent latent dimension. A slot-level token is conceptually
 
-### Paragraph 3 — missing information is not one category
+\[
+\operatorname{Token}_{d,i,k}
+=
+(
+z_{d,i,k},
+\pi_{d,k},
+o_{d,k}^{\mathrm{struct}},
+r_{d,i,k},
+\chi_{d,k},
+\tau_{i,k},
+[\omega_k^-,\omega_k^+]
+),
+\]
 
-A mode hidden in the current domain but observed elsewhere can receive a
-source-supported conditional posterior. A mode hidden from every source cannot.
-Conflating the two lets a generative model present prior-driven samples as
-recovered evidence.
+where:
 
-### Paragraph 4 — exact gap to prior work
+- \(\pi_{d,k}\) is the structural role;
+- \(o_{d,k}^{\mathrm{struct}}\) is structural observability;
+- \(r_{d,i,k}\) is sample reliability;
+- \(\chi_{d,k}\) is identifiability status.
 
-Laplace latent models provide stable continuous-time coordinates. Diffusion
-provides probability-valued prediction. Flow Matching provides distributional
-transport. Shared/private representation learning separates domains. None of
-these components alone assigns transport semantics according to acquisition
-observability while excluding global-null support from recovery claims.
+The common backbone receives a fixed token tensor and attention mask. It does
+not receive dataset identity as a semantic shortcut.
 
-### Paragraph 5 — proposed object and evidence
+## Introduction logic
 
-The paper proposes an observability-partitioned representation, proves its
-four-way decomposition and principal risk properties, then uses an oracle
-known-pole factorial experiment to determine whether posterior, Flow and
-Laplace mechanisms have independent headroom before training a combined model.
-
-## Method overview
-
-```text
-local heterogeneous observation O_d
-        ↓
-structural acquisition operator A_d
-+ sample reliability R_d,i
-        ↓
-fixed Laplace modal slots
-        ↓
-common | observed-private | recoverable-missing | global-null
-        ↓
-Flow  | identity          | conditional posterior | unsupported
-        ↓
-source-supported distribution-valued representation
-```
-
-Structural support and instance reliability are separate:
-
-```text
-structural support
--> modal role and source-supported recoverability
-
-instance reliability
--> confidence and posterior precision for one sample
-```
+1. A single local fault transient can be observed through acquisition operators
+   with different modal support.
+2. Complete alignment can delete task-relevant private information.
+3. Current-domain absence must be separated into source-supported missing and
+   source-global null.
+4. Source support alone does not identify a missing conditional; unpaired
+   marginals can correspond to opposite conditionals.
+5. Population marginal alignment alone can reverse semantics.
+6. The proposed representation uses role, identifiability and complexity gates
+   before assigning Flow, identity or a probability model.
+7. The known-pole experiment determines whether each mechanism has headroom
+   before a learned joint architecture is built.
 
 ## Candidate novelty
 
-The candidate novelty is not the combination of Laplace modeling, Diffusion and
-Flow. It is:
+> An acquisition-observability-conditioned, identifiability-gated
+> representation that canonicalizes only common modal support, preserves
+> observed-private evidence, models source-supported missing modes only under a
+> declared coupling certificate, and excludes source-global-null modes from
+> recovery claims.
 
-> assigning distinct stochastic-transport semantics to
-> acquisition-observable modal components, distinguishing recoverable missing
-> support from source-global-null support, and making the latter ineligible for
-> data-driven recovery claims.
+## Main theory for the paper
 
-## Theoretical contribution map
+The main text should emphasize:
 
-| Role | Result | File |
-|---|---|---|
-| main | four-way source-supported decomposition | `theory/01_observable_subspace_decomposition.md` |
-| support | constructive existence and population canonicality | `theory/02_constructive_existence.md` |
-| background | Flow–Diffusion marginal equivalence | `theory/03_diffusion_flow_marginal_equivalence.md` |
-| method property | observed-private pathwise invariance | `theory/04_observed_private_invariance.md` |
-| main | complete-invariance task-risk lower bound | `theory/05_global_invariance_risk_lower_bound.md` |
-| support | posterior-valued sufficiency | `theory/06_posterior_representation_sufficiency.md` |
-| support | local Laplace modal stability | `theory/07_laplace_modal_stability.md` |
-| main candidate | noise-weighted shared-estimation bound | `theory/08_shared_estimation_perturbation_bound.md` |
-| main candidate | paired approximation-risk bound | `theory/09_unified_representation_risk_bound.md` |
-| optional main/appendix | sampling-gap shift bound | `theory/10_sampling_gap_shift_bound.md` |
-| special case | product-case private-identity OT | `theory/11_private_preserving_optimal_transport.md` |
-| null model | decoupled generator commutation | `theory/12_commuting_block_generators.md` |
-| main experimental driver | identifiability counterexamples | `theory/13_identifiability_and_failure_boundaries.md` |
+1. four-way source-supported decomposition;
+2. complete-invariance task-risk lower bound;
+3. source support versus conditional identifiability;
+4. paired semantic-risk bound;
+5. triangular representation construction.
 
-The main manuscript should not present all results as independent innovations.
-The main text should retain the four-way decomposition, the complete-invariance
-lower bound and the paired risk bound; remaining results support assumptions,
-implementation or appendices.
+The following are necessity gates rather than headline innovations:
+
+- Diffusion proper-score theorem;
+- affine canonicalization theorem;
+- window-local Laplace adequacy bound.
+
+All other results support assumptions or appendices. See `theory/README.md`.
 
 ## Strongest competing explanations
 
-- sampling-rate and sensor metadata are sufficient;
-- a hard or soft support mask without generative modeling is sufficient;
-- a heteroscedastic Gaussian or mixture posterior matches Diffusion;
-- affine calibration, CORAL or ordinary OT matches Flow;
-- a direct time-domain latent matches the local Laplace representation;
-- private information is acquisition identity rather than fault information;
-- unpaired source marginals do not identify the missing conditional.
+- metadata and a hard support mask are sufficient;
+- the source-supported missing conditional is not identified;
+- a Gaussian or mixture posterior matches Diffusion;
+- paired affine calibration or ordinary OT matches Flow;
+- a matched direct time-domain latent matches Laplace coordinates;
+- apparent private information is acquisition identity;
+- canonical marginal alignment permutes task semantics.
 
-## Current evidence boundary
+## Evidence boundary
 
 ```text
 proved:
 conditional mathematical implications under explicit assumptions
 
 executed:
-deterministic four-block semantic tests
+deterministic analytic tests
 
 not executed:
 known-pole factorial experiment
 learned posterior
-learned Flow
+learned canonical Flow
 real paired-rate PHM experiment
 
 not supported:
 universal representation
 global-null recovery
-SOTA
+necessity of Diffusion or Flow
 real diagnosis improvement
 ```

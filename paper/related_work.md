@@ -2,87 +2,85 @@
 
 ## Comparison principle
 
-The paper compares methods by the object they represent, the heterogeneity they
-model and the information they are permitted to change. Similar module names
-are not sufficient evidence of equivalence or novelty.
+The comparison is organized by the represented object, the source of
+heterogeneity, the support semantics and the evidence required for missing
+inference.
 
-| Direction | Representation object | Heterogeneity addressed | Observable-support roles | Private preservation | Global-null exclusion |
+| Direction | Representation object | Support roles | Missing identifiability | Private preservation | Global-null exclusion |
 |---|---|---|---|---|---|
-| Latent Laplace Diffusion | generic latent Laplace trajectory | irregular timestamps and forecasting uncertainty | no explicit four-way split | not structural | no |
-| Neural Laplace | Laplace-domain trajectory | differential-equation dynamics | no | not applicable | no |
-| Flow Matching / OT-CFM | generic data or latent probability path | source-target transport | no | not guaranteed | no |
-| Domain Separation Networks | generic shared/private features | domain variation | not acquisition-derived | model-dependent | no |
-| irregular-time ODE/CDE models | continuous-time hidden state | timestamps and missingness | no | not explicit | no |
-| proposed candidate | fixed physical modal slots | acquisition operators with partial support overlap | shared / observed-private / recoverable-missing / global-null | structural identity | explicit |
+| Latent Laplace Diffusion | generic latent Laplace trajectory | no four-way partition | learned from its forecasting setup | not structural | no |
+| Neural Laplace | Laplace-domain trajectory | no | not addressed | not applicable | no |
+| Flow Matching / OT-CFM | generic probability path | no | not addressed | not guaranteed | no |
+| Domain Separation Networks | generic shared/private features | not acquisition-derived | not addressed | model-dependent | no |
+| partial-view representation | shared latent factors | view-dependent | often assumed through pairing or objectives | method-dependent | rarely explicit |
+| proposed candidate | fixed physical modal slots | common / observed-private / source-supported-missing / source-global-null | explicit certificate required | structural identity | explicit |
 
-## Latent Laplace modeling
+## What is already established
 
-Latent Laplace Diffusion supplies stable complex-conjugate modal dynamics,
-arbitrary-time queries and a gap-aware irregular-time mechanism. These are
-prior contributions. The present project changes the representation semantics:
-modal roles are determined by structural acquisition support, and only
-source-supported missing modes receive a learned posterior.
+The project does not claim as new:
 
-Neural Laplace motivates Laplace-domain trajectory modeling. It does not
-provide the acquisition-support partition or the Flow/identity/posterior role
-assignment.
+- stable Laplace latent dynamics;
+- arbitrary-time modal synthesis;
+- the probability-path relation between Flow and Diffusion;
+- shared/private feature decomposition;
+- generic missing-view generation;
+- optimal transport or Flow Matching.
 
-## Diffusion and probability-flow theory
+## Exact unresolved gap
 
-Score-SDE, probability-flow ODE, Flow Matching and stochastic-interpolant
-theories already connect deterministic and stochastic probability paths. The
-project therefore does not claim to be the first to combine or unify Flow and
-Diffusion.
+Existing components do not jointly answer:
 
-Diffusion is retained only if the recoverable-missing conditional is
-sufficiently non-Gaussian or multimodal that Gaussian and mixture baselines
-fail.
+1. which modal coordinates may be aligned under partially overlapping
+   acquisition support;
+2. which observed coordinates must remain unchanged;
+3. when a current-domain missing coordinate is identifiable from other sources;
+4. when a generated coordinate is only prior-driven;
+5. when the complexity of Flow or Diffusion is actually necessary.
 
-## Flow and optimal transport
+## Narrow novelty statement under test
 
-Flow Matching and OT-CFM motivate learned canonical transport. Ordinary
-marginal transport does not decide which physical support should move, and it
-can align marginals while permuting class semantics.
+> The candidate novelty is a role- and identifiability-gated physical
+> representation: acquisition observability assigns fixed Laplace modal slots to
+> common, observed-private, source-supported-missing or source-global-null
+> roles; paired or physical evidence determines whether missing inference is
+> identifiable; and nested model classes determine whether affine/Gaussian
+> realizations are sufficient before Flow or Diffusion is used.
 
-Flow is retained only if affine calibration, whitening, CORAL and minibatch OT
-cannot achieve the same paired shared-state error and task preservation.
+## Closest-work questions
 
-## Shared/private representation learning
+### Relative to LLapDiff
 
-Shared/private feature decompositions are established. The proposed difference
-is not the existence of shared and private blocks. It is the structural
-acquisition rule that assigns fixed Laplace modal slots to:
+LLapDiff supplies stable latent Laplace dynamics and probabilistic irregular-time
+prediction. The proposed difference is not another generic latent conditioner.
+It is the explicit acquisition-support role assignment, identifiability gate and
+global-null exclusion.
 
-```text
-common support
-observed-private support
-recoverable-missing support
-source-global-null support
-```
+### Relative to Flow Matching and OT
 
-and assigns different permissible operations to those roles.
+Flow methods supply trainable transport. They do not by themselves select the
+physically admissible transported block or prevent semantic permutation. The
+paper therefore requires paired or task-sufficient anchors.
 
-## Partial-view and missing-view representation
+### Relative to shared/private learning
 
-Partial-view methods motivate recovery from complementary observations.
-However, a coordinate being visible in another source domain does not identify
-its current-domain conditional without paired events or another coupling
-assumption. The project treats this as an explicit identifiability condition,
-not an architectural guarantee.
+Shared/private decompositions already exist. The proposed split is fixed by
+acquisition observability and adds two missing-data categories:
+source-supported missing and source-global null.
 
-## Exact novelty statement under test
+### Relative to partial-view methods
 
-> The candidate novelty is an acquisition-observability-conditioned,
-> source-supported modal representation in which common modes are
-> canonicalized at the source-population level, observed-private modes are
-> preserved, recoverable-missing modes remain probability-valued, and modes
-> unsupported by every source are excluded from learned recovery claims.
+Complementary views can support a missing conditional only when their joint
+coupling is identified. Separate unpaired marginals are insufficient; Theory 16
+gives an explicit counterexample.
 
-The claim is rejected or narrowed when:
+## Rejection conditions
 
-- source metadata alone matches the method;
-- Gaussian or mixture posteriors match Diffusion;
-- affine or ordinary OT baselines match Flow;
-- the local Laplace representation has no advantage over a matched
-  time-domain latent;
-- paired source evidence is insufficient to identify the missing conditional.
+Narrow or reject the novelty claim when:
+
+- metadata and a hard support mask match the method;
+- unpaired source evidence cannot identify the missing conditional;
+- Gaussian or mixture models match Diffusion under a proper score;
+- paired affine calibration or ordinary OT matches Flow;
+- a direct time-domain latent matches Laplace coordinates;
+- private information is only acquisition identity;
+- semantic anchors do not prevent class permutation.

@@ -2,264 +2,268 @@
 
 ## Rule
 
-Every experiment must distinguish one proposed mechanism from a named simpler
-explanation. The independent unit is a latent event in synthetic work and a
-machine, bearing, run or recording in real work. Windows or multiple
-acquisition views of one unit are not independent samples.
+Each experiment changes one scientific decision. The independent unit is a
+`latent_event_id` in synthetic work and a machine, bearing, run or recording in
+real work. Multiple acquisition views of one unit are paired observations, not
+independent samples.
 
-A completed run records command, configuration, data and split version, seed,
-environment, terminal state, metrics and interpretation boundary. No custom
-hash, checksum or ledger is required.
+Every completed run records command, configuration, data and split version,
+seed, environment, terminal state, metrics and interpretation boundary. No
+custom hash, receipt or ledger is required.
 
 ## E0 — analytic contract
 
-### Question
+Check:
 
-Does the implementation match the corrected scientific object?
-
-### Checks
-
-- four projectors are symmetric, idempotent, orthogonal and sum to identity;
-- recoverable-missing and global-null support are different;
-- indefinite noise covariance is rejected;
+- four structural projectors are orthogonal and sum to identity;
+- source-supported missing and source-global null are distinct;
+- indefinite covariance is rejected;
 - observed-private and global-null coordinates remain unchanged;
-- the missing update may condition on canonical shared state;
-- stable modal transitions obey the exact decay bound;
-- compensated Gaussian SDE moments match the declared probability path.
-
-### Command
-
-```bash
-python examples/analytic_unified_representation.py
-python -m unittest discover -s tests -v
-```
+- structural observability and instance reliability are separate;
+- soft slot weights obey monotonicity and threshold behavior;
+- stable Laplace transitions satisfy the analytic norm bound.
 
 Failure blocks all empirical work.
 
-## E1 — known-pole 2×2×2 oracle falsification
+## E1 — known-pole mechanism factorial
 
-No neural network is trained in E1. Ground-truth modal states and acquisition
-operators are available.
+Use paired acquisition views generated from the same latent event. Split
+`latent_event_id` before creating views.
 
-### Factor A — support overlap
-
-```text
-full overlap
-partial overlap
-```
-
-### Factor B — private task value
+### Main 2 x 2 x 2 factors
 
 ```text
-I(Y; P | C) = 0
-I(Y; P | C) > 0
+full / partial structural support overlap
+x
+private task-irrelevant / task-relevant
+x
+unimodal / multimodal source-supported missing conditional
 ```
 
-### Factor C — recoverable-missing posterior shape
+### Mandatory identification control
+
+Construct two populations with identical unpaired \(C\) and \(M\) marginals but
+opposite \(p(M\mid C)\). Compare:
 
 ```text
-unimodal
-multimodal
+paired evidence
+unpaired evidence
 ```
 
-The design yields eight cells. Every cell contains paired acquisition views
-generated from the same latent event. Split `latent_event_id` before generating
-views.
+The unpaired model must not be credited with identifying the conditional.
 
-### Global-null negative control
+### Mandatory Flow headroom control
 
-Add one modal coordinate satisfying
-
-\[
-A_d\Theta_0=0
-\]
-
-for every source domain. The correct method output is `unsupported` or
-`prior-only`, not a reconstruction score presented as evidence.
-
-### Signal regimes
-
-Run three declared regimes:
+Use:
 
 ```text
-damped transient only
-damped transient + bounded forced component
-one switching event as a misspecification control
+invertible affine shared distortion
+nonlinear but invertible shared distortion
 ```
 
-The first paper remains focused on event-local transients unless the forced
-baseline shows systematic residual failure.
+A paired affine map must solve the affine cell. Learned Flow is considered only
+in the nonlinear cell.
 
-### Oracle methods
+### Global-null control
 
-1. no role decomposition;
-2. complete invariance;
-3. hard four-way support;
-4. soft slot observability;
-5. posterior mean for missing modes;
-6. oracle Gaussian posterior;
-7. oracle mixture posterior;
-8. oracle full conditional posterior;
-9. identity shared coordinates;
-10. affine shared calibration;
-11. oracle nonlinear canonical map.
-
-### Primary metrics
-
-| Mechanism | One primary metric |
-|---|---|
-| support decomposition | true-versus-estimated modal role error |
-| complete-invariance harm | paired task log-loss difference |
-| observed-private preservation | maximum private drift |
-| missing posterior | CRPS or NLL |
-| shared canonicalization | paired shared modal MSE |
-| global-null behavior | false recovery rate, target zero |
-| modal adequacy | event-level reconstruction residual |
-
-Secondary metrics may include coverage, conditional retrieval, CKA and
-acquisition-ID probes. They are not averaged into one score.
-
-### Go/no-go
-
-Proceed only when E1 shows independent headroom:
+Add a coordinate in \(\mathcal H_0\), independent of all supported
+coordinates. Correct behavior is:
 
 ```text
-support decomposition needed:
-partial-overlap cells fail under no decomposition
-
-private identity needed:
-task-relevant private cells degrade under complete invariance
-
-probability-valued missing state needed:
-mean regression fails when posterior shape matters
-
-Diffusion headroom:
-Gaussian and mixture baselines fail on multimodal cells
-
-Flow headroom:
-affine mapping fails on a semantic-preserving nonlinear distortion
-
-Laplace headroom:
-matched direct time-domain latent is not uniformly better
+unsupported / prior-only
 ```
 
-## E2 — learned missing posterior
+not recovered.
 
-Run only if E1 establishes posterior headroom. Freeze modal slots and support.
+### Physical-scope controls
 
 Compare:
 
-- posterior mean;
-- heteroscedastic Gaussian;
-- mixture-density network;
-- generic latent Diffusion;
-- support-aware modal Diffusion.
+```text
+event-local damped transient
+transient + bounded forced component
+single switching event
+```
 
-The missing posterior conditions on canonical shared state, observed-private
-state, acquisition metadata and the current observation:
+These cells measure Laplace model residual and determine whether the physical
+scope must be narrowed.
+
+## E2 — observable-role screen
+
+Compare:
+
+```text
+no decomposition
+complete invariance
+hard fixed-slot support
+soft fixed-slot support
+```
+
+Primary outcome:
 
 \[
-q_\theta(
-\Theta_{m,d}\mid
-\Theta_c^*,\Theta_{p,d},\mathcal O_d).
+\text{paired slot-role error}.
 \]
 
-Primary outcome: paired CRPS or NLL on the recoverable-missing modal state.
-Use paired bootstrap intervals over latent events.
+Secondary outcomes:
+
+- shared paired modal error;
+- private drift;
+- threshold sensitivity;
+- acquisition-ID leakage.
+
+## E3 — source-supported missing identifiability screen
+
+Use oracle modal states.
+
+Compare:
+
+```text
+unpaired marginal model
+paired conditional model
+known-simulator conditional
+class-only pseudo-pairing
+```
+
+Primary outcome:
+
+\[
+\text{conditional proper score on held-out latent events}.
+\]
+
+A missing posterior may be called data-supported only when the declared
+identifiability certificate is present and train/test latent events are
+disjoint.
+
+## E4 — posterior-complexity screen
+
+Compare under the same information and split:
+
+```text
+posterior mean
+heteroscedastic Gaussian
+finite mixture
+generic latent Diffusion
+support-aware modal Diffusion
+```
+
+Primary metric: one predeclared proper score, CRPS or NLL.
+
+Secondary metrics:
+
+- interval coverage;
+- calibration error;
+- task loss for a variance- or multimodality-sensitive target;
+- sampling cost.
 
 ### Diffusion stop rule
 
-Stop the Diffusion branch when a Gaussian or mixture model is statistically
-equivalent on the primary metric, calibration and downstream decision.
+Stop Diffusion development when the strongest Gaussian or mixture model is
+equivalent within the paired confidence interval on the primary proper score
+and calibration metric.
 
-## E3 — source-only canonicalization headroom
+## E5 — canonicalizer-complexity screen
 
-Before neural Flow, compare:
-
-- identity;
-- affine calibration;
-- whitening;
-- CORAL;
-- MMD;
-- minibatch OT;
-- paired physical-anchor mapping.
-
-Hold out one acquisition operator. The canonical target must be source-only and
-physically anchored by known modal slots or paired events. A population
-barycenter is not interpreted as per-observation posterior equality.
-
-### Flow stop rule
-
-Do not train Flow when affine calibration, CORAL or minibatch OT matches paired
-shared-state error and task preservation.
-
-## E4 — learned shared Flow
-
-Run only if E3 reveals nonlinear headroom. Freeze the modal encoder, role
-assignment and private path.
+Use source-only anchors and completely hold out one acquisition operator.
 
 Compare:
 
-- generic latent Flow Matching;
-- OT-CFM on the same modal state;
-- support-constrained modal Flow.
-
-Primary metric: paired shared modal MSE on a held-out acquisition operator.
-Report task log-loss, class-conditional retrieval, acquisition-ID probe,
-number of function evaluations, latency and memory as secondary results.
-
-## E5 — triangular combined model
-
-Combine only the mechanisms that passed E1--E4:
-
 ```text
-shared canonical Flow
-→ unchanged observed-private state
-→ missing posterior conditioned on canonical shared and private state
-→ global-null unsupported marker
+identity
+paired affine regression
+whitening / CORAL
+minibatch OT
+generic Flow Matching / OT-CFM
+support-constrained shared Flow
 ```
 
-The commuting-generator theorem is a decoupled null baseline, not a claim about
-the final conditional model.
+Primary metric:
 
-## E6 — real paired-rate PHM pilot
+\[
+\text{paired shared modal MSE}.
+\]
 
-Select raw high-rate recordings with a clear license and machine or recording
-group key.
+Secondary metrics:
+
+- task-sufficient semantic statistic preservation;
+- class-conditional retrieval;
+- source-population discrepancy;
+- acquisition-ID probe;
+- NFE, latency and memory.
+
+### Flow stop rule
+
+Stop learned Flow when paired affine, CORAL or ordinary OT is equivalent on the
+primary error and semantic-preservation metrics.
+
+## E6 — Laplace adequacy screen
+
+Compare equal-dimensional representations:
+
+```text
+window-local Laplace modal state
+direct time-domain latent
+Laplace + bounded forced baseline
+```
+
+Primary metric:
+
+\[
+\eta_{\mathrm{modal}}
+=
+\|s-\Phi\Theta\|/(\|s\|+\epsilon).
+\]
+
+Also report acquisition-space residual and cross-acquisition task utility.
+
+### Laplace stop rule
+
+Remove Laplace as the main representation when a matched direct time-domain
+latent simultaneously improves the primary reconstruction and
+cross-acquisition metrics.
+
+## E7 — learned triangular model
+
+Only after E3–E6 show headroom:
+
+```text
+shared canonicalizer
+-> exact observed-private path
+-> source-supported missing posterior conditioned on canonical shared/private
+```
+
+Do not jointly add learned poles, event routing, VQ codebooks or foundation
+pretraining.
+
+## E8 — real recording-level paired-rate pilot
 
 Protocol:
 
-1. split machines or recordings first;
-2. generate high, intermediate and anti-aliased low-rate views inside each
-   split;
-3. keep paired view identity;
-4. freeze support threshold, normalization, HPO and canonical anchor using
-   source data only;
-5. evaluate an unseen rate or sensor response;
-6. use event-local windows appropriate for the declared transient model.
+1. select raw high-rate data with a clear license and grouping key;
+2. split machines or recordings first;
+3. create anti-aliased high/mid/low-rate views inside each split;
+4. freeze support thresholds, normalization, anchors and HPO on source data;
+5. evaluate an unseen intermediate rate or sensor response;
+6. keep acquisition views of one recording paired.
 
-## Statistics
+## Statistical contract
 
-Predeclare:
+For each mechanism freeze one primary comparison and one primary metric.
 
-- one primary comparison per mechanism;
-- one primary metric per mechanism;
-- paired differences at the independent-unit level;
-- paired bootstrap confidence intervals;
-- all source, held-out and worst-condition results;
-- fixed tuning trials and compute budget;
-- confirmatory versus exploratory outcomes.
+| Mechanism | Primary metric |
+|---|---|
+| role assignment | paired slot-role error |
+| shared canonicalization | paired shared modal MSE |
+| private preservation | private drift |
+| missing posterior | CRPS or NLL |
+| complete-invariance harm | paired task log-loss difference |
+| Laplace adequacy | modal residual ratio |
 
-## Stop conditions
+Use paired confidence intervals over independent latent events or recordings.
+Seeds are implementation replicates, not a substitute for independent units.
 
-Simplify or stop when:
+## Final stop condition
 
-- common support is consistently empty;
-- global-null recovery is presented as source evidence;
-- unpaired source data cannot identify the missing conditional;
-- metadata conditioning matches role-aware recovery;
-- Gaussian or mixture posterior matches Diffusion;
-- affine/CORAL/ordinary OT matches Flow;
-- the local modal residual is too large;
-- private modes contain only acquisition identity;
-- only one of the three active mechanisms has measurable value.
+Stop the combined method when only one block has measurable value or when all
+complex mechanisms are matched by simpler baselines. A smaller valid method is
+preferred to an unexplained Flow–Diffusion stack.
