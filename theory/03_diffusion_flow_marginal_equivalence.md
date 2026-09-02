@@ -2,17 +2,22 @@
 
 ## Status
 
-**Proved for a prescribed smooth density path and a time-dependent, state-independent positive-semidefinite diffusion matrix.**
+**Proved for a prescribed smooth density path and a time-dependent,
+state-independent positive-semidefinite diffusion matrix. This is background
+probability-path theory, not the paper's primary novelty.**
 
 ## Purpose
 
-This theorem is the mathematical reason diffusion and flow can be two blocks of one representation rather than two unrelated models. It does not claim that the two processes have identical sample paths. It proves equality of their one-time marginal density path.
+This theorem explains how a deterministic Flow and a compensated stochastic
+process can realize the same one-time marginal path. It does not show that
+either mechanism is needed for the proposed representation, and it does not
+justify stochastic recovery on source-global-null coordinates.
 
 ## 1. Assumptions
 
-Let \(z\in\mathbb R^m\), \(t\in[0,1]\), and let \(\rho_t(z)>0\) be a \(C^1\) density in time and \(C^2\) in state, with sufficient decay at infinity.
-
-Assume a velocity field \(v_t(z)\) satisfies the continuity equation
+Let \(z\in\mathbb R^m\), \(t\in[0,1]\), and let \(\rho_t(z)>0\) be a
+\(C^1\) density in time and \(C^2\) in state, with sufficient decay at
+infinity. Assume a velocity field \(v_t\) satisfies
 
 \[
 \partial_t\rho_t
@@ -21,9 +26,8 @@ Assume a velocity field \(v_t(z)\) satisfies the continuity equation
 \tag{3.1}
 \]
 
-Let \(D_t\) be a deterministic, symmetric, positive-semidefinite matrix that depends on time but not on state.
-
-Define the score
+Let \(D_t\) be deterministic, symmetric, positive semidefinite and independent
+of state. Define
 
 \[
 s_t(z)=\nabla_z\log\rho_t(z).
@@ -31,15 +35,13 @@ s_t(z)=\nabla_z\log\rho_t(z).
 
 ## 2. Lemma 3.1 — score identity
 
-### Statement
-
 \[
 \rho_t(z)s_t(z)=\nabla\rho_t(z).
 \]
 
 ### Proof
 
-Since \(\rho_t(z)>0\),
+Because \(\rho_t(z)>0\),
 
 \[
 \nabla\log\rho_t
@@ -47,9 +49,9 @@ Since \(\rho_t(z)>0\),
 \frac{\nabla\rho_t}{\rho_t}.
 \]
 
-Multiplying by \(\rho_t\) gives the result. ∎
+Multiply by \(\rho_t\). ∎
 
-## 3. Lemma 3.2 — Fokker–Planck equation for the compensated SDE
+## 3. Lemma 3.2 — Fokker–Planck equation
 
 Consider
 
@@ -57,151 +59,123 @@ Consider
 dZ_t
 =
 \left[
- v_t(Z_t)+D_ts_t(Z_t)
+v_t(Z_t)+D_ts_t(Z_t)
 \right]dt
 +
 \sqrt{2D_t}\,dW_t.
 \tag{3.2}
 \]
 
-Because \(D_t\) is independent of state, the density \(p_t\) of this SDE satisfies
+Its density \(p_t\) satisfies
 
 \[
 \partial_tp_t
 =
--\nabla\cdot\left[
-(v_t+D_ts_t)p_t
-\right]
+-\nabla\cdot[(v_t+D_ts_t)p_t]
 +
 \nabla\cdot(D_t\nabla p_t).
 \tag{3.3}
 \]
 
-This is the standard Fokker–Planck equation for diffusion covariance \(2D_t\). ∎
+### Proof
 
-## 4. Theorem 3 — identical marginal density path
+This is the Fokker–Planck equation for drift \(v_t+D_ts_t\) and diffusion
+covariance \(2D_t\), using state independence of \(D_t\). ∎
 
-### Statement
+## 4. Theorem 3 — identical one-time marginal path
 
-If \(Z_0\sim\rho_0\) and Equation (3.2) is well posed, then its density satisfies
+If \(Z_0\sim\rho_0\), Equation (3.2) is well posed, and the
+Fokker–Planck solution is unique in the adopted class, then
 
 \[
 \boxed{p_t=\rho_t}
+\qquad
+\text{for all }t\in[0,1].
 \]
-
-for every \(t\in[0,1]\), provided the Fokker–Planck equation has a unique solution in the adopted class.
 
 ### Detailed proof
 
-Substitute the candidate density \(p_t=\rho_t\) into Equation (3.3):
+Substitute \(p_t=\rho_t\) into Equation (3.3):
 
 \[
 \partial_t\rho_t
 =
--\nabla\cdot\left[
-(v_t+D_ts_t)\rho_t
-\right]
+-\nabla\cdot[(v_t+D_ts_t)\rho_t]
 +
 \nabla\cdot(D_t\nabla\rho_t).
 \]
 
-Expand the first divergence:
+Expand the first divergence. Lemma 3.1 gives
 
 \[
-\partial_t\rho_t
-=
--\nabla\cdot(v_t\rho_t)
--
-\nabla\cdot(D_ts_t\rho_t)
-+
-\nabla\cdot(D_t\nabla\rho_t).
+D_ts_t\rho_t=D_t\nabla\rho_t,
 \]
 
-By Lemma 3.1,
-
-\[
-s_t\rho_t=\nabla\rho_t.
-\]
-
-Therefore
-
-\[
--\nabla\cdot(D_ts_t\rho_t)
-+
-\nabla\cdot(D_t\nabla\rho_t)
-=0.
-\]
-
-The equation reduces to
-
-\[
-\partial_t\rho_t
-=
--\nabla\cdot(v_t\rho_t),
-\]
-
-which is exactly the prescribed continuity equation (3.1). Since the initial density is also \(\rho_0\), uniqueness of the Fokker–Planck solution gives \(p_t=\rho_t\). ∎
+so the two diffusion-divergence terms cancel. The remaining equation is
+Equation (3.1), with the same initial density. Uniqueness yields
+\(p_t=\rho_t\). ∎
 
 ## 5. Corollaries
 
-### Corollary 3.1 — pure flow
+### Corollary 3.1 — pure Flow
 
-Setting
-
-\[
-D_t=0
-\]
-
-gives
+Setting \(D_t=0\) yields the deterministic probability-flow ODE
 
 \[
-dZ_t=v_t(Z_t)dt,
+dZ_t=v_t(Z_t)dt.
 \]
 
-the deterministic probability-flow ODE.
+### Corollary 3.2 — stochastic realizations
 
-### Corollary 3.2 — a family of stochastic realizations
+Every admissible \(D_t\succeq0\) gives a stochastic process with the same
+one-time marginals. The sample paths and numerical behavior need not be equal.
 
-Any admissible \(D_t\succeq0\) gives a stochastic process with the same one-time marginals. The choice of \(D_t\) changes pathwise randomness and numerical behavior, not the prescribed marginal path.
-
-### Corollary 3.3 — observability-conditioned block diffusion
+### Corollary 3.3 — recoverable-missing stochastic block
 
 Let
 
 \[
-D_t=\gamma_tP_{u,d},
+D_t=\gamma_tP_{m,d},
 \qquad
 \gamma_t\geq0.
 \]
 
-Then stochastic forcing and score compensation act only on the unobserved block. If \(v_t\) acts on the shared block and is zero on the private block, the same theorem applies in the product coordinates.
+Then stochastic forcing acts only on the recoverable-missing block. The global
+null projector \(P_0\) must satisfy
+
+\[
+D_tP_0=P_0D_t=0.
+\]
+
+The theorem does not authorize a learned source-supported posterior for
+\(\mathcal H_0\).
 
 ## 6. Gaussian verification
 
-Consider a one-dimensional prescribed path
+For
 
 \[
-\rho_t=\mathcal N(m_t,\sigma_t^2).
+\rho_t=\mathcal N(m_t,\sigma_t^2),
 \]
 
-A continuity velocity is
+a continuity velocity is
 
 \[
 v_t(x)
 =
 \dot m_t
 +
-\frac{\dot\sigma_t}{\sigma_t}(x-m_t).
+\frac{\dot\sigma_t}{\sigma_t}(x-m_t),
 \]
 
-The score is
+and the score is
 
 \[
 s_t(x)
 =-\frac{x-m_t}{\sigma_t^2}.
 \]
 
-For scalar diffusion \(D_t\geq0\), the compensated drift is
+For scalar \(D_t\geq0\), the compensated drift is
 
 \[
 b_t(x)
@@ -215,15 +189,7 @@ b_t(x)
 \right)(x-m_t).
 \]
 
-The mean equation is
-
-\[
-\frac{d}{dt}\mathbb E[X_t]
-=
-\dot m_t.
-\]
-
-For the variance \(V_t\), the linear SDE moment equation gives
+The moment equation gives
 
 \[
 \dot V_t
@@ -237,44 +203,36 @@ For the variance \(V_t\), the linear SDE moment equation gives
 +2D_t.
 \]
 
-Substituting \(V_t=\sigma_t^2\),
+Substituting \(V_t=\sigma_t^2\) yields
 
 \[
-\dot V_t
-=
-2\sigma_t\dot\sigma_t
--2D_t
-+2D_t
-=
-2\sigma_t\dot\sigma_t,
+\dot V_t=2\sigma_t\dot\sigma_t,
 \]
 
-which is exactly the derivative of \(\sigma_t^2\). This is the analytic invariant tested in the code.
+which is the derivative of \(\sigma_t^2\).
 
-## 7. Why this is not a novelty claim by itself
+## 7. Why this is not the novelty claim
 
-Probability-flow ODEs and stochastic-interpolant theory already establish broad relationships between flows and diffusions. The proposed research contribution must therefore be narrower:
-
-\[
-\text{the diffusion matrix and velocity blocks are selected by physical observability projectors in a stable Laplace modal space.}
-\]
-
-The novelty cannot be “we unified diffusion and flow.”
+Probability-flow and stochastic-interpolant theories already establish broad
+Flow–Diffusion relationships. The candidate novelty is the acquisition-support
+partition and its permissible operations, not this theorem.
 
 ## 8. Failure boundaries
 
-1. If \(D_t\) depends on state, additional divergence terms appear. The displayed compensation is then incomplete.
-2. If \(\rho_t\) has zeros or is singular on the chosen coordinate space, the ordinary score may not exist.
-3. Equality of marginals does not imply equality of paths, coupling, likelihood estimator, or discretization error.
-4. A learned approximate score produces only approximate equality.
-5. Block projectors that change discontinuously with state require a separate nonsmooth analysis.
+1. State-dependent \(D_t\) introduces additional divergence terms.
+2. A density with zeros or singular support may not have an ordinary score.
+3. Equal marginals do not imply equal paths, likelihoods or semantic coupling.
+4. A learned approximate score gives approximate, not exact, equality.
+5. Discontinuous learned projectors require separate analysis.
+6. Diffusion is unnecessary if a simpler calibrated posterior model matches it.
 
 ## 9. Experimental implication
 
-The first analytic experiment should prescribe a Gaussian modal path and verify:
+The analytic experiment should verify:
 
-- flow and compensated SDE have the same mean trajectory;
-- flow and compensated SDE have the same covariance trajectory;
+- Flow and compensated SDE mean trajectories agree;
+- their covariance trajectories agree;
 - pathwise variance differs when \(D_t>0\);
 - observed-private coordinates remain unchanged;
-- discretization error is reported separately from the theorem.
+- global-null coordinates receive no stochastic update;
+- numerical discretization error is reported separately.
