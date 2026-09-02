@@ -2,23 +2,27 @@
 
 ## Status
 
-This document fixes the mathematical universe used by the remaining theory files. It is not itself an empirical claim. Every theorem in this repository is conditional on the axioms that it explicitly imports from this file.
+This document fixes the mathematical universe of the project. Every theorem is
+conditional on the axioms it explicitly imports. The object under study is not
+an arbitrary collection of heterogeneous time series; it is a set of
+acquisition operators observing a shared local dynamical process.
 
-## 1. Spaces
+## 1. Local modal state and acquisition model
 
-### Axiom A0 — finite-dimensional modal state
+### Axiom A0 — finite-dimensional local modal state
 
-The local physical state over one analysis window is represented in a finite-dimensional real Hilbert space
+Over one declared analysis window \([0,T]\), the latent physical state belongs
+to a finite-dimensional real Hilbert space
 
 \[
-\mathcal H = \mathbb R^m
+\mathcal H=\mathbb R^m
 \]
 
-with Euclidean inner product \(\langle x,y\rangle=x^\top y\) and norm \(\|x\|_2\).
+with Euclidean inner product and norm. This is a local approximation. It does
+not assert that an entire machine is globally finite-dimensional or globally
+linear.
 
-This is a local approximation. It does not assert that an entire machine is globally finite-dimensional or globally linear.
-
-### Axiom A1 — acquisition domains
+### Axiom A1 — structural acquisition operator
 
 There is a finite source-domain set
 
@@ -26,52 +30,99 @@ There is a finite source-domain set
 \mathcal D_s=\{1,\ldots,D\}.
 \]
 
-For each domain \(d\), the observation space is \(\mathcal Y_d=\mathbb R^{n_d}\), and the locally linearized acquisition model is
+Each acquisition domain has a structural operator
 
 \[
-Y_d=A_d\Theta+\varepsilon_d,
+A_d:\mathcal H\rightarrow\mathcal Y_d,
 \]
 
-where \(A_d:\mathcal H\to\mathcal Y_d\) is a bounded linear operator, \(\Theta\in\mathcal H\) is the modal state, and \(\varepsilon_d\) is measurement error.
+and a sample \(i\) is observed as
 
-The operator \(A_d\) may represent sensor response, channel selection, anti-alias filtering, sampling times, missing observations, and a local decoder Jacobian.
+\[
+Y_{d,i}=R_{d,i}A_d\Theta_i+\varepsilon_{d,i}.
+\]
 
-### Axiom A2 — observation-noise model
+The fixed operator \(A_d\) represents acquisition capabilities such as sensor
+response, channel selection, anti-alias filtering and nominal sampling support.
+The sample-dependent operator \(R_{d,i}\) represents realized coverage,
+timestamps, valid masks and other instance-level evidence loss.
 
-For each source domain, the noise covariance \(\Sigma_d\in\mathbb R^{n_d\times n_d}\) is symmetric positive definite. The noise-weighted Gramian is
+Structural support is defined from \(A_d\). Instance reliability derived from
+\(R_{d,i}\) changes posterior precision or token confidence; it does not silently
+relabel the structural subspaces for every sample.
+
+### Axiom A2 — observation-noise metric
+
+For each source domain, the structural noise covariance
+\(\Sigma_d\in\mathbb R^{n_d\times n_d}\) is symmetric positive definite. The
+noise-weighted structural Gramian is
 
 \[
 G_d=A_d^\top\Sigma_d^{-1}A_d.
 \]
 
-Positive definiteness is used only to define a non-degenerate observation metric. If a covariance is singular, the model must first be restricted to its supported observation subspace; the implementation does not silently use a pseudoinverse.
+If a covariance is singular or indefinite, the statistical model must be
+redefined on a supported observation space. The implementation does not use a
+pseudoinverse as a silent repair.
 
-### Axiom A3 — observable threshold
+### Axiom A3 — effective structural observability
 
-A fixed source-only threshold \(\tau_o>0\) defines the effectively observable modal subspace
+A source-only threshold \(\tau_o>0\) defines the ideal hard observable
+subspace
 
 \[
 \mathcal H_d^o
 =
 \operatorname{Range}
-\left(
+\left[
 \mathbf 1_{[\tau_o,\infty)}(G_d)
-\right).
+\right].
 \]
 
-The threshold is part of the scientific protocol. It cannot be selected using a held-out target domain.
+The threshold cannot be selected using a held-out acquisition domain.
+
+For a fixed modal-slot implementation in which \(G_d\) is approximately
+diagonal in the declared modal basis, slot \(k\) may instead carry the soft
+structural weight
+
+\[
+o_{d,k}
+=
+\sigma\left(
+\frac{g_{d,k}-\tau_o}{T_o}
+\right),
+\qquad
+T_o>0,
+\]
+
+where \(g_{d,k}\) is the corresponding diagonal or Rayleigh quotient. Soft
+weights express threshold uncertainty; they do not change the exact subspace
+theorems below.
+
+### Definition A3.1 — instance reliability
+
+For sample \(i\), modal slot \(k\) has an instance reliability
+
+\[
+r_{d,i,k}\in[0,1],
+\]
+
+computed from timestamp coverage, valid observations, signal quality or
+estimated SNR. Structural observability \(o_{d,k}\) asks whether the acquisition
+design can observe the slot. Reliability \(r_{d,i,k}\) asks how much evidence
+this particular sample provides.
 
 ## 2. Laplace modal coordinates
 
 ### Axiom A4 — local stable modal approximation
 
-On a finite physical window \([0,T]\), the latent physical trajectory admits
+On \([0,T]\), the latent trajectory admits
 
 \[
 s(t)=\Phi(t;\Lambda)\Theta+r(t),
 \]
 
-where \(\Phi\) is a finite stable Laplace-modal dictionary, \(\Lambda\) contains modal poles, and
+where \(\Phi\) is a finite Laplace-modal dictionary and
 
 \[
 \sup_{t\in[0,T]}\|r(t)\|_2
@@ -79,7 +130,7 @@ where \(\Phi\) is a finite stable Laplace-modal dictionary, \(\Lambda\) contains
 \varepsilon_{\mathrm{modal}}.
 \]
 
-For an oscillatory transient, a real modal block is
+A transient oscillatory block is
 
 \[
 A_k=
@@ -93,67 +144,88 @@ A_k=
 \omega_k\geq0.
 \]
 
-### Axiom A5 — band-indexed pole chart
+The main paper initially targets event-local damped transients. A bounded
+forced component is a baseline used to test model misspecification, not an
+automatic expansion to arbitrary nonlinear dynamics.
 
-Each modal slot has a declared physical-frequency interval \([\omega_k^-,\omega_k^+]\) with \(\omega_k^-<\omega_k^+\). Unconstrained parameters \((a_k,\nu_k)\in\mathbb R^2\) are decoded by
+### Axiom A5 — band-indexed stable pole chart
+
+Every modal slot has a declared angular-frequency interval
+\([\omega_k^-,\omega_k^+]\), measured in \(\mathrm{rad\,s^{-1}}\), with
+\(\omega_k^-<\omega_k^+\). Unconstrained parameters are decoded by
 
 \[
-\rho_k=\rho_{\min}+\operatorname{softplus}(a_k),
+\rho_k
+=
+\rho_{\min}
++
+\operatorname{softplus}(a_k),
 \]
 
 \[
-\omega_k=\omega_k^-+(\omega_k^+-\omega_k^-)\sigma(\nu_k),
+\omega_k
+=
+\omega_k^-
++
+(\omega_k^+-\omega_k^-)\sigma(\nu_k),
 \]
 
-where \(\rho_{\min}>0\). This removes unstable poles and cross-slot frequency permutation from the admissible parameter space.
+where \(\rho_{\min}>0\). Frequencies reported in hertz use
+\(f_k=\omega_k/(2\pi)\).
 
 ## 3. Probability and transport
 
 ### Axiom A6 — finite second moments
 
-All modal distributions used by the transport theory belong to
+All modal distributions used by transport belong to
 
 \[
-\mathcal P_2(\mathcal H),
+\mathcal P_2(\mathcal H).
 \]
 
-the probability measures with finite second moment.
+### Axiom A7 — regular conditional distributions
 
-### Axiom A7 — regular conditional posterior
+The latent state and observations take values in standard Borel spaces.
+Regular conditional distributions therefore exist up to
+observation-null sets.
 
-The latent state and observations take values in standard Borel spaces. Therefore a regular conditional distribution
+### Axiom A8 — well-posed dynamics
 
-\[
-q_d(d\theta\mid\mathcal O_d)
-\]
+Every ODE velocity is measurable in transport time, locally Lipschitz in state
+and of at most linear growth. Every SDE drift and diffusion satisfies the
+regularity stated in its theorem. A score-based result assumes a positive,
+sufficiently differentiable density on the active subspace.
 
-exists, up to observation-null sets.
+### Axiom A9 — downstream Markov condition
 
-### Axiom A8 — well-posed velocity and score fields
-
-Every ODE velocity used in a theorem is measurable in time, locally Lipschitz in state, and satisfies a linear-growth bound. Every SDE drift and diffusion coefficient satisfies the conditions stated in its theorem for existence and uniqueness. A theorem that needs a density assumes that density is positive and sufficiently differentiable on the relevant active subspace.
-
-### Axiom A9 — task Markov condition
-
-For posterior sufficiency results, the downstream variable \(Y\) satisfies
+For posterior-sufficiency results,
 
 \[
 Y\perp\!\!\!\perp\mathcal O_d\mid\Theta.
 \]
 
-This says that the observation affects the task only through the latent physical state. It is not assumed for tasks whose labels directly encode acquisition identity.
+The assumption is inappropriate when the target directly encodes sensor or
+dataset identity.
 
-## 4. Observable decomposition notation
+## 4. Four-way source-supported decomposition
 
-For domain \(d\):
+Define the common observable subspace
 
 \[
 \mathcal H_c
 =
-\bigcap_{j\in\mathcal D_s}\mathcal H_j^o
+\bigcap_{j\in\mathcal D_s}\mathcal H_j^o,
 \]
 
-is the common observable subspace,
+and the source-observable span
+
+\[
+\mathcal H_\cup
+=
+\sum_{j\in\mathcal D_s}\mathcal H_j^o.
+\]
+
+For domain \(d\), define
 
 \[
 \mathcal H_{p,d}
@@ -161,89 +233,132 @@ is the common observable subspace,
 \mathcal H_d^o\cap\mathcal H_c^\perp
 \]
 
-is the observed-private subspace, and
+as observed-private support,
 
 \[
-\mathcal H_{u,d}
+\mathcal H_{m,d}
 =
-(\mathcal H_d^o)^\perp
+\mathcal H_\cup\cap(\mathcal H_d^o)^\perp
 \]
 
-is the unobserved subspace. Their orthogonal projectors are \(P_c\), \(P_{p,d}\), and \(P_{u,d}\).
+as recoverable-missing support, and
 
-The modal state is decomposed as
+\[
+\mathcal H_0
+=
+\mathcal H_\cup^\perp
+\]
+
+as the global-null support.
+
+The modal state has the unique decomposition
 
 \[
 \Theta
 =
-\Theta_c+\Theta_{p,d}+\Theta_{u,d},
+\Theta_c
++
+\Theta_{p,d}
++
+\Theta_{m,d}
++
+\Theta_0.
 \]
 
-where \(\Theta_c=P_c\Theta\), \(\Theta_{p,d}=P_{p,d}\Theta\), and \(\Theta_{u,d}=P_{u,d}\Theta\).
+The associated projectors are
+\(P_c,P_{p,d},P_{m,d},P_0\).
 
 ## 5. Unified representation
 
-The ideal representation for acquisition domain \(d\) is the conditional law
+The data-supported representation for domain \(d\) is
 
 \[
-\mu_d^U
+\mu_d^U(\cdot\mid o)
 =
 \operatorname{Law}
 \left(
 T_d\Theta_c,
 \Theta_{p,d},
-\Theta_{u,d}
-\mid\mathcal O_d
+\Theta_{m,d}
+\mid
+\mathcal O_d=o
 \right),
 \]
 
-where:
+together with \(P_0\) as an unsupported-support marker.
 
-- \(T_d\) maps common observable modes to a source-only canonical distribution;
-- the observed-private block is unchanged;
-- the unobserved block remains a conditional posterior.
+The roles are
 
-The method does not define a single deterministic vector as the full theoretical representation. A tensor interface may store samples, moments, masks, and canonical coordinates, but these are a finite encoding of \(\mu_d^U\).
+\[
+\begin{aligned}
+\Theta_c
+&\longrightarrow
+T_d\Theta_c
+&&\text{population-level canonical flow},\\
+\Theta_{p,d}
+&\longrightarrow
+\Theta_{p,d}
+&&\text{identity preservation},\\
+\Theta_{m,d}
+&\longrightarrow
+q_\theta(
+\Theta_{m,d}\mid
+T_d\Theta_c,\Theta_{p,d},\mathcal O_d)
+&&\text{conditional posterior},\\
+\Theta_0
+&\longrightarrow
+\text{unsupported}
+&&\text{no data-driven recovery claim}.
+\end{aligned}
+\]
+
+The source-domain population marginal of \(T_d\Theta_c\) may be canonical.
+The conditional law for one observation is not asserted to equal the
+population barycenter.
 
 ## 6. Proof-status convention
 
-Each theory document uses one of three labels:
+Each theory document uses one of:
 
 - **proved under stated assumptions** — a mathematical implication is derived;
-- **constructive definition** — an object is explicitly defined but empirical adequacy is unknown;
-- **conjecture or empirical hypothesis** — the statement requires experiments or stronger assumptions.
+- **constructive definition** — an object is well-defined but its empirical
+  adequacy is unknown;
+- **empirical hypothesis** — a result requires experiments.
 
-A proof of existence does not prove identifiability, learnability, statistical efficiency, or usefulness on PHM data.
+Existence does not imply identifiability, learnability, calibration or
+usefulness.
 
 ## 7. Dependency graph
 
 ```text
 Axioms
-├── observable decomposition
-│   ├── constructive existence
+├── four-way observable decomposition
+│   ├── source-supported representation existence
 │   ├── observed-private invariance
-│   └── shared estimation bound
+│   └── GLS shared-estimation bound
 ├── probability-path regularity
-│   ├── diffusion–flow marginal equivalence
+│   ├── flow–diffusion marginal equivalence
 │   ├── posterior sufficiency
-│   └── representation risk bound
+│   └── paired representation-risk bound
 ├── stable modal chart
-│   ├── Laplace modal stability
+│   ├── modal stability
 │   └── sampling-gap shift bound
-└── product/transport assumptions
-    ├── private-preserving optimal transport
-    └── commuting block generators
+└── transport assumptions
+    ├── product-case private-identity optimality
+    └── decoupled generator null model
 ```
 
 ## 8. Non-claims
 
 These axioms do not establish that:
 
-1. the true machine has a globally fixed finite pole set;
-2. \(A_d\) is known exactly;
-3. the common observable subspace is non-trivial;
-4. a neural network can recover the exact posterior;
-5. marginal distribution alignment preserves fault semantics;
-6. the proposed representation improves any downstream metric.
-
-Those issues are explicit failure boundaries, not hidden assumptions.
+1. arbitrary heterogeneous time series share one latent process;
+2. the machine has a globally fixed finite pole set;
+3. the structural operators \(A_d\) are known exactly;
+4. the common support is non-trivial;
+5. global-null modes can be recovered from source data;
+6. a neural network can learn the exact missing-mode posterior;
+7. marginal canonicalization preserves fault semantics;
+8. Diffusion is needed when a Gaussian or mixture posterior is sufficient;
+9. Flow is needed when an affine calibration is sufficient;
+10. the representation improves a real PHM metric.
