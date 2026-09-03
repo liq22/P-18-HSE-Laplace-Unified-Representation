@@ -5,6 +5,7 @@ build/
 dist/
 *.egg-info/
 outputs/
+theory/outputs/
 *.pdf
 .ipynb_checkpoints/
 .DS_Store
