@@ -1,76 +1,54 @@
-schema_version: 3
+schema_version: 4
 project_name: HSE-Laplace-Source-Supported-Partial-Unified-Representation
-stage: refined_theory_contract
+stage: theory_proof_notebook_gate
 language: English
 
 scope: >-
   Cross-acquisition representation of one shared window-local dynamical process
-  or declared system family under partially overlapping structural modal
-  support. Unrelated heterogeneous time series are out of scope.
-
-central_question: >-
-  Which modal coordinates may be canonicalized, which must be preserved, which
-  current-domain missing coordinates are identifiable from declared source
-  evidence, and which coordinates have no source likelihood support?
+  or declared system family under partially overlapping structural modal support.
 
 representation:
-  structural_roles:
-    common_observable: anchored_canonicalization
-    observed_private: exact_identity
-    source_supported_missing: conditional_inference_if_identified
-    source_global_null: unsupported_no_data_driven_recovery
-  gates:
-    role_gate: source_only_structural_observability
-    identifiability_gate: paired_or_physical_certificate
-    canonicalizer_complexity: identity_affine_ot_flow
-    posterior_complexity: point_gaussian_mixture_diffusion
+  common_observable: anchored_canonicalization
+  observed_private: exact_preservation
+  source_supported_missing: conditional_inference_if_identified
+  source_global_null: unsupported_no_data_driven_recovery
   dependency: triangular_shared_then_missing
-  coordinate_system: fixed_window_local_laplace_modal_slots
-  structural_observability: domain_level
-  instance_reliability: sample_level
 
-current_claim: >-
-  Under explicit structural-observability, finite-modal, coupling and
-  regularity assumptions, a partially unified distribution-valued
-  representation can canonicalize common observable modes, preserve
-  observed-private modes, infer source-supported missing modes only when their
-  conditional is identified, and exclude source-global-null modes from
-  data-driven recovery claims.
+scientific_gates:
+  role_gate: source_only_structural_observability
+  identifiability_gate: paired_or_physical_certificate
+  canonicalizer_complexity: identity_affine_ot_flow
+  posterior_complexity: point_gaussian_mixture_diffusion
 
-claim_status: theoretical_candidate
+theory_admission:
+  proof_source: theory/NN_name.md
+  witness_source: theory/notebooks/NN_name.ipynb
+  notebook_is_not_proof: true
+  ci_command: python theory/run_notebooks.py --timeout 180
+  required_conditions:
+    - complete_assumptions_statement_derivation_boundary
+    - same_stem_notebook_passes_clean_kernel
+    - witness_tests_central_finite_implication
+    - method_specific_novelty_role
+    - measurable_known_pole_prediction
+
+admitted_theoretical_candidates:
+  - T01_four_way_source_supported_decomposition
+  - T05_complete_invariance_task_risk_lower_bound
+  - T16_source_support_not_conditional_identifiability
+  - T20_T09_triangular_representation_and_paired_risk_control
+
+not_headline_contributions:
+  - diffusion_flow_marginal_equivalence
+  - posterior_sufficiency
+  - modal_stability
+  - product_case_private_ot
+  - commuting_generators
+  - diffusion_flow_laplace_complexity_gates
+
 formal_claim_supported: false
-evidence_level: analytic_derivations_and_behavioral_tests
-
-main_theory:
-  - four_way_source_supported_decomposition
-  - complete_invariance_task_risk_lower_bound
-  - source_support_not_conditional_identifiability
-  - paired_semantic_risk_bound
-  - triangular_stochastic_transport
-
-necessity_gates:
-  diffusion: >-
-    Promote only when Gaussian and finite-mixture conditionals leave a paired
-    proper-score and calibration gap.
-  flow: >-
-    Promote only when paired affine, CORAL and ordinary OT leave nonlinear
-    canonicalization headroom while semantics are preserved.
-  laplace: >-
-    Retain only when a window-local modal representation beats a matched direct
-    time-domain latent on the declared reconstruction and cross-acquisition
-    metrics.
-
-largest_uncertainties:
-  - whether realistic acquisition metadata identify stable modal roles
-  - whether paired or physical evidence identifies the missing conditional
-  - whether a local damped-modal dictionary is adequate for PHM transients
-  - whether simpler posterior families match Diffusion
-  - whether simpler canonicalizers match Flow
-  - whether source-only anchors preserve fault semantics
-
-next_decisive_experiment: known_pole_oracle_factorial_with_identifiability_and_complexity_controls
-
-stopping_condition: >-
-  Stop or simplify any mechanism when its strongest predeclared simpler
-  baseline is equivalent under the same information, independent-unit split
-  and compute budget.
+evidence_level: conditional_derivations_and_finite_executable_witnesses
+known_pole_evidence: not_started
+learned_model_evidence: not_started
+real_phm_evidence: not_started
+next_decisive_experiment: known_pole_role_identifiability_and_complexity_gates
