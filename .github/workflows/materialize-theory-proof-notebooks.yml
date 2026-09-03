@@ -24,9 +24,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tar -xzf .bootstrap/theory-notebooks.tar.gz -C .
-          rm .bootstrap/theory-notebooks.tar.gz
-          rmdir .bootstrap
+          cat .bootstrap/chunk_*.b64 > /tmp/theory-notebooks.b64
+          base64 --decode /tmp/theory-notebooks.b64 > /tmp/theory-notebooks.tar.gz
+          tar -xzf /tmp/theory-notebooks.tar.gz -C .
+          rm -rf .bootstrap
           rm .github/workflows/materialize-theory-proof-notebooks.yml
       - name: Validate materialized theory witnesses
         shell: bash
