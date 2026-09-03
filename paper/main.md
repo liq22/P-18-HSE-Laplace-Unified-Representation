@@ -2,224 +2,90 @@
 
 ## Working title
 
-**Observability- and Identifiability-Gated Laplace Stochastic Representation
-for Cross-Acquisition Time Series**
-
-## Scope
-
-The paper studies multiple acquisition operators observing the same local
-dynamical process or one declared system family. The operators may differ in
-sampling rate, anti-alias response, sensor transfer function, channel set,
-timestamps and sample reliability.
-
-The paper does not cover unrelated systems, incompatible state dimensions or
-arbitrary label ontologies.
+**Observability- and Identifiability-Gated Partial Modal Representation for Cross-Acquisition Time Series**
 
 ## Problem
 
-Different acquisition operators do not merely shift a common distribution.
-They expose partially overlapping physical modal support. A full
-domain-invariant point embedding can therefore erase information that exists
-only in a higher-support view, while a generative model can fabricate confidence
-for coordinates unsupported by the source evidence.
+Different acquisition operators expose partially overlapping physical modal support. Complete domain invariance can erase task-relevant information available only in a higher-support view, while an unconstrained generator can present prior-driven samples as recovered evidence.
 
-## Core representation
-
-For domain \(d\),
+## Representation
 
 \[
 \mathcal H
-=
-\mathcal H_c
-\oplus
-\mathcal H_{p,d}
-\oplus
-\mathcal H_{m,d}
-\oplus
-\mathcal H_0.
+=\mathcal H_c\oplus\mathcal H_{p,d}\oplus\mathcal H_{m,d}\oplus\mathcal H_0.
 \]
-
-The four roles are:
 
 | Role | Meaning | Permitted operation |
 |---|---|---|
 | \(\mathcal H_c\) | observable in every declared source domain | anchored canonicalization |
-| \(\mathcal H_{p,d}\) | observed now, but not common to every domain | exact identity |
-| \(\mathcal H_{m,d}\) | hidden now, supported by at least one other source | conditional inference only when identifiable |
-| \(\mathcal H_0\) | unsupported by every source | no data-driven recovery |
+| \(\mathcal H_{p,d}\) | observed now, but not common to every domain | exact preservation |
+| \(\mathcal H_{m,d}\) | hidden now, supported by another source | conditional inference only when identified |
+| \(\mathcal H_0\) | unsupported by every source | no data-driven recovery claim |
 
-The symbol \(\mathcal H_{m,d}\) means **source-supported missing**. It is
-not synonymous with statistically recoverable.
-
-## Three gates
-
-### Gate 1 — structural role
-
-A fixed modal slot receives one of the four roles from the source-only
-structural acquisition operators.
-
-### Gate 2 — identifiability
-
-A source-supported missing slot receives a learned posterior only if a declared
-certificate \(\chi_{d,k}=1\) is available. Acceptable certificates include:
-
-- the same `latent_event_id` observed by complementary acquisitions;
-- a known simulator state;
-- an injective physical coupling model;
-- another explicitly justified semantic anchor.
-
-Unpaired source marginals alone do not qualify.
-
-### Gate 3 — model complexity
-
-The operator class is escalated only when a simpler nested class fails:
+The candidate factorization is
 
 \[
-T_d:
-\text{identity}
-\rightarrow
-\text{affine}
-\rightarrow
-\text{OT}
-\rightarrow
-\text{Flow},
+C^*=T_d(C),\qquad P'=P,\qquad
+M'\sim q_\theta(M\mid C^*,P,\mathcal O_d,\chi_d).
 \]
 
-\[
-q_d:
-\text{point}
-\rightarrow
-\text{Gaussian}
-\rightarrow
-\text{mixture}
-\rightarrow
-\text{Diffusion}.
-\]
+Flow and Diffusion are not assumed to be necessary. Their inclusion is decided later against affine/OT and Gaussian/mixture alternatives.
 
-Thus the contribution is not the mechanical combination of Laplace, Flow and
-Diffusion. It is the rule that determines **which physical role may be changed,
-which evidence is sufficient to infer it, and which model complexity is
-actually needed**.
+## Theory-to-contribution admission rule
 
-## Candidate final factorization
+A theorem is not listed as a paper contribution merely because it appears in `theory/`.
 
-When the gates pass,
+It must pass all five gates:
 
-\[
-C^*=T_d(C),
-\]
+1. **Formal completeness:** its Markdown contains explicit assumptions, statement, derivation, and failure boundary.
+2. **Executable witness:** the same-stem Notebook passes in a clean kernel.
+3. **Mechanism relevance:** the Notebook exercises the central finite implication, not a superficial formula.
+4. **Novelty role:** the result is specific to the proposed representation rather than established probability-flow, stability, or decision-theory background.
+5. **Empirical prediction:** the result yields a measurable prediction for the known-pole experiment.
 
-\[
-P'=P,
-\]
+Notebook success means only that a finite witness is internally consistent. It does not validate the theorem generally and does not establish empirical usefulness.
 
-\[
-M'\sim
-q_\theta(M\mid C^*,P,\mathcal O_d,\chi_d).
-\]
+## Admitted theoretical contribution candidates
 
-The source-global-null block is excluded. The dependency is triangular:
-canonical shared state first, private identity second, conditional missing
-posterior third.
+### C1 — Source-supported role decomposition
 
-## HSE token contract
+The four-way decomposition separates common observable, observed-private, source-supported missing, and source-global-null modal coordinates. Its paired Notebook checks the direct sum, empty-block behavior, and global-null separation.
 
-The learned implementation should retain fixed modal slots rather than a
-sample-dependent latent dimension. A slot-level token is conceptually
+### C2 — Cost of complete invariance
 
-\[
-\operatorname{Token}_{d,i,k}
-=
-(
-z_{d,i,k},
-\pi_{d,k},
-o_{d,k}^{\mathrm{struct}},
-r_{d,i,k},
-\chi_{d,k},
-\tau_{i,k},
-[\omega_k^-,\omega_k^+]
-),
-\]
+When private information has conditional task value, complete paired invariance has a non-zero Bayes log-risk lower bound. The Notebook realizes the equality case and the task-irrelevant control.
 
-where:
+### C3 — Identifiability gate for missing inference
 
-- \(\pi_{d,k}\) is the structural role;
-- \(o_{d,k}^{\mathrm{struct}}\) is structural observability;
-- \(r_{d,i,k}\) is sample reliability;
-- \(\chi_{d,k}\) is identifiability status.
+Visibility in another source domain does not identify the current-domain conditional. The Notebook constructs two worlds with equal unpaired marginals and opposite missing conditionals, then shows what pairing resolves.
 
-The common backbone receives a fixed token tensor and attention mask. It does
-not receive dataset identity as a semantic shortcut.
+### C4 — Triangular partial stochastic representation with paired risk control
 
-## Introduction logic
+Anchored shared canonicalization, private identity, and a shared-conditioned missing posterior form one triangular kernel. The paired-risk result controls downstream change only under a same-event coupling. The paired Notebooks check conditional benefit, private invariance, and the semantic-reversal counterexample.
 
-1. A single local fault transient can be observed through acquisition operators
-   with different modal support.
-2. Complete alignment can delete task-relevant private information.
-3. Current-domain absence must be separated into source-supported missing and
-   source-global null.
-4. Source support alone does not identify a missing conditional; unpaired
-   marginals can correspond to opposite conditionals.
-5. Population marginal alignment alone can reverse semantics.
-6. The proposed representation uses role, identifiability and complexity gates
-   before assigning Flow, identity or a probability model.
-7. The known-pole experiment determines whether each mechanism has headroom
-   before a learned joint architecture is built.
+## Results that are not headline contributions
 
-## Candidate novelty
+The following remain supporting theory, established background, special cases, null models, or complexity gates even when their Notebooks pass:
 
-> An acquisition-observability-conditioned, identifiability-gated
-> representation that canonicalizes only common modal support, preserves
-> observed-private evidence, models source-supported missing modes only under a
-> declared coupling certificate, and excludes source-global-null modes from
-> recovery claims.
+- diffusion–flow marginal equivalence;
+- posterior sufficiency;
+- local modal stability;
+- product-case private-preserving OT;
+- generator commutation;
+- sampling-gap and projector perturbation bounds;
+- Diffusion proper-score gate;
+- affine Flow gate;
+- window-local Laplace adequacy gate.
 
-## Main theory for the paper
-
-The main text should emphasize:
-
-1. four-way source-supported decomposition;
-2. complete-invariance task-risk lower bound;
-3. source support versus conditional identifiability;
-4. paired semantic-risk bound;
-5. triangular representation construction.
-
-The following are necessity gates rather than headline innovations:
-
-- Diffusion proper-score theorem;
-- affine canonicalization theorem;
-- window-local Laplace adequacy bound.
-
-All other results support assumptions or appendices. See `theory/README.md`.
-
-## Strongest competing explanations
-
-- metadata and a hard support mask are sufficient;
-- the source-supported missing conditional is not identified;
-- a Gaussian or mixture posterior matches Diffusion;
-- paired affine calibration or ordinary OT matches Flow;
-- a matched direct time-domain latent matches Laplace coordinates;
-- apparent private information is acquisition identity;
-- canonical marginal alignment permutes task semantics.
-
-## Evidence boundary
+## Evidence state
 
 ```text
-proved:
-conditional mathematical implications under explicit assumptions
-
-executed:
-deterministic analytic tests
-
-not executed:
-known-pole factorial experiment
-learned posterior
-learned canonical Flow
-real paired-rate PHM experiment
-
-not supported:
-universal representation
-global-null recovery
-necessity of Diffusion or Flow
-real diagnosis improvement
+formal derivations: present under explicit assumptions
+executable finite witnesses: 25 / 25 locally; CI is authoritative
+known-pole mechanism evidence: not started
+learned Diffusion/Flow evidence: not started
+real PHM evidence: not started
+formal_claim_supported: false
 ```
+
+The next scientific step remains the known-pole role, identifiability, and complexity-gate experiment. No new theorem is promoted to an empirical contribution before that experiment.
