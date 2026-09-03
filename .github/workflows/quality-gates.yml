@@ -17,6 +17,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Reject transport residue
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e .bootstrap
+          test ! -e .github/workflows/materialize-theory-proof-notebooks.yml
       - name: Install package and notebook runtime
         run: python -m pip install -e ".[notebooks]"
       - name: Run analytic prototype
