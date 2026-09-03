@@ -11,15 +11,17 @@ permissions:
 jobs:
   semantic-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install package
-        run: python -m pip install -e .
+      - name: Install package and notebook runtime
+        run: python -m pip install -e ".[notebooks]"
       - name: Run analytic prototype
         run: python examples/analytic_unified_representation.py
       - name: Run scientific semantic tests
         run: python -m unittest discover -s tests -v
+      - name: Execute all theory witnesses
+        run: python theory/run_notebooks.py --timeout 180
