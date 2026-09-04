@@ -30,9 +30,9 @@ theory_status:
   laplace_stability_and_gap_shift: supporting_results
 
 current_evidence:
-  analytic_oracle: completed
-  semantic_tests: completed
-  theory_notebook_witnesses: completed_locally_pending_ci
+  analytic_oracle: completed_in_ci
+  semantic_tests: completed_in_ci
+  theory_notebook_witnesses: completed_in_ci
   learned_model: not_started
   known_pole_paired_experiment: not_started
   real_phm: not_started
