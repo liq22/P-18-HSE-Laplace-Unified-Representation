@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hse-laplace-unified-representation"
-version = "0.1.0"
-description = "Analytic foundation for observability-conditioned Laplace stochastic transport"
+name = "hse-llapdiff-support-calibrated-representation"
+version = "0.2.0"
+description = "Theory and analytic oracle for HSE-conditioned Latent Laplace Diffusion"
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
 

@@ -1,91 +1,67 @@
-# HSE–Laplace Source-Supported Partial Unified Representation
+# HSE–LapDiff
 
 ## Working title
 
-**Observability- and Identifiability-Gated Partial Modal Representation for Cross-Acquisition Time Series**
+**Support-Calibrated Latent Laplace Diffusion for Probabilistic Cross-Acquisition Representation**
 
 ## Problem
 
-Different acquisition operators expose partially overlapping physical modal support. Complete domain invariance can erase task-relevant information available only in a higher-support view, while an unconstrained generator can present prior-driven samples as recovered evidence.
+Heterogeneous industrial acquisitions do not merely rescale the same discrete sequence. Sampling rate, anti-alias filtering, sensor response, timestamps, and missingness change how much information is available about a shared physical event. A deterministic embedding can expose a fixed interface, but it does not state how uncertain the unobserved modal content should remain.
 
-## Representation
+## Gap
 
-\[
-\mathcal H
-=\mathcal H_c\oplus\mathcal H_{p,d}\oplus\mathcal H_{m,d}\oplus\mathcal H_0.
-\]
+HSE maps heterogeneous signals to a fixed latent token interface. LLapDiff models irregular targets as stable Laplace-modal latent trajectories and provides probabilistic generation. The unresolved problem is how acquisition information should enter the HSE condition and calibrate a posterior over one canonical Laplace latent state.
 
-| Role | Meaning | Permitted operation |
-|---|---|---|
-| \(\mathcal H_c\) | observable in every declared source domain | anchored canonicalization |
-| \(\mathcal H_{p,d}\) | observed now, but not common to every domain | exact preservation |
-| \(\mathcal H_{m,d}\) | hidden now, supported by another source | conditional inference only when identified |
-| \(\mathcal H_0\) | unsupported by every source | no data-driven recovery claim |
+## Method under test
 
-The candidate factorization is
+For a window-local modal state \(\Theta\in\mathbb R^m\), acquisition domain \(d\) produces
 
 \[
-C^*=T_d(C),\qquad P'=P,\qquad
-M'\sim q_\theta(M\mid C^*,P,\mathcal O_d,\chi_d).
+X_d=A_d\Theta+\varepsilon_d,
+\qquad
+\varepsilon_d\sim\mathcal N(0,R_d)
 \]
 
-Flow and Diffusion are not assumed to be necessary. Their inclusion is decided later against affine/OT and Gaussian/mixture alternatives.
+in the analytic special case. Its fixed-dimensional information statistics are
 
-## Theory-to-contribution admission rule
+\[
+b_d=A_d^TR_d^{-1}X_d,
+\qquad
+J_d=A_d^TR_d^{-1}A_d.
+\]
 
-A theorem is not listed as a paper contribution merely because it appears in `theory/`.
+HSE is interpreted as a learned fixed-token approximation to slotwise acquisition statistics and physical metadata:
 
-It must pass all five gates:
+\[
+H_d=
+\operatorname{HSE}
+(X_d,t_d,m_d,a_d)
+\in\mathbb R^{K\times D}.
+\]
 
-1. **Formal completeness:** its Markdown contains explicit assumptions, statement, derivation, and failure boundary.
-2. **Executable witness:** the same-stem Notebook passes in a clean kernel.
-3. **Mechanism relevance:** the Notebook exercises the central finite implication, not a superficial formula.
-4. **Novelty role:** the result is specific to the proposed representation rather than established probability-flow, stability, or decision-theory background.
-5. **Empirical prediction:** the result yields a measurable prediction for the known-pole experiment.
+LLapDiff is then conditioned on \(H_d\) to generate
 
-Notebook success means only that a finite witness is internally consistent. It does not validate the theorem generally and does not establish empirical usefulness.
+\[
+p_\theta(Z^\star\mid H_d),
+\]
 
-## Admitted theoretical contribution candidates
+where \(Z^\star\) is the canonical stable Laplace latent trajectory shared by paired acquisition views of the same event.
 
-### C1 — Source-supported role decomposition
+The method aligns the coordinate system, not the posterior uncertainty. Higher-information views may have narrower posteriors than lower-information views.
 
-The four-way decomposition separates common observable, observed-private, source-supported missing, and source-global-null modal coordinates. Its paired Notebook checks the direct sum, empty-block behavior, and global-null separation.
+## Candidate contributions
 
-### C2 — Cost of complete invariance
+1. **Acquisition-information HSE conditioning.** A fixed physical token interface that represents signal evidence, structural information, physical time, frequency support, and observation reliability.
+2. **Support-calibrated canonical posterior.** Heterogeneous paired views condition one LLapDiff posterior family in the same Laplace coordinate system without complete deterministic invariance.
+3. **Theory linked to falsification.** Fixed-dimensional sufficiency, closed-form posterior, information monotonicity, paired identifiability, and the task cost of complete invariance yield measurable predictions for the known-pole experiment.
 
-When private information has conditional task value, complete paired invariance has a non-zero Bayes log-risk lower bound. The Notebook realizes the equality case and the task-irrelevant control.
+## What is not claimed
 
-### C3 — Identifiability gate for missing inference
+- HSE tokens are not yet proved to recover the exact sufficient statistics outside the analytic oracle.
+- LLapDiff is not claimed to be necessary until Gaussian and mixture baselines leave proper-score headroom.
+- Stable Laplace dynamics and Flow–Diffusion probability-path theory are prior work, not contributions here.
+- No learned-model or real-PHM result currently supports the method.
 
-Visibility in another source domain does not identify the current-domain conditional. The Notebook constructs two worlds with equal unpaired marginals and opposite missing conditionals, then shows what pairing resolves.
+## Future work
 
-### C4 — Triangular partial stochastic representation with paired risk control
-
-Anchored shared canonicalization, private identity, and a shared-conditioned missing posterior form one triangular kernel. The paired-risk result controls downstream change only under a same-event coupling. The paired Notebooks check conditional benefit, private invariance, and the semantic-reversal counterexample.
-
-## Results that are not headline contributions
-
-The following remain supporting theory, established background, special cases, null models, or complexity gates even when their Notebooks pass:
-
-- diffusion–flow marginal equivalence;
-- posterior sufficiency;
-- local modal stability;
-- product-case private-preserving OT;
-- generator commutation;
-- sampling-gap and projector perturbation bounds;
-- Diffusion proper-score gate;
-- affine Flow gate;
-- window-local Laplace adequacy gate.
-
-## Evidence state
-
-```text
-formal derivations: present under explicit assumptions
-executable finite witnesses: 25 / 25 locally; CI is authoritative
-known-pole mechanism evidence: not started
-learned Diffusion/Flow evidence: not started
-real PHM evidence: not started
-formal_claim_supported: false
-```
-
-The next scientific step remains the known-pole role, identifiability, and complexity-gate experiment. No new theorem is promoted to an empirical contribution before that experiment.
+After posterior calibration is established, conditional Flow Matching or diffusion distillation may be studied as faster samplers in the same canonical Laplace latent space. They are not part of the current method.

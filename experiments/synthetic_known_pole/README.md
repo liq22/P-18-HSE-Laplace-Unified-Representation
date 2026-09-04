@@ -2,30 +2,32 @@
 
 ## Objective
 
-Construct paired heterogeneous observations from the same declared modal event and test whether flow, identity, and diffusion act on the intended subspaces.
+Test whether HSE-conditioned LLapDiff recovers a calibrated posterior over the same declared Laplace modal event from heterogeneous paired acquisitions.
 
-## Required latent variables
+## Required generator semantics
 
-- `latent_event_id`;
-- common damping, frequencies, and residues;
-- private damping, frequencies, and residues;
-- event time and optional forcing;
-- a split assigned before acquisition views are generated.
+```text
+latent event is sampled once
+train/validation/test split is assigned by latent_event_id
+acquisition views are generated only after the split
+low-rate views are anti-aliased before sampling
+all views retain the same canonical modal target
+```
 
-## Required acquisition operators
+## First implementation
 
-- high-rate wide-band;
-- anti-aliased low-rate;
-- irregular/missing;
-- a held-out operator not used for fitting.
+Use fixed known modal slots. Do not learn poles, event boundaries, token allocation, codebooks, or Flow Matching.
 
-## First implementation boundary
+## Falsifying comparisons
 
-Use fixed known modal slots. Do not learn poles, event routing, token allocation, or codebooks in this experiment.
+```text
+Gaussian posterior oracle
+posterior mean
+heteroscedastic Gaussian
+finite mixture
+original LLapDiff condition
+LLapDiff + acquisition metadata
+HSE-conditioned LLapDiff
+```
 
-## Primary failure tests
-
-- low-rate observation cannot identify the hidden private realization;
-- complete alignment loses private task information when it is conditionally useful;
-- shared flow cannot modify private coordinates;
-- posterior coverage fails when diffusion uncertainty collapses.
+The experiment must include an ambiguous conditional for which posterior mean and a single Gaussian are inadequate. If a finite mixture matches Diffusion, the Diffusion claim is stopped or reduced.

@@ -1,4 +1,4 @@
-"""Finite interface for the source-supported unified representation."""
+"""Canonical Laplace-posterior representation used by the analytic oracle."""
 
 from __future__ import annotations
 
@@ -8,63 +8,44 @@ import numpy as np
 
 
 @dataclass(frozen=True)
-class UnifiedRepresentation:
-    """Finite summary of a distribution-valued, four-block representation.
+class CanonicalLaplacePosterior:
+    """Gaussian posterior in one fixed canonical modal coordinate system."""
 
-    Global-null coordinates are marked but never represented as learned
-    recoveries. The Monte Carlo axis of ``recoverable_missing_samples`` is
-    explicit; a posterior mean is not silently substituted for a distribution.
-    """
-
-    shared_canonical: np.ndarray
-    observed_private: np.ndarray
-    recoverable_missing_samples: np.ndarray
-    structural_observability: np.ndarray
-    instance_reliability: np.ndarray
-    global_null_mask: np.ndarray
+    mean: np.ndarray
+    covariance: np.ndarray
 
     def validate(self) -> None:
-        shared = np.asarray(self.shared_canonical, dtype=float)
-        private = np.asarray(self.observed_private, dtype=float)
-        samples = np.asarray(self.recoverable_missing_samples, dtype=float)
-        structural = np.asarray(self.structural_observability, dtype=float)
-        reliability = np.asarray(self.instance_reliability, dtype=float)
-        global_null = np.asarray(self.global_null_mask)
+        mean = np.asarray(self.mean, dtype=float)
+        covariance = np.asarray(self.covariance, dtype=float)
+        if mean.ndim != 1:
+            raise ValueError("mean must be one-dimensional")
+        if covariance.shape != (mean.size, mean.size):
+            raise ValueError("covariance shape must match the modal dimension")
+        if np.any(~np.isfinite(mean)) or np.any(~np.isfinite(covariance)):
+            raise ValueError("posterior parameters must be finite")
+        if not np.allclose(covariance, covariance.T, atol=1e-10):
+            raise ValueError("covariance must be symmetric")
+        try:
+            np.linalg.cholesky(covariance)
+        except np.linalg.LinAlgError as exc:
+            raise ValueError("covariance must be positive definite") from exc
 
-        if shared.ndim != 1 or private.ndim != 1:
-            raise ValueError("shared and observed-private coordinates must be vectors")
-        if samples.ndim != 2:
-            raise ValueError(
-                "recoverable_missing_samples must be [num_samples, dimension]"
-            )
-        if samples.shape[0] < 2:
-            raise ValueError("at least two posterior samples are required")
-        if structural.ndim != 1 or reliability.ndim != 1:
-            raise ValueError(
-                "structural_observability and instance_reliability must be vectors"
-            )
-        if structural.shape != reliability.shape:
-            raise ValueError(
-                "structural_observability and instance_reliability must match"
-            )
-        if global_null.shape != structural.shape or global_null.dtype != np.bool_:
-            raise ValueError("global_null_mask must be a boolean vector of modal slots")
-        if np.any((structural < 0.0) | (structural > 1.0)):
-            raise ValueError("structural_observability must lie in [0, 1]")
-        if np.any((reliability < 0.0) | (reliability > 1.0)):
-            raise ValueError("instance_reliability must lie in [0, 1]")
-        if np.any(structural[global_null] > 0.0):
-            raise ValueError("global-null slots cannot be structurally observable")
-        arrays = (shared, private, samples, structural, reliability)
-        if any(np.any(~np.isfinite(array)) for array in arrays):
-            raise ValueError("representation coordinates must be finite")
-
-    @property
-    def missing_posterior_mean(self) -> np.ndarray:
+    def directional_variance(self, direction: np.ndarray) -> float:
         self.validate()
-        return np.mean(self.recoverable_missing_samples, axis=0)
+        vector = np.asarray(direction, dtype=float)
+        if vector.shape != self.mean.shape:
+            raise ValueError("direction shape must match the modal dimension")
+        norm = np.linalg.norm(vector)
+        if norm == 0:
+            raise ValueError("direction must be non-zero")
+        unit = vector / norm
+        return float(unit @ self.covariance @ unit)
 
-    @property
-    def missing_posterior_variance(self) -> np.ndarray:
+    def entropy(self) -> float:
+        """Differential entropy of the Gaussian posterior."""
         self.validate()
-        return np.var(self.recoverable_missing_samples, axis=0, ddof=1)
+        dimension = self.mean.size
+        sign, logdet = np.linalg.slogdet(self.covariance)
+        if sign <= 0:
+            raise ValueError("covariance determinant must be positive")
+        return float(0.5 * (dimension * np.log(2.0 * np.pi * np.e) + logdet))
