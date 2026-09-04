@@ -1,54 +1,45 @@
-schema_version: 4
-project_name: HSE-Laplace-Source-Supported-Partial-Unified-Representation
-stage: theory_proof_notebook_gate
+schema_version: 5
+project_name: HSE-LapDiff
+stage: linear_gaussian_theory_oracle
 language: English
 
 scope: >-
-  Cross-acquisition representation of one shared window-local dynamical process
-  or declared system family under partially overlapping structural modal support.
+  Multiple acquisition operators observe the same window-local dynamical event
+  through different sampling rates, timestamps, masks, channels, noise levels,
+  and sensor responses.
 
-representation:
-  common_observable: anchored_canonicalization
-  observed_private: exact_preservation
-  source_supported_missing: conditional_inference_if_identified
-  source_global_null: unsupported_no_data_driven_recovery
-  dependency: triangular_shared_then_missing
+active_method:
+  conditioner: fixed_physical_hse_tokens
+  generative_model: latent_laplace_diffusion
+  target: canonical_laplace_latent_posterior
+  flow_matching: future_work_only
 
-scientific_gates:
-  role_gate: source_only_structural_observability
-  identifiability_gate: paired_or_physical_certificate
-  canonicalizer_complexity: identity_affine_ot_flow
-  posterior_complexity: point_gaussian_mixture_diffusion
+central_claim_under_test: >-
+  HSE can encode acquisition score, information, physical time, frequency
+  support, and reliability into a fixed token interface that conditions
+  Latent Laplace Diffusion to produce calibrated posteriors in one canonical
+  modal coordinate system without imposing complete deterministic invariance.
 
-theory_admission:
-  proof_source: theory/NN_name.md
-  witness_source: theory/notebooks/NN_name.ipynb
-  notebook_is_not_proof: true
-  ci_command: python theory/run_notebooks.py --timeout 180
-  required_conditions:
-    - complete_assumptions_statement_derivation_boundary
-    - same_stem_notebook_passes_clean_kernel
-    - witness_tests_central_finite_implication
-    - method_specific_novelty_role
-    - measurable_known_pole_prediction
+theory_status:
+  fixed_dimensional_sufficiency: proved_in_linear_gaussian_case
+  closed_form_canonical_posterior: proved_in_linear_gaussian_case
+  acquisition_information_monotonicity: proved_under_loewner_order
+  paired_conditional_identifiability: proved_up_to_null_sets
+  complete_invariance_risk_lower_bound: proved_for_paired_deterministic_invariance_and_log_loss
+  posterior_sufficiency: proved_under_latent_markov_condition
+  laplace_stability_and_gap_shift: supporting_results
 
-admitted_theoretical_candidates:
-  - T01_four_way_source_supported_decomposition
-  - T05_complete_invariance_task_risk_lower_bound
-  - T16_source_support_not_conditional_identifiability
-  - T20_T09_triangular_representation_and_paired_risk_control
-
-not_headline_contributions:
-  - diffusion_flow_marginal_equivalence
-  - posterior_sufficiency
-  - modal_stability
-  - product_case_private_ot
-  - commuting_generators
-  - diffusion_flow_laplace_complexity_gates
+current_evidence:
+  analytic_oracle: completed_in_ci
+  semantic_tests: completed_in_ci
+  theory_notebook_witnesses: completed_in_ci
+  learned_model: not_started
+  known_pole_paired_experiment: not_started
+  real_phm: not_started
 
 formal_claim_supported: false
-evidence_level: conditional_derivations_and_finite_executable_witnesses
-known_pole_evidence: not_started
-learned_model_evidence: not_started
-real_phm_evidence: not_started
-next_decisive_experiment: known_pole_role_identifiability_and_complexity_gates
+next_decisive_experiment: known_pole_paired_acquisition_posterior_calibration
+stop_condition: >-
+  Simplify or stop the generative claim if a heteroscedastic Gaussian or finite
+  mixture conditioned on the same HSE tokens matches LLapDiff on paired proper
+  scores, calibration, and task-sensitive posterior decisions.

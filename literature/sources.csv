@@ -1,13 +1,10 @@
 id,role,title,year,source
+HSE,method_origin,HSE: A plug-and-play module for unified fault diagnosis foundation models,2025,Information Fusion 123:103277
 LLAPDIFF,method_origin,Latent Laplace Diffusion for Irregular Multivariate Time Series,2026,arXiv:2605.19805
-NEURAL_LAPLACE,modal_prior,Neural Laplace: Learning diverse classes of differential equations in the Laplace domain,2022,arXiv:2206.04843
-FLOW_MATCHING,flow_foundation,Flow Matching for Generative Modeling,2023,arXiv:2210.02747
-OT_CFM,transport_baseline,Improving and Generalizing Flow-Based Generative Models with Minibatch Optimal Transport,2024,arXiv:2302.00482
-STOCHASTIC_INTERPOLANTS,novelty_boundary,Stochastic Interpolants: A Unifying Framework for Flows and Diffusions,2025,arXiv:2303.08797
-SCORE_SDE,novelty_boundary,Score-Based Generative Modeling through Stochastic Differential Equations,2021,arXiv:2011.13456
-DSN,shared_private_precedent,Domain Separation Networks,2016,arXiv:1608.06019
+NEURAL_LAPLACE,modal_precedent,Neural Laplace: Learning diverse classes of differential equations in the Laplace domain,2022,arXiv:2206.04843
 CSDI,diffusion_baseline,CSDI: Conditional Score-based Diffusion Models for Probabilistic Time Series Imputation,2021,arXiv:2107.03502
+WARPFORMER,irregular_multirate_baseline,Warpformer: A Multi-scale Modeling Approach for Irregular Clinical Time Series,2023,arXiv:2306.09368
+TPATCHGNN,irregular_patch_baseline,Irregular Multivariate Time Series Forecasting: A Transformable Patching Graph Neural Networks Approach,2024,PMLR:235
 LATENT_ODE,continuous_time_baseline,Latent ODEs for Irregularly-Sampled Time Series,2019,arXiv:1907.03907
 NEURAL_CDE,continuous_time_baseline,Neural Controlled Differential Equations for Irregular Time Series,2020,arXiv:2005.08926
-CONTIFORMER,continuous_time_baseline,ContiFormer: Continuous-Time Transformer for Irregular Time Series Modeling,2024,arXiv:2402.10635
-TPATCHGNN,irregular_graph_baseline,Irregular Multivariate Time Series Forecasting: A Transformable Patching Graph Neural Networks Approach,2024,PMLR:235
+FLOW_MATCHING,future_work_only,Flow Matching for Generative Modeling,2023,arXiv:2210.02747
