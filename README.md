@@ -1,36 +1,32 @@
 # HSE–LapDiff
 
-**Support-Calibrated Latent Laplace Diffusion for Probabilistic Cross-Acquisition Representation**
+**Acquisition-Information Conditioning for Probabilistic Cross-Acquisition Representation**
 
-This repository studies one bounded problem:
-
-> How can different sampling rates, timestamps, missingness patterns, and sensor responses condition one posterior over the same window-local Laplace latent state?
-
-## Core idea
-
-HSE converts a variable-length acquisition into a fixed set of physical conditioning tokens. LLapDiff then predicts a posterior in one canonical Laplace latent coordinate system.
+The research question is whether fixed-budget HSE conditioning retains the information needed by the **same LLapDiff** to predict a canonical target across sampling rates, timestamps, masks and sensor responses.
 
 ```text
-heterogeneous observation
-    -> HSE physical tokens [K, D]
-    -> LLapDiff history conditioning
-    -> canonical Laplace latent posterior
+current acquisition O + encoder-visible descriptors
+    -> HSE tokens, masks and physical fields H
+    -> actual decoder condition C = (H, a_consumed)
+    -> LLapDiff conditional latent distribution
 ```
 
-The method does **not** force two acquisitions to have the same deterministic embedding. A more informative acquisition should generally produce a narrower posterior in the directions it observes.
+The analytical oracle uses known-pole physical coefficients. A learned LLapDiff uses a frozen reference-encoder latent target; these are not assumed identical. Fixed token shape is not a sufficiency or calibration guarantee.
 
-## Current status
+## Status
 
 ```text
 active method: HSE + Latent Laplace Diffusion
 Flow Matching: future work only
-implemented evidence: linear-Gaussian analytic oracle
-learned HSE-LLapDiff model: not started
-real PHM evidence: not started
+implemented model: linear-Gaussian analytic oracle
+new analysis: actual-condition information loss and denoising projection
+learned HSE-LLapDiff / real PHM evidence: not started
 formal_claim_supported: false
 ```
 
-## Analytic oracle
+The diagonal token implementation does not store all off-diagonal acquisition information. This can lose information **unless the actual side input already reconstructs it**. The original full-statistic oracle remains correct; it does not validate inference through the diagonal tokens.
+
+## Run
 
 ```bash
 python -m venv .venv
@@ -41,27 +37,17 @@ python -m unittest discover -s tests -v
 python theory/run_notebooks.py --timeout 180
 ```
 
-The oracle validates only the linear-Gaussian special case:
+To retain executed copies, add `--output-dir theory/outputs --summary theory/outputs/summary.json` to the last command. Source Notebooks remain output-free. Execution establishes a finite witness, not general proof validity or novelty.
 
-1. variable-length observations admit fixed-dimensional statistics
-   \(b=A^TR^{-1}x\) and \(J=A^TR^{-1}A\);
-2. the Gaussian posterior has a closed form in one canonical modal space;
-3. \(J_H\succeq J_L\) implies \(\Sigma_H\preceq\Sigma_L\);
-4. paired observations identify a conditional relation, whereas separate marginals do not;
-5. complete deterministic invariance can discard task-relevant private information.
-
-## Repository map
+## Read
 
 | Path | Purpose |
 |---|---|
-| `src/hse_laplace/` | Minimal acquisition, token, posterior, and modal contracts |
-| `examples/` | Executed analytic oracle |
-| `theory/` | One proof or boundary per Markdown file, with one finite witness each |
-| `paper/` | Single manuscript authority, experiment plan, and current results |
-| `experiments/synthetic_known_pole/` | Next falsification experiment |
-| `future_work/` | Flow Matching and other explicitly inactive directions |
-| `literature/` | Closest prior work and novelty boundary |
+| `theory/README.md` | One Markdown and one same-stem Notebook per result |
+| `paper/main.md` | Scientific argument and contribution candidates |
+| `paper/results.md` | Numerical checks and their limits |
+| `paper/experiments.md` | Three sequential tasks: theory, compression experiment, learned integration |
+| `src/hse_laplace/` | Current analytical acquisition and token code |
+| `future_work/flow_matching.md` | Explicitly inactive direction |
 
-## Evidence boundary
-
-A passing test or Notebook means that a finite consequence is internally consistent. It does not validate a theorem beyond its assumptions, demonstrate a learned model, establish novelty, or prove usefulness on PHM data.
+Next: compare full, diagonal and declared small-block acquisition information under identical actual side inputs. Do not add a learned coupling branch before that experiment supports it.

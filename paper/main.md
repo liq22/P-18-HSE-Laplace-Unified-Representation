@@ -2,66 +2,64 @@
 
 ## Working title
 
-**Support-Calibrated Latent Laplace Diffusion for Probabilistic Cross-Acquisition Representation**
+**Acquisition-Information Conditioning for Probabilistic Cross-Acquisition Representation**
 
-## Problem
+## Problem and exact gap
 
-Heterogeneous industrial acquisitions do not merely rescale the same discrete sequence. Sampling rate, anti-alias filtering, sensor response, timestamps, and missingness change how much information is available about a shared physical event. A deterministic embedding can expose a fixed interface, but it does not state how uncertain the unobserved modal content should remain.
+The same local event can produce different information under different sampling rates, timestamps, masks and sensor responses. A fixed embedding interface does not establish that a conditional generator receives the same physical evidence or should return the same uncertainty.
 
-## Gap
+HSE supplies heterogeneous-signal tokenization. LLapDiff supplies stable modal prediction in a latent-trajectory diffusion model. Neither component is claimed here as new. The remaining question is whether an actual finite-budget HSE condition retains the cross-modal acquisition information required by that fixed generator.
 
-HSE maps heterogeneous signals to a fixed latent token interface. LLapDiff models irregular targets as stable Laplace-modal latent trajectories and provides probabilistic generation. The unresolved problem is how acquisition information should enter the HSE condition and calibrate a posterior over one canonical Laplace latent state.
+Statistical compression and approximate sufficient-representation theory already connect compressed conditions to conditional generation; see Alsing and Wandelt and Oko et al. in `related_work.md`. Our candidate difference must be a concrete, budgeted acquisition-information mechanism and its measurable effect, not a new name for those identities.
 
-## Method under test
+## Three objects, one controlled comparison
 
-For a window-local modal state \(\Theta\in\mathbb R^m\), acquisition domain \(d\) produces
-
-\[
-X_d=A_d\Theta+\varepsilon_d,
-\qquad
-\varepsilon_d\sim\mathcal N(0,R_d)
-\]
-
-in the analytic special case. Its fixed-dimensional information statistics are
+The analytical target is a known-pole coefficient vector `beta` with `s(t)=Phi_Lambda(t) beta`. Under known linear-Gaussian acquisition,
 
 \[
-b_d=A_d^TR_d^{-1}X_d,
-\qquad
-J_d=A_d^TR_d^{-1}A_d.
+x=A\beta+\epsilon,\quad b=A^TR^{-1}x,\quad J=A^TR^{-1}A.
 \]
 
-HSE is interpreted as a learned fixed-token approximation to slotwise acquisition statistics and physical metadata:
+The learned target is instead `Z0=E_ref(X_ref)` from a source-trained frozen reference encoder. Its coordinates are not automatically the physical coefficients. LLapDiff's predicted modal parameters are a third object, not an assumed ground-truth physical state.
+
+The actual condition is
 
 \[
-H_d=
-\operatorname{HSE}
-(X_d,t_d,m_d,a_d)
-\in\mathbb R^{K\times D}.
+H=T_\psi(O,a),\qquad C=(H,a).
 \]
 
-LLapDiff is then conditioned on \(H_d\) to generate
+`O` includes all current-acquisition information visible to the conditioner encoder; `a` includes only the side input actually consumed by the generator. Teacher and student see the same underlying acquisition. A reference target is supervision, not extra input granted only to the teacher.
+
+## Analysis that guides the candidate method
+
+Theory 1 preserves the complete `(b,J)` sufficiency result. It also gives a collision through the existing diagonal tokenizer, with a positive control showing that full acquisition side information can reconstruct `J`. Therefore a missing matrix entry inside `tokens` is not by itself proof of complete-condition information loss.
+
+Theory 9 separates
 
 \[
-p_\theta(Z^\star\mid H_d),
+\mathbb E\operatorname{KL}(p(Z_0\mid O,a)\|q_\phi(Z_0\mid H,a))
+=I(Z_0;O\mid H,a)
++\mathbb E\operatorname{KL}(p(Z_0\mid H,a)\|q_\phi(Z_0\mid H,a)).
 \]
 
-where \(Z^\star\) is the canonical stable Laplace latent trajectory shared by paired acquisition views of the same event.
+Theory 10 separates full-information Bayes error, the conditioning projection gap, and denoiser approximation error. The same result is converted explicitly between epsilon, x0 and v under a fixed schedule. These are established analytical tools applied to our interface, not standalone novelty claims.
 
-The method aligns the coordinate system, not the posterior uncertainty. Higher-information views may have narrower posteriors than lower-information views.
+## Candidate method, not yet implemented
 
-## Candidate contributions
+Compare the original HSE against the smallest acquisition-coupling feature supported by the known-pole experiment, initially a declared within-mode cosine/sine information block. Preserve the original patch/token budget and the LLapDiff target VAE, denoiser, training schedule and sampler. Report the real scalar storage and computation: a full `(b,J)` oracle is not a same-budget deployed baseline.
 
-1. **Acquisition-information HSE conditioning.** A fixed physical token interface that represents signal evidence, structural information, physical time, frequency support, and observation reliability.
-2. **Support-calibrated canonical posterior.** Heterogeneous paired views condition one LLapDiff posterior family in the same Laplace coordinate system without complete deterministic invariance.
-3. **Theory linked to falsification.** Fixed-dimensional sufficiency, closed-form posterior, information monotonicity, paired identifiability, and the task cost of complete invariance yield measurable predictions for the known-pole experiment.
+Do not assume that `2x2` blocks suffice when cross-mode coupling is strong. If actual side information already recovers all of `J`, study genuine patch/compression or finite-capacity loss rather than hiding metadata to manufacture an advantage.
 
-## What is not claimed
+## Contribution admission
 
-- HSE tokens are not yet proved to recover the exact sufficient statistics outside the analytic oracle.
-- LLapDiff is not claimed to be necessary until Gaussian and mixture baselines leave proper-score headroom.
-- Stable Laplace dynamics and Flow–Diffusion probability-path theory are prior work, not contributions here.
-- No learned-model or real-PHM result currently supports the method.
+No new learned-method contribution is admitted yet. Candidates are:
+
+1. a concrete acquisition-coupling condition that improves the same LLapDiff at declared equal information and budget;
+2. analysis of that specific condition's posterior and denoising loss, using rather than reclaiming generic KL/projection theory;
+3. paired evidence that separates compression, fitting, correlated noise and reference-target uncertainty, including negative results.
+
+The finite witnesses in `results.md` support only their stated constructions. They do not show learned sufficiency, calibration, superiority over mixtures, or PHM generalization.
 
 ## Future work
 
-After posterior calibration is established, conditional Flow Matching or diffusion distillation may be studied as faster samplers in the same canonical Laplace latent space. They are not part of the current method.
+Flow Matching remains outside the active method. Consider sampler acceleration only after learned posterior validity is established and sampling latency is a measured bottleneck.

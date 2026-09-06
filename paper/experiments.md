@@ -1,78 +1,54 @@
-# Experiment plan
+# Three sequential research tasks
 
-## E0 — closed-form theory oracle
+## A — Close the actual-condition theory
 
-Implemented now. It checks:
+Scope: definitions, full-statistic versus actual-token boundary, conditional KL decomposition and denoising projection. Retain the original Gaussian posterior/information-order and dense-`J` sufficiency witnesses. Add an actual-token collision and a full-operator side-input positive control. Gaussian plug-in error must not be relabeled as the true compressed-posterior error.
 
-- variable observation length with fixed modal statistics;
-- exact Gaussian posterior in canonical coordinates;
-- posterior covariance and entropy decrease under Loewner-ordered acquisition information;
-- fixed `K x D` HSE conditioning tokens;
-- likelihood-ratio invariance for observations sharing the same sufficient statistics.
+The amended/new Notebooks are 01, 03, 09 and 10. Their finite outputs go in `results.md`. No learned model, new token architecture, sampler, or large data experiment is part of this task.
 
-These results validate only the declared linear-Gaussian special case.
+## B — Paired known-pole compression experiment
 
-## E1 — known-pole paired-acquisition falsification
+Freeze two damped modes and infer four cosine/sine coefficients. Use two cells: a Gaussian prior and a declared finite Gaussian-mixture prior with an exactly computable oracle. Split latent events before constructing acquisitions. Start with declared linear `A,R`; a later physical-filter cell must measure finite-window leakage rather than assume a perfect spectral null.
 
-Generate a latent event before any acquisition view. Split `latent_event_id`, then produce:
+For the same events, observations and actual side inputs compare:
 
 ```text
-high-rate wide-band view
-anti-aliased middle-rate view
-anti-aliased low-rate view
-irregular and block-missing view
+full (b,J) oracle
+b + diag(J)
+b + declared within-mode 2x2 blocks
 ```
 
-The canonical target is the same declared Laplace modal trajectory for all paired views.
+Run coarse and full `(A,R)` side-information regimes separately, with equal access within each regime. If full side information eliminates the gap, retain that result and do not hide the descriptor. Report the actual token/scalar budget and discarded cross-block information. A small block is a hypothesis, not an already sufficient condition.
 
-### Factors
+Primary endpoint: declared posterior KL when the **true compressed conditional** can be computed, or Bayes denoising-risk gap. A diagonal/block plug-in Gaussian is an approximate model and must be labeled separately. Auxiliary endpoints: modal mean error, directional variance, conditional coverage and computational cost.
 
-1. complete versus partial frequency support;
-2. task-irrelevant versus task-relevant private mode;
-3. unimodal versus multimodal conditional ambiguity.
+Deliver one result CSV, compression/posterior and calibration figures, and numerical manuscript updates. Continue only if a specific coupling feature reduces a real condition gap. No universal information manager or new model factory is needed.
 
-### Baselines
+## C — Minimal learned HSE to LLapDiff integration
 
-```text
-posterior mean regression
-heteroscedastic Gaussian
-finite conditional mixture
-original LLapDiff conditioning
-LLapDiff + acquisition metadata
-HSE-conditioned LLapDiff
-```
+Freeze the weights of one source-trained target VAE. Keep the modal-predictor architecture, diffusion parameterization, schedule, time weighting, reverse sampler and reference query grid identical across arms. Train the denoiser and conditioner in each arm with matched initialization policy, optimizer and budget; do not silently freeze one arm only. Change only history conditioning:
 
-Flow Matching and OT are not active baselines in this paper.
-
-### Primary metrics
-
-| Question | Primary metric |
+| Arm | Actual condition |
 |---|---|
-| Does HSE preserve fixed canonical coordinates? | paired modal-mean error |
-| Is uncertainty calibrated to acquisition information? | joint Energy Score or declared marginal CRPS |
-| Does more information reduce uncertainty? | directional posterior variance order |
-| Is private task information lost by full invariance? | paired task log-loss difference |
-| Is the posterior calibrated? | 50/80/90% coverage |
+| B0 | original LLapDiff conditioner + common a |
+| B1 | original HSE conditioner + common a |
+| M | coupling-aware HSE supported by Task B + common a |
 
-### Stop rule for Diffusion
+Gaussian/mixture alternatives receive the same HSE condition. The full-statistic oracle is labeled an upper-information analytical baseline, not ranked as an equal-budget implementation.
 
-Stop or demote the Diffusion component if the strongest Gaussian or finite-mixture model is equivalent on the predeclared proper score and calibration metrics under the same HSE condition.
+Check that tokens, time, bands, masks and `a` are actually consumed; that HSE receives training gradients; and that evaluation patch selection is declared and deterministic. Epsilon/x0/v and sampler conventions must agree. Do not add a sample-residual penalty without deriving its target effect.
 
-## E2 — minimal HSE–LLapDiff integration
+Use one predeclared proper score (joint Energy Score, or marginal CRPS with a joint-dependence diagnostic). Add acquisition-stratified coverage and width, observation-dependent checks against a prior-only baseline, target mean error, posterior draw count and cost. Approximate diffusion NLL is not automatically comparable to exact Gaussian likelihood.
 
-Keep the original LLapDiff target VAE, stable modal predictor, diffusion parameterization, and reverse sampler. Replace or augment only the history port tokens with HSE physical tokens. Do not simultaneously add learned poles, event routing, codebooks, domain adversaries, or Flow Matching.
+## Uncertainty and noise controls
 
-## E3 — real paired-rate pilot
+- Gaussian cells check `J_H >= J_L -> Sigma_H <= Sigma_L` under their assumptions.
+- General posterior cells use proper scores and conditional averaging under a justified degradation chain, not a per-event variance-order penalty.
+- Resampled views of the same noisy record must not count as independent likelihood factors.
+- A noisy high-rate reference conditional is not silently described as a clean-state posterior.
 
-Use one raw high-rate recording source with a clear grouping key.
+## Statistics and progression
 
-1. split machines or recordings first;
-2. generate high/mid/low views inside each split;
-3. use explicit anti-alias filtering;
-4. fit normalization and HSE parameters on source splits only;
-5. test an unseen intermediate rate or missingness pattern;
-6. treat views from one recording as paired observations.
+The independent unit is a latent event, later a machine/run/bearing/recording. Keep training seeds and posterior Monte Carlo draws separate. Use paired event-level intervals and predeclared practical/equivalence margins; a nonsignificant difference or a wide interval does not establish equivalence.
 
-## Statistical contract
-
-The independent unit is `latent_event_id` in E1 and a machine, run, bearing, or recording in E3. Seeds are implementation replicates. Method differences use paired confidence intervals over independent units. Failure and null results remain in the paper.
+Only after Task C succeeds move to one licensed raw recording source: split recordings first, construct anti-aliased rate views within each split, fit preprocessing on source only, and evaluate an unseen intermediate rate. Such an offline pilot does not establish cross-hardware generalization. Flow Matching stays future work.
