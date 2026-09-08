@@ -44,9 +44,13 @@ Theory 9 separates
 
 Theory 10 separates full-information Bayes error, the conditioning projection gap, and denoiser approximation error. The same result is converted explicitly between epsilon, x0 and v under a fixed schedule. These are established analytical tools applied to our interface, not standalone novelty claims.
 
-## Candidate method, not yet implemented
+## Coefficient-space falsification and candidate method
 
-Compare the original HSE against the smallest acquisition-coupling feature supported by the known-pole experiment, initially a declared within-mode cosine/sine information block. Preserve the original patch/token budget and the LLapDiff target VAE, denoiser, training schedule and sampler. Report the real scalar storage and computation: a full `(b,J)` oracle is not a same-budget deployed baseline.
+Theory 11 computes the true compressed conditional by mixing compatible acquisition designs with their posterior probabilities. In Task B, a Gaussian prior can therefore yield a non-Gaussian compressed posterior. Replacing J by its diagonal is a different, approximate probability model.
+
+The 6,144-event coefficient-space experiment supports a limited conclusion: within-mode blocks reduce information loss relative to diagonal summaries when the decoder lacks the distinguishing operator information. They are exactly sufficient in the no-cross-coupling control, but not when cross-mode coupling is hidden. Full operator side input removes the information gap in all arms. Scalar budgets are 8/10/14, so this is not a same-budget method win.
+
+Compare the original HSE against the smallest coupling feature supported by an actual sampled-window follow-up, initially a declared within-mode cosine/sine information block. Preserve the original patch/token budget and the LLapDiff target VAE, denoiser, training schedule and sampler. Report the real scalar storage and computation: a full `(b,J)` oracle is not a same-budget deployed baseline.
 
 Do not assume that `2x2` blocks suffice when cross-mode coupling is strong. If actual side information already recovers all of `J`, study genuine patch/compression or finite-capacity loss rather than hiding metadata to manufacture an advantage.
 
@@ -58,7 +62,7 @@ No new learned-method contribution is admitted yet. Candidates are:
 2. analysis of that specific condition's posterior and denoising loss, using rather than reclaiming generic KL/projection theory;
 3. paired evidence that separates compression, fitting, correlated noise and reference-target uncertainty, including negative results.
 
-The finite witnesses in `results.md` support only their stated constructions. They do not show learned sufficiency, calibration, superiority over mixtures, or PHM generalization.
+The finite witnesses and coefficient-space Monte Carlo experiment in `results.md` support only their stated constructions. They do not show learned sufficiency, calibration, superiority over mixtures, or PHM generalization.
 
 ## Future work
 

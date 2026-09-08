@@ -8,8 +8,6 @@ Command:
 python examples/analytic_hse_llapdiff_oracle.py
 ```
 
-The existing three-dimensional oracle reported:
-
 | Quantity | Low | Mid | High |
 |---|---:|---:|---:|
 | variance, coordinate 1 | 0.500000 | 0.500000 | 0.333333 |
@@ -18,45 +16,96 @@ The existing three-dimensional oracle reported:
 | Gaussian entropy | 3.563668 | 3.452097 | 2.568876 |
 | token shape | 3 x 8 | 3 x 8 | 3 x 8 |
 
-These posterior values were calculated from the **full** information statistics. Token shape and masks were checked separately. They do not establish that the posterior was reconstructed from diagonal tokens or that a learned HSE preserves the full statistics.
+These posterior values were calculated from the **full** information statistics. Token shape and masks were checked separately. They do not establish inference through diagonal tokens or learned HSE sufficiency.
 
 ## Task A: finite theory witnesses, 2026-09-06
-
-Reproduce the current theory witnesses with:
 
 ```bash
 python theory/run_notebooks.py --timeout 180 --output-dir theory/outputs --summary theory/outputs/summary.json
 python -m unittest discover -s tests -p 'test_conditioning_information.py' -v
 ```
 
-The changed/new witnesses are 01, 03, 09 and 10. Their local runs used isolated kernels and the inspected analytical acquisition/token code. Full repository CI is reported separately in the PR; this table is not a claim that a learned model or the complete new benchmark has been run.
-
 | Witness | Numerical result | Interpretation |
 |---|---:|---|
-| Original dense-J likelihood-ratio spread | 4.44e-16 | Full-statistic sufficiency positive control retained |
-| Actual diagonal-token collision: posterior mean distance | 0.5128728388 | Same exposed tokens can hide coupling when side input is coarse |
-| Collision: directed KL between full posteriors | 0.5714285714 nats | Posterior separation, not compression mutual information |
-| Full A,R side-input control | posterior means/covariances agree within 1e-12 | J can be recovered outside the token array |
+| Original dense-J likelihood-ratio spread | 4.44e-16 locally | Full-statistic positive control retained |
+| Actual diagonal-token collision: posterior mean distance | 0.5128728388 | Coarse side input can hide coupling |
+| Directed KL between two full posteriors | 0.5714285714 nats | Posterior separation, not compression mutual information |
+| Full A,R side-input control | agreement within 1e-12 | J can be reconstructed outside the token array |
 | Non-Gaussian prior / realized high / average high variance | 0.1 / 1.0 / 0.1 | Eventwise variance decrease is not universal |
-| Degraded binary observation posterior | 0.74 versus high-view 0.90 | Averaged posterior consistency, not pairwise equality |
-| Theory 09: total KL | 0.4552409007 nats | One enumerated binary model |
-| Theory 09: compression + fitting | 0.3680642072 + 0.0871766936 | Decomposition residual 2.78e-17 |
-| Theory 09: side information exposes O | compression 0; fitting 0.4552409007 | Better condition does not automatically fit the decoder |
-| Theory 09: nonconstant two-token example | 0.2374752379 = 0.2042044257 + 0.0332708123 | Independently checks nontrivial coarse conditioning |
-| Theory 10: full denoising Bayes risk | 0.2382116886 | Full observation is 90%-accurate, not a clean-state teacher |
-| Theory 10: compressed denoising Bayes risk | 0.4737228680 | Same schedule and forward noise, H constant |
-| Theory 10: projection gap | 0.2355111793 | Equals the Bayes risk difference |
-| Theory 10: cross term | -1.24e-12 | Orthogonality check |
-| Theory 10: 160-to-240-node refinement | maximum change 1.42e-11 | Numerical integration check |
-| Theory 10: score-identity residual | 1.78e-15 | Direct differentiation of Gaussian mixture density |
-| Theory 10: alpha=0 control | epsilon gap 0; x0 gap 0.64 | One diffusion time cannot certify sufficiency |
+| Degraded binary observation posterior | 0.74 versus 0.90 | Averaged posterior consistency, not paired equality |
+| Theory 09: total KL | 0.4552409007 | Enumerated binary model |
+| Theory 09: compression + fitting | 0.3680642072 + 0.0871766936 | Residual 2.78e-17 |
+| Theory 09: full observation side input | compression 0; fitting 0.4552409007 | Better input does not automatically fit the model |
+| Theory 09: nonconstant two-token example | 0.2374752379 = 0.2042044257 + 0.0332708123 | Nontrivial coarse conditioning |
+| Theory 10: full / compressed denoising risk | 0.2382116886 / 0.4737228680 | Same schedule, noisy full observation |
+| Theory 10: projection gap | 0.2355111793 | Equal to Bayes risk difference |
+| Theory 10: cross term | -1.24e-12 | Orthogonality witness |
+| Theory 10: quadrature refinement | maximum change 1.42e-11 | 160 to 240 nodes |
+| Theory 10: score residual | 1.78e-15 | Independent density differentiation |
+| Theory 10: alpha=0 | epsilon gap 0; x0 gap 0.64 | One diffusion time cannot certify sufficiency |
 
-The uploaded review's clean-observation denoising example had full Bayes risk zero and gap about 0.473723. The new witness deliberately uses a noisy full observation, so its gap is about 0.235511. These are different experiments and are not conflicting measurements.
+The uploaded review used a clean-observation denoising example (full Bayes risk zero, gap about 0.473723). The present witness deliberately uses noisy observations; its gap about 0.235511 is a different experiment. Exact roundoff-sized residuals can vary across NumPy/BLAS versions. The correct dense-J and Gaussian positive controls are retained.
 
-## What passed and what did not get promoted
+## Task B: exact compressed posterior, 2026-09-08
 
-The finite checks exercise the intended identities and their counterexamples. The original dense-J and Gaussian positive controls remain valid. The two new actual-condition tests check the current tokenizer rather than a replacement implementation.
+Command, run from the repository root:
 
-No experiment here supports the claim that a small-block token is sufficient, that a learned HSE reduces conditional information loss, or that LLapDiff is superior or calibrated. Generic KL/projection results remain analytical support, not newly admitted paper contributions.
+```bash
+python -m pip install -e ".[notebooks,experiments]"
+OPENBLAS_NUM_THREADS=1 python -m experiments.synthetic_known_pole.run_compression --events-per-seed 2048 --seeds 0 1 2 --bootstrap 1000 --output-dir outputs/task_b
+```
 
-`formal_claim_supported: false`. Task B's paired compression experiment, Task C's learned HSE-LLapDiff comparison, and real PHM experiments remain unstarted.
+[All 60 rows, selected columns and paired intervals](assets/compression_summary.csv). The retained CSV rounds to ten significant digits without clipping small negative values; the command regenerates the full-precision table with additional diagnostics and two figures.
+
+This is a **coefficient-space** acquisition experiment for four coefficients assigned to two fixed damped modes. No sampled-waveform tokenizer, neural model or hardware filter was run. Prior/design probabilities are known, not learned.
+
+Each cell has 6,144 independent held-out events. The same event has four independently noisy acquisition views; all arms receive the same view and declared side input. Views and coefficient dimensions are averaged within event before bootstrap resampling. Corresponding events are reused across coupling cells, so the cells are not independent experiments. Seeds 0,1,2 are simulator replicates.
+
+### True compression loss
+
+Entries are expected conditional KL estimates in nats, with marginal 95% event-paired bootstrap intervals. These are diagnostic intervals, not a simultaneous multiple-comparison guarantee. Individual log-ratio estimates are not clipped. Zero controls below have absolute magnitude below 1e-12.
+
+| Prior | Cross coupling | Diagonal exact conditional | Block exact conditional | Paired gain of block over diagonal |
+|---|---:|---:|---:|---:|
+| gaussian | 0 | 0.083534 [0.079170, 0.088016] | 0 (analytic control) | 0.083534 [0.079170, 0.088016] |
+| gaussian | 0.45 | 0.136693 [0.130889, 0.142697] | 0.059186 [0.055549, 0.062843] | 0.077507 [0.073511, 0.081762] |
+| gaussian | 0.8 | 0.091889 [0.087131, 0.096253] | 0.039478 [0.036462, 0.042468] | 0.052411 [0.048737, 0.055937] |
+| mixture | 0 | 0.055256 [0.052178, 0.058788] | 0 (analytic control) | 0.055256 [0.052178, 0.058788] |
+| mixture | 0.45 | 0.089283 [0.084986, 0.093364] | 0.037205 [0.034546, 0.039723] | 0.052078 [0.048968, 0.055283] |
+| mixture | 0.8 | 0.061142 [0.057404, 0.065027] | 0.024326 [0.021822, 0.026732] | 0.036816 [0.034014, 0.039673] |
+
+Full operator side information closes the compression and denoising gap for every arm to numerical precision. A block gain is conditional on missing operator information, not automatic because tokens omit a matrix entry.
+
+The loss is not monotone in cross coupling: changing the design also changes how informative b is about the hidden design. Off-diagonal matrix norm alone is not a sufficient proxy for information loss. The correct conditional mixture remains calibrated while less informative; information loss is not itself miscalibration.
+
+**Compression figure:** `outputs/task_b/compression.svg` plots the exact diagonal/block conditionals for both priors, with event-paired confidence intervals. The non-monotone curves and positive block residuals are retained.
+
+### Plug-in fitting error is not token loss
+
+At cross coupling 0.8:
+
+| Prior / model | Total log-score gap | Compression component | Fitting component | 90% central marginal coverage |
+|---|---:|---:|---:|---:|
+| gaussian / diag_exact | 0.091889 | 0.091889 | 0.000000 | 0.9017 |
+| gaussian / diag_plugin | 0.601327 | 0.091889 | 0.509438 | 0.8371 |
+| gaussian / block_exact | 0.039478 | 0.039478 | 0.000000 | 0.9018 |
+| gaussian / block_plugin | 0.409752 | 0.039478 | 0.370274 | 0.8548 |
+| mixture / diag_exact | 0.061142 | 0.061142 | 0.000000 | 0.9001 |
+| mixture / diag_plugin | 0.367740 | 0.061142 | 0.306599 | 0.8589 |
+| mixture / block_exact | 0.024326 | 0.024326 | 0.000000 | 0.9005 |
+| mixture / block_plugin | 0.238864 | 0.024326 | 0.214538 | 0.8726 |
+
+The plug-in penalty is often larger than the actual compression penalty. A block plug-in can perform worse than the exact diagonal conditional despite retaining more information. This is model mismatch, not a contradiction of information refinement.
+
+Coverage is averaged central marginal coverage, not joint coverage. A prior-only model can also be marginally calibrated. Observation-sensitive endpoints here are joint log-score loss against the full oracle and paired denoising-predictor distance.
+
+**Calibration figure:** `outputs/task_b/calibration.svg` compares 50/80/90% nominal coverage with measured marginal coverage for exact conditionals and plug-ins, separately for each prior at cross coupling 0.8. It is not a learned-posterior calibration claim.
+
+### Decision and remaining scope
+
+- **Retain:** coupling can have information value; exact conditionals marginalize hidden acquisition designs with data-dependent weights.
+- **Reject the stronger claim:** within-mode 2x2 blocks are universally sufficient. Hidden cross-mode terms leave positive loss.
+- **Retain the null:** full actual operator side input removes the Bayes-information advantage.
+- **No learned contribution admitted:** statistics contain 8/10/14 unique scalars. There is no matched-budget learned HSE comparison. Known Gaussian/finite-mixture oracles represent the true posteriors; Diffusion necessity remains untested.
+
+One new theory Markdown/Notebook pair and eight behavior tests cover the conditional calculation, its weights, controls, pairing and diffusion-noise boundary. Local execution passed; the PR reports remote CI separately. Physical-window compression, learned HSE-LLapDiff and real PHM experiments remain unstarted. `formal_claim_supported: false`.

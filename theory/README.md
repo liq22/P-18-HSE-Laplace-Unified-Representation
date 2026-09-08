@@ -15,16 +15,17 @@ Every numbered Markdown has one same-stem Notebook under `notebooks/`. Markdown 
 | 08 | Sampling-gap perturbation | Supporting bound |
 | 09 | Posterior error = actual-condition compression + fitting | New project derivation of a standard identity |
 | 10 | Optimal denoising projection gap; epsilon/x0/v and score relation | New project derivation of standard projection theory |
+| 11 | Exact conditional after discarding a finite acquisition design; nested-summary loss | Computable Task B oracle, not a generic novelty claim |
 
 ## Read the current argument
 
-`00 -> 01 -> 09 -> 10`, then `03` for the uncertainty boundary. Retain the other correct analytical results without promoting them to new contributions.
+`00 -> 01 -> 09 -> 10 -> 11`, then `03` for the uncertainty boundary. Retain the other correct analytical results without promoting them to new contributions.
 
 ## Contribution rule
 
 A candidate needs a checked general argument, a passing same-stem witness, a novelty comparison, and a method-specific prediction. A learned-method claim additionally needs same-information, same-budget experimental support. A formula being stated and its toy example running are not sufficient for admission.
 
-The generic KL, projection, factorization and covariance results are analytical support. **No new learned-method contribution is admitted by this change.** The candidate contribution is a specific acquisition-coupling conditioner, still awaiting the compression and learned experiments in `paper/experiments.md`.
+The generic KL, projection, factorization and covariance results are analytical support. **No new learned-method contribution is admitted by this change.** The candidate contribution is a specific acquisition-coupling conditioner, supported only by a finite coefficient-space compression experiment; a physical-window and same-budget learned comparison are still required in `paper/experiments.md`.
 
 ## Run
 

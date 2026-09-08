@@ -8,6 +8,8 @@ The amended/new Notebooks are 01, 03, 09 and 10. Their finite outputs go in `res
 
 ## B — Paired known-pole compression experiment
 
+**Executed slice:** finite-design linear coefficient measurements. Theory 11 and `experiments/synthetic_known_pole/compression.py` implement the true conditional, with 6,144 held-out events per prior/coupling cell. The retained table is `paper/assets/compression_summary.csv`. Physical-filter and actual HSE compression remain untested.
+
 Freeze two damped modes and infer four cosine/sine coefficients. Use two cells: a Gaussian prior and a declared finite Gaussian-mixture prior with an exactly computable oracle. Split latent events before constructing acquisitions. Start with declared linear `A,R`; a later physical-filter cell must measure finite-window leakage rather than assume a perfect spectral null.
 
 For the same events, observations and actual side inputs compare:
@@ -20,9 +22,13 @@ b + declared within-mode 2x2 blocks
 
 Run coarse and full `(A,R)` side-information regimes separately, with equal access within each regime. If full side information eliminates the gap, retain that result and do not hide the descriptor. Report the actual token/scalar budget and discarded cross-block information. A small block is a hypothesis, not an already sufficient condition.
 
-Primary endpoint: declared posterior KL when the **true compressed conditional** can be computed, or Bayes denoising-risk gap. A diagonal/block plug-in Gaussian is an approximate model and must be labeled separately. Auxiliary endpoints: modal mean error, directional variance, conditional coverage and computational cost.
+The executed slice uses the joint-log-score gap `log p(beta|b,D) - log p(beta|b,summary)`. Averaging over true event draws estimates expected conditional KL; posterior densities are exact, but the expectation is Monte Carlo. Each event's four views are averaged before a 1,000-replicate paired bootstrap. There are two priors and three fixed cross couplings (0, 0.45, 0.8), with simulator seeds 0,1,2. Seed values do not represent neural training.
 
-Deliver one result CSV, compression/posterior and calibration figures, and numerical manuscript updates. Continue only if a specific coupling feature reduces a real condition gap. No universal information manager or new model factory is needed.
+The exact mixture and the diagonal/block plug-in models are reported separately. Primary endpoint: expected conditional KL; denoising conditional-mean distance and central marginal coverage are secondary. Full statistics, diagonal statistics and block statistics contain 14, 8 and 10 unique scalars: an upper-information comparison, not a matched-budget result. A diagonal/block plug-in Gaussian is an approximate model and must be labeled separately. Auxiliary endpoints: modal mean error, directional variance, conditional coverage and computational cost.
+
+The CSV and two reproducible figures are now produced by `python -m experiments.synthetic_known_pole.run_compression`. Results do not support universal block sufficiency or monotonic loss versus off-diagonal magnitude. A finite mixture is an exact model for this synthetic family; it cannot establish a Diffusion advantage.
+
+**Before C:** replace algebraic coefficient measurements with declared sampled-window acquisition, audit whether actual side metadata already reconstructs the coupling, and retain `(P,K,D)` plus equal scalar/parameter/compute budgets. Continue only if a specific coupling feature reduces an actual condition or finite-capacity gap. No universal information manager or new model factory is needed.
 
 ## C — Minimal learned HSE to LLapDiff integration
 
