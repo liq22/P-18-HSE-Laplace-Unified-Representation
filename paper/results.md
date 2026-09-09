@@ -106,6 +106,31 @@ Coverage is averaged central marginal coverage, not joint coverage. A prior-only
 - **Retain:** coupling can have information value; exact conditionals marginalize hidden acquisition designs with data-dependent weights.
 - **Reject the stronger claim:** within-mode 2x2 blocks are universally sufficient. Hidden cross-mode terms leave positive loss.
 - **Retain the null:** full actual operator side input removes the Bayes-information advantage.
-- **No learned contribution admitted:** statistics contain 8/10/14 unique scalars. There is no matched-budget learned HSE comparison. Known Gaussian/finite-mixture oracles represent the true posteriors; Diffusion necessity remains untested.
+- **No learned contribution admitted:** statistics contain 8/10/14 unique layout entries. There is no matched-budget learned HSE comparison. Known Gaussian/finite-mixture oracles represent the true posteriors; Diffusion necessity remains untested.
 
-One new theory Markdown/Notebook pair and eight behavior tests cover the conditional calculation, its weights, controls, pairing and diffusion-noise boundary. Local execution passed; the PR reports remote CI separately. Physical-window compression, learned HSE-LLapDiff and real PHM experiments remain unstarted. `formal_claim_supported: false`.
+One theory Markdown/Notebook pair and the behavior tests cover the conditional calculation, its weights, controls, pairing and diffusion-noise boundary. Physical-window compression, learned HSE-LLapDiff and real PHM experiments remain unstarted. `formal_claim_supported: false`.
+
+## Development integration checks, 2026-09-09
+
+The complete Task B command above was rerun with the same 2,048 events per seed, seeds 0/1/2 and 1,000 bootstrap replicates. All 60 rows and 1,500 numeric fields agreed with the supplied full-precision Task B CSV; the maximum absolute difference in this local run was zero. The retained rounded CSV was not overwritten. This is a reproduction check, not additional independent evidence.
+
+The original sign-family determinant is constant across designs. Its observation-space check therefore cannot by itself detect omission of a design-dependent Jacobian. The strengthened same-stem Theory 11 Notebook adds a separate two-design counterexample with unequal determinants:
+
+| Calculation | Design 1 posterior probability | Design 2 posterior probability |
+|---|---:|---:|
+| Correct score-space likelihood | 0.37678292 | 0.62321708 |
+| Observation-space likelihood without Jacobian | 0.54733817 | 0.45266183 |
+
+The maximum weight error is **0.1705552474**. This diagnoses a test-coverage gap; the original score-space implementation already included the correct determinant implicitly and its scientific sweep remains unchanged.
+
+The posterior function now rejects repeated or fractional design indices, inconsistent prior-component counts, nonnormalized weights and nonsymmetric/indefinite covariance inputs. These checks preserve the declared joint distribution instead of silently truncating, reweighting or repairing it. The five added tests cover these cases and verify that plot-only execution never invokes the experiment.
+
+To regenerate figures directly from retained results:
+
+```bash
+python -m experiments.synthetic_known_pole.run_compression --plot-only paper/assets/compression_summary.csv --output-dir outputs/task_b_reference
+```
+
+Percentile intervals are drawn from their actual endpoints without clipping them to contain the sample estimate. The 8/10/14 layout counts are not Shannon information, minimum storage bits or free parameters of the finite sign family.
+
+Local validation covered the Task B files and the amended Notebook; the complete repository is checked separately by the PR and `dev` push CI. Integrating into `dev` is not novelty approval and does not change `formal_claim_supported: false`.
