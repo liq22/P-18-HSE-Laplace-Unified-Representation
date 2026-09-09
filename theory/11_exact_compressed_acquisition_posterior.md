@@ -86,7 +86,7 @@ $$\omega_{dk}(b,s)=
 
 $$p(b\mid d,k)=p(x=A_d^{-T}b\mid d,k)/|\det A_d|.$$
 
-The determinant changes the **design** weights and cannot generally be omitted. Evaluating the hidden raw x under alternative designs is not the decoder's score likelihood. The test suite checks this formula through observation-space covariance independently of the score-space implementation.
+The determinant changes the **design** weights and cannot generally be omitted. Evaluating the hidden raw x under alternative designs is not the decoder's score likelihood. The test suite checks this formula through observation-space covariance independently of the score-space implementation. The four-sign sweep family below has equal determinants; that check alone cannot detect an omitted Jacobian. A separate two-design test fixes the diagonal at 1.5 and varies the first within-mode off-diagonal entry from 0.1 to 1.3. The resulting determinants differ; omitting the determinant then changes the posterior design weights. This test is a boundary witness, not an additional sweep or a learned-model result.
 
 ## 5. Corollary — refinement reduces compression loss, not every sample error
 
@@ -128,7 +128,15 @@ $$\mathbb E\log(p_F/q)=\mathcal C_r+\mathbb E\log(p_r/q).$$
 
 The second term is model mismatch; it must not be attributed to token information loss. The experiment evaluates all three terms using the same true beta and observations, making the arithmetic decomposition exact per event while non-negativity remains a population property.
 
-## 8. Numerical protocol and contribution boundary
+## 8. Implementation assumptions and falsifying controls
+
+The current implementation uses a **uniform** design prior. The general formula above allows arbitrary positive `pi_d`; nonuniform design priors are not silently accepted by this implementation. A compatible set must contain distinct integer indices. Duplicating an index reweights its probability; converting a fractional index to an integer changes the selected design. Both are rejected.
+
+Prior weights, means and covariances must describe the same number of components, with normalized positive weights and symmetric positive-definite covariances. Truncating unequal arrays with `zip` would change the declared prior and invalidate the calculated conditional. No renormalization or covariance repair is performed.
+
+The 8/10/14 figures count entries in general matrix-summary layouts. In the particular finite sign family, many entries are fixed or repeated. These counts are not measured bitrates, information entropy, or proof of an equal-budget neural comparison.
+
+## 9. Numerical protocol and contribution boundary
 
 The script preassigns train/validation/test event identities; no fitting or tuning uses any split. Evaluation uses 2,048 events per simulator seed (0,1,2), with four independently noisy acquisition views per event. Metrics are averaged within event before bootstrap resampling. The three seeds are simulation replicates, not training seeds. The two priors and three c values reuse corresponding event/random-noise draws to enable paired comparisons.
 
