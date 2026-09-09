@@ -81,7 +81,7 @@ class ConditionalMixture:
         """PIT for central marginal coverage; not a joint-coverage statistic."""
         z = (values[:, None, :] - self.means) / np.sqrt(np.diagonal(self.covariances, axis1=1, axis2=2))[None]
         cdf = .5 * (1 + np.fromiter((erf(x/sqrt(2)) for x in z.ravel()), float, z.size).reshape(z.shape))
-        return np.einsum('nl,nlm->nm', np.exp(log_weights) if False else np.exp(self.log_weights), cdf)
+        return np.einsum('nl,nlm->nm', np.exp(self.log_weights), cdf)
 
     def denoising_mean(self, noisy: np.ndarray, alpha: float, sigma: float) -> np.ndarray:
         """E[beta | noisy,b,retained] with the same independent diffusion noise."""
