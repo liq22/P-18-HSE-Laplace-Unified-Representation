@@ -81,7 +81,7 @@ class ConditionalMixture:
         """PIT for central marginal coverage; not a joint-coverage statistic."""
         z = (values[:, None, :] - self.means) / np.sqrt(np.diagonal(self.covariances, axis1=1, axis2=2))[None]
         cdf = .5 * (1 + np.fromiter((erf(x/sqrt(2)) for x in z.ravel()), float, z.size).reshape(z.shape))
-        return np.einsum('nl,nlm->nm', np.exp(self.log_weights), cdf)
+        return np.einsum('nl,nlm->nm', np.exp(log_weights) if False else np.exp(self.log_weights), cdf)
 
     def denoising_mean(self, noisy: np.ndarray, alpha: float, sigma: float) -> np.ndarray:
         """E[beta | noisy,b,retained] with the same independent diffusion noise."""
@@ -106,16 +106,33 @@ def conditional_posterior(b: np.ndarray, family: np.ndarray, design_indices: np.
     weights use p(b | design), not p(x | design) evaluated at the hidden x.
     """
     b = np.asarray(b, dtype=float)
-    indices = np.asarray(design_indices, dtype=int)
+    family = np.asarray(family, dtype=float)
+    indices = np.asarray(design_indices)
     if b.ndim != 2 or b.shape[1] != 4 or not np.isfinite(b).all():
         raise ValueError('b must be finite [N,4]')
-    if indices.size == 0 or np.any(indices < 0) or np.any(indices >= len(family)):
-        raise ValueError('design_indices must be a nonempty subset of the family')
-    weights, prior_means, prior_covs = prior
+    if family.ndim != 3 or family.shape[1:] != (4, 4) or not np.isfinite(family).all():
+        raise ValueError('family must be finite [D,4,4] information matrices')
+    if (indices.ndim != 1 or indices.size == 0
+            or not np.issubdtype(indices.dtype, np.integer)
+            or np.any(indices < 0) or np.any(indices >= len(family))
+            or np.unique(indices).size != indices.size):
+        raise ValueError('design_indices must be a nonempty set of distinct integer indices')
+    weights, prior_means, prior_covs = (np.asarray(value, dtype=float) for value in prior)
+    if (weights.ndim != 1 or weights.size == 0
+            or prior_means.shape != (weights.size, 4)
+            or prior_covs.shape != (weights.size, 4, 4)):
+        raise ValueError('prior weights, means and covariances must have matching component counts')
+    if (not all(np.isfinite(value).all() for value in (weights, prior_means, prior_covs))
+            or np.any(weights <= 0) or not np.isclose(weights.sum(), 1., rtol=0, atol=1e-12)):
+        raise ValueError('prior must be finite with positive weights summing to one')
+    # Duplicated designs or truncated priors silently change the declared joint law.
+    for matrices in (family, prior_covs):
+        if not np.allclose(matrices, matrices.swapaxes(-1, -2), rtol=0, atol=1e-12):
+            raise ValueError('information and prior covariance matrices must be symmetric')
+        np.linalg.cholesky(matrices)
     component_means, component_covs, log_masses = [], [], []
     for i in indices:
         J = family[i]
-        np.linalg.cholesky(J)
         for weight, mu, covariance in zip(weights, prior_means, prior_covs):
             precision = np.linalg.solve(covariance, np.eye(4))
             post_cov = np.linalg.solve(precision + J, np.eye(4))
