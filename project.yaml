@@ -1,45 +1,49 @@
 schema_version: 5
 project_name: HSE-LapDiff
-stage: linear_gaussian_theory_oracle
+stage: finite_design_paired_compression_oracle
 language: English
 
 scope: >-
-  Multiple acquisition operators observe the same window-local dynamical event
-  through different sampling rates, timestamps, masks, channels, noise levels,
-  and sensor responses.
+  The same window-local event under declared acquisition operators; distinguish
+  known-pole coefficient oracles from frozen-reference-encoder latent targets.
 
 active_method:
-  conditioner: fixed_physical_hse_tokens
+  conditioner: fixed_budget_hse_with_declared_actual_side_information
   generative_model: latent_laplace_diffusion
-  target: canonical_laplace_latent_posterior
+  target: frozen_reference_latent_in_learned_experiments
   flow_matching: future_work_only
 
 central_claim_under_test: >-
-  HSE can encode acquisition score, information, physical time, frequency
-  support, and reliability into a fixed token interface that conditions
-  Latent Laplace Diffusion to produce calibrated posteriors in one canonical
-  modal coordinate system without imposing complete deterministic invariance.
+  A minimal acquisition-coupling condition may reduce fixed-budget HSE
+  information loss and improve the same LLapDiff beyond equal-side-information
+  baselines. This is a candidate requiring paired and learned evidence.
 
 theory_status:
-  fixed_dimensional_sufficiency: proved_in_linear_gaussian_case
-  closed_form_canonical_posterior: proved_in_linear_gaussian_case
-  acquisition_information_monotonicity: proved_under_loewner_order
-  paired_conditional_identifiability: proved_up_to_null_sets
-  complete_invariance_risk_lower_bound: proved_for_paired_deterministic_invariance_and_log_loss
-  posterior_sufficiency: proved_under_latent_markov_condition
-  laplace_stability_and_gap_shift: supporting_results
+  fixed_dimensional_sufficiency: full_b_J_or_reconstructible_actual_condition_only
+  closed_form_canonical_posterior: retained_linear_gaussian_result
+  acquisition_information_monotonicity: gaussian_loewner_order_only
+  general_uncertainty: posterior_averaging_under_degradation
+  paired_conditional_identifiability: retained_with_declared_observation_map
+  complete_invariance_risk_lower_bound: exact_paired_invariance_and_log_loss
+  posterior_sufficiency: retained_markov_condition
+  laplace_stability_and_gap_shift: inherited_supporting_results
+  conditioning_KL_decomposition: standard_identity_with_finite_witness
+  conditioning_denoising_projection: standard_projection_with_finite_witness
+  exact_compressed_acquisition_posterior: finite_design_bayes_derivation_with_witness
 
 current_evidence:
-  analytic_oracle: completed_in_ci
-  semantic_tests: completed_in_ci
-  theory_notebook_witnesses: completed_in_ci
+  analytic_oracle: existing_result_retained
+  actual_token_boundary_tests: locally_passed
+  task_b_theory_notebook: locally_passed
+  task_b_behavior_tests: eight_locally_passed
   learned_model: not_started
-  known_pole_paired_experiment: not_started
+  coefficient_space_compression: completed_6144_events_per_prior_cell
+  sampled_waveform_compression: not_started
   real_phm: not_started
 
 formal_claim_supported: false
-next_decisive_experiment: known_pole_paired_acquisition_posterior_calibration
+next_decisive_experiment: sampled_window_actual_condition_and_budget_check
 stop_condition: >-
-  Simplify or stop the generative claim if a heteroscedastic Gaussian or finite
-  mixture conditioned on the same HSE tokens matches LLapDiff on paired proper
-  scores, calibration, and task-sensitive posterior decisions.
+  Do not retain a coupling feature when actual side inputs already remove its
+  information gap. Do not claim Diffusion superiority when Gaussian or finite
+  mixture models are equivalent under the same condition and declared budget.
