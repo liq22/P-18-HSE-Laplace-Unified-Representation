@@ -45,6 +45,27 @@ def run_experiment(events_per_seed: int, seeds: list[int], repetitions: int) -> 
     return rows
 
 
+def load_plot_rows(path: Path) -> list[dict]:
+    """Read plot columns from a retained or freshly generated result CSV."""
+    numeric = ('cross_coupling', 'total_gap_nats', 'total_gap_nats_lo',
+               'total_gap_nats_hi', 'coverage_50', 'coverage_80', 'coverage_90')
+    with path.open(newline='', encoding='utf-8') as source:
+        reader = csv.DictReader(source)
+        required = {'prior', 'side_information', 'arm', *numeric}
+        missing = required - set(reader.fieldnames or [])
+        if missing:
+            raise ValueError(f'plot CSV is missing columns: {sorted(missing)}')
+        rows = list(reader)
+    if not rows:
+        raise ValueError('plot CSV has no result rows')
+    for row in rows:
+        for field in numeric:
+            row[field] = float(row[field])
+        if not np.isfinite([row[field] for field in numeric]).all():
+            raise ValueError('plot CSV contains nonfinite measurements')
+    return rows
+
+
 def plot_results(rows: list[dict], output: Path) -> None:
     import matplotlib
     matplotlib.use('Agg')
@@ -56,8 +77,10 @@ def plot_results(rows: list[dict], output: Path) -> None:
             data = [r for r in rows if r['prior'] == prior and r['side_information'] == 'coarse' and r['arm'] == arm]
             x, y = [r['cross_coupling'] for r in data], [r['total_gap_nats'] for r in data]
             lo, hi = [r['total_gap_nats_lo'] for r in data], [r['total_gap_nats_hi'] for r in data]
-            ax.errorbar(x, y, yerr=[np.subtract(y, lo), np.subtract(hi, y)],
-                        marker=marker, linestyle=line, capsize=3, label=f'{prior}: {arm}')
+            plotted, = ax.plot(x, y, marker=marker, linestyle=line, label=f'{prior}: {arm}')
+            # Percentile intervals need not contain the sample estimate. Draw the
+            # actual endpoints rather than clipping a negative error-bar length.
+            ax.vlines(x, lo, hi, colors=plotted.get_color())
     ax.set(xlabel='Cross-mode information coupling', ylabel='Estimated expected conditional KL (nats)',
            title='Exact compressed posterior: event-paired 95% intervals')
     ax.legend(fontsize=9)
@@ -87,8 +110,16 @@ def main() -> None:
     parser.add_argument('--seeds', nargs='+', type=int, default=[0, 1, 2])
     parser.add_argument('--bootstrap', type=int, default=1000)
     parser.add_argument('--output-dir', type=Path, default=Path('outputs/task_b'))
+    parser.add_argument('--plot-only', type=Path, metavar='CSV',
+                        help='redraw the two figures from CSV without simulating events')
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    if args.plot_only is not None:
+        rows = load_plot_rows(args.plot_only)
+        plot_results(rows, args.output_dir)
+        print(json.dumps({'mode': 'plot_only', 'source_csv': str(args.plot_only),
+                          'output_dir': str(args.output_dir), 'rows': len(rows)}, indent=2))
+        return
     rows = run_experiment(args.events_per_seed, args.seeds, args.bootstrap)
     with (args.output_dir/'compression_summary.csv').open('w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
