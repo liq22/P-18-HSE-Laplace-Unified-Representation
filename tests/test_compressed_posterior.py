@@ -1,5 +1,8 @@
 """Protect the posterior being evaluated, not documentation keywords."""
 import unittest
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 import numpy as np
 from experiments.synthetic_known_pole.compression import (
     acquisition_family, prior_parameters, retained_information, matching_designs,
@@ -82,6 +85,65 @@ class CompressedPosteriorTests(unittest.TestCase):
         noisy = np.array([[.1, -.2, .7, .9]])
         predicted = (noisy - 0*p.denoising_mean(noisy, 0, 1))/1
         np.testing.assert_array_equal(predicted, noisy)
+
+    def test_jacobian_is_detected_when_design_determinants_differ(self):
+        family = np.tile(1.5*np.eye(4), (2, 1, 1))
+        family[:, 0, 1] = family[:, 1, 0] = [.1, 1.3]
+        b = np.array([[.4, -.2, .3, 1.]])
+        prior = prior_parameters('gaussian')
+        group = matching_designs(family, retained_information(family[0], 'diag'), 'diag')
+        exact = conditional_posterior(b, family, group, prior)
+        raw_logs, log_determinants = [], []
+        for J in family:
+            A = np.linalg.cholesky(J).T
+            x = np.linalg.solve(A.T, b.T).T
+            raw_logs.append(_lognormal(x, np.zeros(4), A@A.T+np.eye(4))[0])
+            log_determinants.append(np.linalg.slogdet(A)[1])
+        raw_logs, log_determinants = np.array(raw_logs), np.array(log_determinants)
+        corrected = np.exp(raw_logs-log_determinants-np.max(raw_logs-log_determinants))
+        corrected /= corrected.sum()
+        omitted = np.exp(raw_logs-raw_logs.max()); omitted /= omitted.sum()
+        np.testing.assert_allclose(np.exp(exact.log_weights[0]), corrected, atol=1e-12)
+        self.assertGreater(np.max(np.abs(corrected-omitted)), .1)
+
+    def test_design_subset_cannot_reweight_or_truncate_indices(self):
+        family, prior = acquisition_family(.45), prior_parameters('gaussian')
+        for indices in ([0, 0, 1], [0.9, 1.9], [[0, 1]], [True, False], []):
+            with self.subTest(indices=indices), self.assertRaises(ValueError):
+                conditional_posterior(np.zeros((1, 4)), family, np.asarray(indices), prior)
+
+    def test_prior_components_cannot_be_silently_dropped(self):
+        family = acquisition_family(.45)
+        weights, means, covs = prior_parameters('mixture')
+        for prior in ((weights, means[:1], covs), (weights, means, covs[:1]),
+                      (np.array([.2, .2]), means, covs)):
+            with self.assertRaises(ValueError):
+                conditional_posterior(np.zeros((1, 4)), family, np.arange(4), prior)
+
+    def test_nonsymmetric_or_indefinite_prior_is_not_a_covariance(self):
+        family = acquisition_family(.45)
+        weights, means, covs = prior_parameters('gaussian')
+        asymmetric = covs.copy(); asymmetric[0, 0, 1] = .4
+        indefinite = covs.copy(); indefinite[0, 0, 0] = -1.
+        with self.assertRaises(ValueError):
+            conditional_posterior(np.zeros((1, 4)), family, np.arange(4), (weights, means, asymmetric))
+        with self.assertRaises(np.linalg.LinAlgError):
+            conditional_posterior(np.zeros((1, 4)), family, np.arange(4), (weights, means, indefinite))
+
+    def test_plot_only_does_not_call_the_experiment(self):
+        from experiments.synthetic_known_pole import run_compression as runner
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory)/'results.csv'
+            source.write_text('prior,cross_coupling,side_information,arm,total_gap_nats,'
+                              'total_gap_nats_lo,total_gap_nats_hi,coverage_50,coverage_80,coverage_90\n'
+                              'gaussian,0.45,coarse,diag_exact,0.1,0.08,0.12,0.5,0.8,0.9\n')
+            with patch('sys.argv', ['run_compression', '--plot-only', str(source),
+                                   '--output-dir', directory]), \
+                 patch.object(runner, 'run_experiment', side_effect=AssertionError('must not simulate')), \
+                 patch.object(runner, 'plot_results') as plot:
+                runner.main()
+                plot.assert_called_once()
+                self.assertEqual(plot.call_args.args[0][0]['cross_coupling'], .45)
 
 if __name__ == '__main__':
     unittest.main()
