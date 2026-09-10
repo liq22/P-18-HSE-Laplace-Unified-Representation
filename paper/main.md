@@ -1,69 +1,29 @@
-# HSE–LapDiff
+# Acquisition-Calibrated HSE for Latent Laplace Diffusion
 
-## Working title
+## Abstract
 
-**Acquisition-Information Conditioning for Probabilistic Cross-Acquisition Representation**
+Heterogeneous acquisition changes both the values of a time series and the information available about its latent dynamics. A fixed-size embedding does not by itself preserve that information, while forcing identical representations can conceal differences in uncertainty. We study acquisition-calibrated conditioning for HSE–LapDiff: the conditioner must encode what a measurement supports within a declared storage budget, and the generative model must use that condition without receiving hidden acquisition information. In a known-pole Gaussian model, we derive an exact posterior-distortion expression and an upper bound in terms of normalized precision and natural-parameter errors. A prior-predictive criterion evaluates coupling layouts without reading hidden event coefficients. We then compare directly decodable, equal-size information headers on sampled damped waveforms. Across 24 declared acquisition conditions, geometry-adaptive coupling improves on fixed within-mode precision blocks, but a more expensive posterior-risk selector chooses exactly the same layouts as a magnitude rule. Exact posterior-moment headers provide a stronger control: they preserve marginal uncertainty while exposing residual joint dependence loss. These results rule out treating fixed token shape, retained coupling magnitude, or marginal calibration as sufficient evidence of unified representation. They define a testable conditioner intervention for a fixed LLapDiff model; learned-model and real-PHM validation remain to be established.
 
-## Problem and exact gap
+## 1. Introduction
 
-The same local event can produce different information under different sampling rates, timestamps, masks and sensor responses. A fixed embedding interface does not establish that a conditional generator receives the same physical evidence or should return the same uncertainty.
+Industrial monitoring systems record similar dynamical events through different sampling rates, sensor responses and missing-data patterns. These changes affect not only sequence length but also which aspects of an event can be inferred. HSE addresses heterogeneous signal interfaces through temporal-aware patching and fusion, providing a useful starting point for a shared model [li2025hse]. The next question is not whether heterogeneous inputs can have the same token shape, but whether that token preserves the evidence needed for a common latent prediction task.
 
-HSE supplies heterogeneous-signal tokenization. LLapDiff supplies stable modal prediction in a latent-trajectory diffusion model. Neither component is claimed here as new. The remaining question is whether an actual finite-budget HSE condition retains the cross-modal acquisition information required by that fixed generator.
+Irregular-time models address important parts of this problem. ContiFormer models continuous-time relations, while t-PatchGNN aligns transformable temporal patches and models asynchronous inter-series dependencies [chen2023contiformer, zhang2024tpatchgnn]. LLapDiff generates latent trajectories with stable Laplace-modal predictions and gap-aware history conditioning [you2026llapdiff]. Its construction avoids sequential integration over physical time, not iterative reverse diffusion. These methods motivate a continuous latent target, but they do not by themselves establish sufficiency of an arbitrary replacement HSE conditioner.
 
-Statistical compression and approximate sufficient-representation theory already connect compressed conditions to conditional generation; see Alsing and Wandelt and Oko et al. in `related_work.md`. Our candidate difference must be a concrete, budgeted acquisition-information mechanism and its measurable effect, not a new name for those identities.
+The distinction matters when observations share only part of their information. A representation that discards task-relevant private information can have lower cross-acquisition discrepancy and worse decision quality. Conversely, a less informative observation may have a correctly wider posterior. Equal posterior means or narrow prediction intervals are therefore not valid definitions of unified representation. We use one canonical target coordinate system while allowing different observations to induce different conditional distributions.
 
-## Three objects, one controlled comparison
+Statistical compression provides a sharper starting point than heuristic alignment. In a known linear-Gaussian acquisition, the score and information matrix `(b,J)` preserve the likelihood's dependence on fixed-pole coefficients. Fisher-preserving score compression and Bayesian low-rank posterior approximation are established results [alsing2018compression, spantini2015lowrank]. Approximate sufficient representations have also been connected to conditional diffusion error [oko2025sufficiency]. We do not claim these principles as new. The unresolved design question here is which physically induced couplings should occupy a finite HSE condition, and how their omission affects the actual downstream posterior.
 
-The analytical target is a known-pole coefficient vector `beta` with `s(t)=Phi_Lambda(t) beta`. Under known linear-Gaussian acquisition,
+Two distinctions prevent misleading answers. First, the complete condition includes side inputs actually consumed by the decoder: if these reconstruct the full acquisition matrix, coupling absent from the token array may not be missing from the model. Second, the true conditional after compression is not generally obtained by substituting a diagonal or block matrix into an uncompressed inference formula. The existing finite-design experiment separates the resulting information loss from this additional approximation error. The present study extends that analysis to sampled-waveform coupling and a directly decoded fixed-storage header.
 
-\[
-x=A\beta+\epsilon,\quad b=A^TR^{-1}x,\quad J=A^TR^{-1}A.
-\]
+Our approach makes posterior distortion, rather than raw off-diagonal magnitude, the reference quantity. A normalized-precision bound explains when an approximation can be sensitive to discarded interactions. A design-only Gaussian criterion provides an analytical benchmark for a small family of equal-size coupling layouts. We additionally retain a moment-matching control that is optimal among Gaussian distributions with a given block partition. This control is essential: retaining more likelihood information does not guarantee a better approximate posterior, and exact encoder-side inference must not be confused with learned HSE performance.
 
-The learned target is instead `Z0=E_ref(X_ref)` from a source-trained frozen reference encoder. Its coordinates are not automatically the physical coefficients. LLapDiff's predicted modal parameters are a third object, not an assumed ground-truth physical state.
+The current contributions are a concrete constrained conditioning formulation, a fully stated Gaussian error analysis, and sampled-waveform evidence that narrows the viable method. Generic factorization, KL identities and Gaussian projections remain supporting mathematics. The risk selector has no demonstrated advantage over the simpler magnitude selector in the evaluated grid, and the moment encoder is an analytic control rather than a learned method. The next comparison fixes the LLapDiff target encoder, modal predictor, parameterization and sampler, and changes only the conditioner. Its success must be demonstrated before claiming improved probabilistic unified representation for PHM.
 
-The actual condition is
+## 2. Method and evidence
 
-\[
-H=T_\psi(O,a),\qquad C=(H,a).
-\]
+The complete method definition is in [method.md](method.md), with proofs in [Theory 12](../theory/12_posterior_precision_distortion.md) and [Theory 13](../theory/13_acquisition_only_budget_choice.md). Existing conditioning results remain in Theories 00–11. The experimental design, ablations and task-compatible baseline matrix are in [experiments.md](experiments.md). Current sampled-waveform findings are in [results_sampled.md](results_sampled.md); prior coefficient-space results remain in [results.md](results.md).
 
-`O` includes all current-acquisition information visible to the conditioner encoder; `a` includes only the side input actually consumed by the generator. Teacher and student see the same underlying acquisition. A reference target is supervision, not extra input granted only to the teacher.
+## Contribution boundary
 
-## Analysis that guides the candidate method
-
-Theory 1 preserves the complete `(b,J)` sufficiency result. It also gives a collision through the existing diagonal tokenizer, with a positive control showing that full acquisition side information can reconstruct `J`. Therefore a missing matrix entry inside `tokens` is not by itself proof of complete-condition information loss.
-
-Theory 9 separates
-
-\[
-\mathbb E\operatorname{KL}(p(Z_0\mid O,a)\|q_\phi(Z_0\mid H,a))
-=I(Z_0;O\mid H,a)
-+\mathbb E\operatorname{KL}(p(Z_0\mid H,a)\|q_\phi(Z_0\mid H,a)).
-\]
-
-Theory 10 separates full-information Bayes error, the conditioning projection gap, and denoiser approximation error. The same result is converted explicitly between epsilon, x0 and v under a fixed schedule. These are established analytical tools applied to our interface, not standalone novelty claims.
-
-## Coefficient-space falsification and candidate method
-
-Theory 11 computes the true compressed conditional by mixing compatible acquisition designs with their posterior probabilities. In Task B, a Gaussian prior can therefore yield a non-Gaussian compressed posterior. Replacing J by its diagonal is a different, approximate probability model.
-
-The 6,144-event coefficient-space experiment supports a limited conclusion: within-mode blocks reduce information loss relative to diagonal summaries when the decoder lacks the distinguishing operator information. They are exactly sufficient in the no-cross-coupling control, but not when cross-mode coupling is hidden. Full operator side input removes the information gap in all arms. Scalar budgets are 8/10/14, so this is not a same-budget method win.
-
-Compare the original HSE against the smallest coupling feature supported by an actual sampled-window follow-up, initially a declared within-mode cosine/sine information block. Preserve the original patch/token budget and the LLapDiff target VAE, denoiser, training schedule and sampler. Report the real scalar storage and computation: a full `(b,J)` oracle is not a same-budget deployed baseline.
-
-Do not assume that `2x2` blocks suffice when cross-mode coupling is strong. If actual side information already recovers all of `J`, study genuine patch/compression or finite-capacity loss rather than hiding metadata to manufacture an advantage.
-
-## Contribution admission
-
-No new learned-method contribution is admitted yet. Candidates are:
-
-1. a concrete acquisition-coupling condition that improves the same LLapDiff at declared equal information and budget;
-2. analysis of that specific condition's posterior and denoising loss, using rather than reclaiming generic KL/projection theory;
-3. paired evidence that separates compression, fitting, correlated noise and reference-target uncertainty, including negative results.
-
-The finite witnesses and coefficient-space Monte Carlo experiment in `results.md` support only their stated constructions. They do not show learned sufficiency, calibration, superiority over mixtures, or PHM generalization.
-
-## Future work
-
-Flow Matching remains outside the active method. Consider sampler acceleration only after learned posterior validity is established and sampling latency is a measured bottleneck.
+The learned acquisition-calibrated HSE is a candidate. It is not declared a completed improvement over LLapDiff, a new general theorem of Bayesian compression, or a calibrated real-PHM model. A result must survive its same-information baseline, budget accounting and independent-event evaluation before entering a final submission claim.

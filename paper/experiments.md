@@ -1,60 +1,98 @@
-# Three sequential research tasks
+# Experiments, ablations and comparison contract
 
-## A — Close the actual-condition theory
+## 1. Experiment map and runnable scope
 
-Scope: definitions, full-statistic versus actual-token boundary, conditional KL decomposition and denoising projection. Retain the original Gaussian posterior/information-order and dense-`J` sufficiency witnesses. Add an actual-token collision and a full-operator side-input positive control. Gaussian plug-in error must not be relabeled as the true compressed-posterior error.
+| ID | Scientific question | Entry point | Implementation status |
+|---|---|---|---|
+| E0 | Do formal identities and counterexamples match executable calculations? | `bash paper/run.sh theory` | Implemented; each numbered result has Markdown + Notebook |
+| E1 | True compressed conditional or plug-in mismatch? | `bash paper/run.sh oracle full` | Existing finite-design Task B, preserved |
+| E2 | Does sampled-window coupling matter at equal header storage? | `bash paper/run.sh sampled full` | Implemented Gaussian sampled-waveform oracle |
+| E3 | Which allocation, parameterization and side-input assumptions cause the effect? | `bash paper/run.sh ablation full` | Same E2 factorial run; not an extra independent experiment |
+| E4 | Reproduce official LLapDiff and compatible published baselines | `paper/run_official_baselines.sh` | Verified official CLI launcher; requires separately installed upstream code/data; not executed here |
+| E5 | Does the proposed conditioner improve the same learned LLapDiff? | B0/B1/M protocol below | Planned; no fake command substituting an oracle for training |
+| E6 | Does the effect survive real recording splits and acquisition changes? | Local PHM export contract below | Planned; no real data trained in this update |
 
-The amended/new Notebooks are 01, 03, 09 and 10. Their finite outputs go in `results.md`. No learned model, new token architecture, sampler, or large data experiment is part of this task.
+`all` runs E0–E3 only. The official public-dataset baseline is not a PHM result or the unimplemented learned HSE intervention.
 
-## B — Paired known-pole compression experiment
+## 2. Completed sampled protocol
 
-**Executed slice:** finite-design linear coefficient measurements. Theory 11 and `experiments/synthetic_known_pole/compression.py` implement the true conditional, with 6,144 held-out events per prior/coupling cell. The retained table is `paper/assets/compression_summary.csv`. Physical-filter and actual HSE compression remain untested.
+One event has four coefficients drawn from known N(0,I). Two modes have damping 12 and 18 inverse seconds and frequencies 100 Hz and 100+delta Hz. Use rates 1024/2048 Hz, windows 0.08/0.2 s, delta 5/30 Hz, and regular/jitter/block-missing designs: 24 cells.
 
-Freeze two damped modes and infer four cosine/sine coefficients. Use two cells: a Gaussian prior and a declared finite Gaussian-mixture prior with an exactly computable oracle. Split latent events before constructing acquisitions. Start with declared linear `A,R`; a later physical-filter cell must measure finite-window leakage rather than assume a perfect spectral null.
+Select K=4 non-overlapping patches of P=16 raw points, deterministically over the window. Missing entries are removed, not refilled. All arms receive the same observations. Direct evaluation of damped waveforms is not a hardware anti-alias resampling experiment. A truncated damped sinusoid is not strictly bandlimited even when its nominal oscillation frequency is below Nyquist.
 
-For the same events, observations and actual side inputs compare:
+Each full cell uses 2,048 independent events per seed, seeds 0/1/2. Each seed reserves 384 prior draws before evaluation. No model is fit. Event coefficients are reused across designs; the cells are not 24 independent datasets. Noise is independent between separately generated acquisitions and shared across methods within one acquisition.
 
-```text
-full (b,J) oracle
-b + diag(J)
-b + declared within-mode 2x2 blocks
-```
+Arms: padded diagonal precision, fixed within-mode precision, magnitude-selected precision, design-risk-selected precision, within-mode posterior moments, selected posterior moments, and the larger full posterior. All sparse headers store 11 scalars including pattern ID; full stores 15. Moment heads perform exact inference at the encoder. Storage is matched; computation, information content and learned capacity are not all equal.
 
-Run coarse and full `(A,R)` side-information regimes separately, with equal access within each regime. If full side information eliminates the gap, retain that result and do not hide the descriptor. Report the actual token/scalar budget and discarded cross-block information. A small block is a hypothesis, not an already sufficient condition.
+Repeat every arm with full actual A,R supplied to the decoder. This closes all header-induced inference gaps and is a required null control.
 
-The executed slice uses the joint-log-score gap `log p(beta|b,D) - log p(beta|b,summary)`. Averaging over true event draws estimates expected conditional KL; posterior densities are exact, but the expectation is Monte Carlo. Each event's four views are averaged before a 1,000-replicate paired bootstrap. There are two priors and three fixed cross couplings (0, 0.45, 0.8), with simulator seeds 0,1,2. Seed values do not represent neural training.
+## 3. Primary estimates and uncertainty
 
-The exact mixture and the diagonal/block plug-in models are reported separately. Primary endpoint: expected conditional KL; denoising conditional-mean distance and central marginal coverage are secondary. Full statistics, diagonal statistics and block statistics contain 14, 8 and 10 unique scalars: an upper-information comparison, not a matched-budget result. A diagonal/block plug-in Gaussian is an approximate model and must be labeled separately. Auxiliary endpoints: modal mean error, directional variance, conditional coverage and computational cost.
+E1 estimates true compressed-conditional expected log-ratio separately from plug-in mismatch. E2 reports exact Gaussian KL for each event between the full posterior and its plug-in or moment approximation. Do not call the latter compression mutual information.
 
-The CSV and two reproducible figures are now produced by `python -m experiments.synthetic_known_pole.run_compression`. Results do not support universal block sufficiency or monotonic loss versus off-diagonal magnitude. A finite mixture is an exact model for this synthetic family; it cannot establish a Diffusion advantage.
+For E2 report paired event-level means and 95% percentile bootstrap intervals (1,000 replicates) per design. Directional comparisons use the same event difference before bootstrapping. The mean over 24 designs is descriptive and does not multiply the effective sample size by 24. Risk-versus-magnitude equality is identity of selected layouts in this grid, not equivalence inferred from a nonsignificant p-value.
 
-**Before C:** replace algebraic coefficient measurements with declared sampled-window acquisition, audit whether actual side metadata already reconstructs the coupling, and retain `(P,K,D)` plus equal scalar/parameter/compute budgets. Continue only if a specific coupling feature reduces an actual condition or finite-capacity gap. No universal information manager or new model factory is needed.
+Secondary diagnostics: mean MSE, central marginal 90% coverage, joint Gaussian KL, normalized precision error, smallest normalized precision eigenvalue, bound looseness, actual observation count and header size. Moment matching may preserve all marginal coverages while losing joint dependence. A prior-only baseline is required in learned calibration studies.
 
-## C — Minimal learned HSE to LLapDiff integration
+## 4. Main learned comparison (E5)
 
-Freeze the weights of one source-trained target VAE. Keep the modal-predictor architecture, diffusion parameterization, schedule, time weighting, reverse sampler and reference query grid identical across arms. Train the denoiser and conditioner in each arm with matched initialization policy, optimizer and budget; do not silently freeze one arm only. Change only history conditioning:
+Freeze one source-trained target VAE and its weights. Hold fixed the LLapDiff modal predictor architecture, v/x0/epsilon parameterization, schedule, time weights, sampling steps, optimizer, batch composition and evaluation grid. Train denoiser and conditioner in each arm rather than freezing one selectively.
 
-| Arm | Actual condition |
-|---|---|
-| B0 | original LLapDiff conditioner + common a |
-| B1 | original HSE conditioner + common a |
-| M | coupling-aware HSE supported by Task B + common a |
+| Arm | Change allowed | Why required |
+|---|---|---|
+| B0 | Official LLapDiff history summarizer | Immediate model origin |
+| B1 | Original fixed-P,K,D HSE; same side input a | Benefit beyond replacing the conditioner |
+| B2 | HSE + complete declared acquisition metadata | Eliminate an uncounted-information explanation |
+| M | Budgeted acquisition-calibrated HSE | Candidate method |
+| G | Heteroscedastic Gaussian on identical condition | Strong inexpensive probabilistic baseline |
+| GM | Source-selected finite mixture on identical condition | Test diffusion complexity |
 
-Gaussian/mixture alternatives receive the same HSE condition. The full-statistic oracle is labeled an upper-information analytical baseline, not ranked as an equal-budget implementation.
+The full-statistic Gaussian and exact-moment oracles are separate analytical upper-information/upper-compute controls, not equal-budget trained models.
 
-Check that tokens, time, bands, masks and `a` are actually consumed; that HSE receives training gradients; and that evaluation patch selection is declared and deterministic. Epsilon/x0/v and sampler conventions must agree. Do not add a sample-residual penalty without deriving its target effect.
+Use the same 20 source-validation tuning trials per learned arm and equal maximum optimizer updates. Record wall-clock, peak memory, parameters and FLOPs. A claimed +/-5% match must be measured, not assumed. All input observations and metadata are identical within an information regime. Dataset ID may route a task head but cannot enter the embedding.
 
-Use one predeclared proper score (joint Energy Score, or marginal CRPS with a joint-dependence diagnostic). Add acquisition-stratified coverage and width, observation-dependent checks against a prior-only baseline, target mean error, posterior draw count and cost. Approximate diffusion NLL is not automatically comparable to exact Gaussian likelihood.
+Train seeds 0/1/2 and posterior Monte Carlo draws are separate axes. Select hyperparameters by one predeclared joint proper score. Use Energy Score with a dependence diagnostic or a declared exact joint likelihood. Report marginal CRPS, 50/80/90/95% coverage and width, downstream log-loss/macro-F1 and paired retrieval. Do not compare approximate diffusion NLL to exact mixture likelihood without identifying the approximation.
 
-## Uncertainty and noise controls
+## 5. Mandatory ablations
 
-- Gaussian cells check `J_H >= J_L -> Sigma_H <= Sigma_L` under their assumptions.
-- General posterior cells use proper scores and conditional averaging under a justified degradation chain, not a per-event variance-order penalty.
-- Resampled views of the same noisy record must not count as independent likelihood factors.
-- A noisy high-rate reference conditional is not silently described as a clean-state posterior.
+| Ablation | Hypothesis | Failure interpretation |
+|---|---|---|
+| diagonal / within-mode / cross-mode allocation | Location matters beyond count | Equal results remove allocation contribution |
+| magnitude / posterior-risk selector | Additional complexity helps | Current grid: none; retain simpler rule |
+| precision / posterior-moment parameterization | Inversion amplifies omitted interactions | Do not blame all error on token information |
+| full A,R side input | Alleged new information is absent | Zero gain is the correct control |
+| shuffled layout ID or coupling fields | Decoder uses the advertised information | No change suggests an unused branch |
+| remove distillation, lambda=0 | Teacher term explains gain | Compare matched teacher access |
+| STFT/wavelet with same decoder | Laplace/HSE specificity | Narrow to general conditioning if equal |
+| known / source-estimated poles and noise | Specification robustness | Oracle bound does not automatically transfer |
+| physical filter mismatch, clock jitter, missing blocks | Acquisition robustness | Report degradation, not fallback preprocessing |
 
-## Statistics and progression
+Do not implement the full cross-product before the B0/B1/M pilot works. E2 does not establish the learned ablations.
 
-The independent unit is a latent event, later a machine/run/bearing/recording. Keep training seeds and posterior Monte Carlo draws separate. Use paired event-level intervals and predeclared practical/equivalence margins; a nonsignificant difference or a wide interval does not establish equivalence.
+## 6. Published comparison set (not an asserted universal SOTA ranking)
 
-Only after Task C succeeds move to one licensed raw recording source: split recordings first, construct anti-aliased rate views within each split, fit preprocessing on source only, and evaluate an unseen intermediate rate. Such an offline pilot does not establish cross-hardware generalization. Flow Matching stays future work.
+| Category | Representative | Valid task/table |
+|---|---|---|
+| recent direct parent | LLapDiff (2026), official implementation | Probabilistic forecasting / declared target-horizon imputation |
+| conditional diffusion | CSDI; TimeGrad when autoregressive protocol matches | Keep imputation separate from extrapolation |
+| irregular modeling | ContiFormer, t-PatchGNN, Neural CDE, Warpformer if adaptable | Point MAE/MSE; no invented predictive densities |
+| simple forecasting | DLinear, PatchTST | Same input scope, splits and horizons |
+| physical tokenizer | fixed HSE, Conv1D, STFT, wavelet | Same condition budget and decoder |
+| Bayesian approximation | diagonal/block, exact Gaussian/mixture, Spantini-style low-rank with accounted costs | Analytic diagnostics, not learned SOTA rows |
+| irregularity coverage | Time-IMM taxonomy/data where relevant | Supplementary validity, not PHM substitution |
+
+The official LLapDiff README states some adapters use target-only scalar input. Reduce the proposed method to that scope, or label an information-unmatched comparison as supplemental. Large pretrained models need a separate pretraining-data/cost regime.
+
+## 7. Real-data plan and PHMFactory boundary
+
+No PHMFactory submodule exists in the inspected dev tree. Do not add one to make the paper run. An external PHMFactory checkout may prepare data, but the paper consumes exports, not its internal readers/trainers.
+
+Minimal export: per-record `values[N,C]`, `time_s[N]` or `[N,C]`, boolean `valid_mask`, and a table with `recording_id`, `machine_id`, `split`, `sampling_rate_hz`, sensor/channel identity and independently supplied labels. Declare units, sensor response and ontology. Paths are relative to an explicit data root. Missing fields are errors, not guessed defaults.
+
+Choose a licensed raw vibration dataset after auditing recording/bearing identity. Split recordings/machines before windows or rate views. Fit normalization, poles, responses and cutoffs only on source data. Evaluate an unseen intermediate rate; record real anti-alias filters and coupled-noise structure. A filtered copy of one noisy record is not an independent measurement likelihood.
+
+CWRU and PU are candidates, not admitted datasets or current evidence. License, native rates, grouping keys and high-frequency task value must be checked before freezing a final configuration.
+
+## 8. Decisions
+
+Admit a learned contribution only if M improves fixed LLapDiff under declared conditions, surpasses the strongest simple posterior alternative on proper scores or a meaningful cost/accuracy tradeoff, and retains task information. Negative calibration, prior misspecification and equal results must change the claim. Mathematical identities and CI remain supporting evidence, not novelty approval.

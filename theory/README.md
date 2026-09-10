@@ -1,36 +1,28 @@
-# Theory and executable witnesses
+# Theory index
 
-Every numbered Markdown has one same-stem Notebook under `notebooks/`. Markdown carries assumptions and proofs; Notebook carries finite examples or counterexamples. Passing a Notebook is neither a novelty decision nor evidence of a trained model.
+Each numbered Markdown has one same-stem Notebook in `notebooks/`. Markdown states assumptions and proof; Notebook supplies finite constructive or counterexample checks. Successful execution is not general proof verification or novelty approval.
 
-| ID | Result | Current role |
+| ID | Result | Role |
 |---:|---|---|
-| 00 | Distinct physical coefficients, reference latent and actual condition | Definitions |
-| 01 | Full `(b,J)` sufficiency; actual diagonal-token collision and full-side-input control | Analytic baseline and boundary |
-| 02 | Closed-form canonical Gaussian posterior | Strong simple baseline |
-| 03 | Gaussian covariance order; general posterior coarsening | Supporting result and counterexample |
+| 00 | Targets, acquisition assumptions and actual condition | Definitions |
+| 01 | Full-statistic sufficiency and diagonal-token boundary | Analytic baseline |
+| 02 | Closed-form Gaussian posterior | Strong simple baseline |
+| 03 | Gaussian information order and general posterior coarsening | Supporting result |
 | 04 | Paired conditional identifiability | Protocol requirement |
-| 05 | Complete deterministic invariance information loss | Motivation under exact assumptions |
+| 05 | Complete invariance information loss | Motivation under exact assumptions |
 | 06 | Posterior sufficiency | Established decision-theoretic support |
 | 07 | Stable Laplace dynamics | Inherited property |
 | 08 | Sampling-gap perturbation | Supporting bound |
-| 09 | Posterior error = actual-condition compression + fitting | New project derivation of a standard identity |
-| 10 | Optimal denoising projection gap; epsilon/x0/v and score relation | New project derivation of standard projection theory |
-| 11 | Exact conditional after discarding a finite acquisition design; nested-summary loss | Computable Task B oracle, not a generic novelty claim |
+| 09 | Compression versus model fitting | Standard identity applied to actual condition |
+| 10 | Conditional denoising projection | Established projection analysis |
+| 11 | Exact compressed posterior over finite designs | Computable oracle, not arbitrary plug-in |
+| 12 | Normalized precision/natural-parameter error to posterior KL | New project derivation; Gaussian support, not generic novelty |
+| 13 | Design-only budget choice and strong moment-matching control | Restricted oracle and complexity/parameterization boundary |
 
-## Read the current argument
+Read 00 -> 01 -> 09 -> 10 for the current condition argument. Read 11 to distinguish exact compressed inference from plug-ins. Read 12 -> 13 with `paper/results_sampled.md` for the fixed-storage sampled experiment.
 
-`00 -> 01 -> 09 -> 10 -> 11`, then `03` for the uncertainty boundary. Retain the other correct analytical results without promoting them to new contributions.
-
-## Contribution rule
-
-A candidate needs a checked general argument, a passing same-stem witness, a novelty comparison, and a method-specific prediction. A learned-method claim additionally needs same-information, same-budget experimental support. A formula being stated and its toy example running are not sufficient for admission.
-
-The generic KL, projection, factorization and covariance results are analytical support. **No new learned-method contribution is admitted by this change.** The candidate contribution is a specific acquisition-coupling conditioner, supported only by a finite coefficient-space compression experiment; a physical-window and same-budget learned comparison are still required in `paper/experiments.md`.
-
-## Run
-
-```bash
+```
 python theory/run_notebooks.py --timeout 180
 ```
 
-The existing runner checks pairing and executes each Notebook. It does not check mathematical correctness or originality. Outputs may be kept under ignored `theory/outputs/`; do not build another registry or review-document hierarchy.
+A contribution requires a correct general argument, a passing witness, an explicit closest-work difference and a method-specific prediction. A learned-method contribution also needs the same-information, declared-budget experiment. The generic identities and simple finite-set optimum do not become original contributions because they have files. No learned contribution is admitted by the current sampled oracle.

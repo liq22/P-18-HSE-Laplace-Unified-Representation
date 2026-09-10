@@ -1,32 +1,39 @@
-# Related work and the contribution boundary
+# Verified related work and exact gap (10 September 2026)
 
-## Inherited components
+Primary-source reading includes the LLapDiff paper and released README, Oko et al. Proposition 3 and its proof, Bayesian approximation papers, and the official irregular-time model pages. This is a focused novelty review, not a proof that no equivalent work exists.
 
-HSE supplies fixed heterogeneous-signal tokenization; fixed input/output shape is not our contribution. LLapDiff supplies latent-trajectory diffusion with stable Laplace modal prediction, arbitrary-time queries and gap-aware conditioning. Its latent target and learned modal parameters must not be treated as the known physical coefficient vector in the analytical oracle.
-
-CSDI is a conditional diffusion baseline. Irregular-time models such as Warpformer, t-PatchGNN and continuous-time encoders are relevant where input, task and budget contracts match. Flow Matching is not an active component.
-
-## Direct analytical predecessors
-
-**Alsing and Wandelt, Generalized massive optimal data compression (2018), arXiv:1712.00012.** Score compression preserves Fisher information under its stated conditions. This motivates acquisition-information summaries, but local Fisher preservation is not a guarantee that an arbitrary diagonal token preserves a full posterior.
-
-**Oko, Lin, Cai and Mei, A Statistical Theory of Contrastive Pre-training and Multimodal Generative AI (2025), arXiv:2501.04641v2.** Definition 1 uses conditional KL to measure approximate sufficiency. Proposition 3 connects encoder sufficiency to conditional denoising error under a bounded-target assumption. Appendix D.5 uses conditional mean differences, total variation, Pinsker and a data-processing bound. Therefore neither “compressed representation controls conditional diffusion” nor the general KL/projection identities in our Theories 9–10 are claimed as first results.
-
-The citation check here covers those sections, not an audit of every proof in the paper. Our Gaussian coefficient oracle is unbounded and must not borrow the bounded-target constant without an added assumption.
-
-## Exact candidate difference
-
-> Under a fixed HSE budget and explicit decoder side information, retain or approximate the acquisition-induced cross-modal coupling needed by the same LLapDiff, and measure the resulting posterior and denoising loss.
-
-| Object | Already available | Still to establish here |
+| Work | What is already established | What this project must add, or stop claiming |
 |---|---|---|
-| `(b,J)` sufficiency | Gaussian likelihood factorization | Which information the actual token and side inputs preserve |
-| score compression | Fisher-information preservation | Posterior-relevant dense or small-block coupling at fixed budget |
-| approximate sufficiency | conditional KL and denoising theory | Computable error for a concrete physical conditioner |
-| LLapDiff | stable latent-trajectory generation | same-model benefit attributable only to conditioner changes |
+| HSE, Information Fusion 123:103277 (2025) | Temporal-aware patching and fusion for heterogeneous fault-diagnosis signals | Do not reclaim a fixed heterogeneous interface; preserve P,K,D and compare the actual original HSE |
+| LLapDiff, arXiv:2605.19805 (2026) | Latent diffusion, stable Laplace-modal prediction, gap-aware conditioning and arbitrary-time synthesis | Changing the history condition, not adding the same modal generator again; no one-step inference claim |
+| Alsing–Wandelt, arXiv:1712.00012 | Score-based Fisher-preserving compression | Fisher preservation is not general posterior sufficiency of arbitrary tokens |
+| Oko et al., arXiv:2501.04641v2 (2025) | Approximate sufficiency, conditional denoising bounds and a sampling corollary | Generic conditional KL and denoising projection identities are prior analytical machinery |
+| Spantini et al., DOI 10.1137/140977308 (2015) | Optimal low-rank Gaussian posterior approximations, including KL-related objectives | Our constrained directly decoded header is a different restriction, not a new general posterior optimality theory |
+| Spantini et al., DOI 10.1137/16M1082123 (2017) | Goal-oriented posterior approximation | Do not claim that task-aware Bayesian compression is new |
+| ContiFormer, NeurIPS 2023; arXiv:2402.10635 | Continuous-time attention and expressive irregular-series modeling | Strong point-prediction counterpart; it does not itself provide our Gaussian header guarantee |
+| t-PatchGNN, ICML 2024/PMLR 235 | Transformable patches and asynchronous multivariate correlations | Required patch-based external baseline where task and inputs match |
+| CSDI, arXiv:2107.03502 (2021) | Conditional diffusion for probabilistic imputation | Compare imputation against imputation, not against target-only forecast results |
+| Time-IMM, arXiv:2506.10412 (2025) | Cause-driven multimodal irregularity taxonomy and benchmark | Use its irregularity taxonomy as external stress-test context, not PHM evidence or a model row |
 
-If `(H,a)` already reconstructs `J`, absence of off-diagonal entries in `H` is not a novel failure. If Gaussian or finite mixtures perform equivalently under the same condition, retain that negative result. The method claim is unproven until the paired compression and learned experiments are complete.
+## Surviving gap
 
-## Future work
+The reviewed works do not settle the particular deployment question tested here: under the actual side information, what must a finite HSE condition retain about acquisition-induced modal coupling so that the same LLapDiff can represent the correct conditional target, and what is the cost of approximating that condition?
 
-Flow Matching may later accelerate a validated posterior sampler. It is neither an active baseline nor part of the current contribution list.
+The current answer is deliberately narrower than a new universal tokenizer. We provide a computable Gaussian distortion analysis, an explicit equal-storage header, and strong controls separating likelihood approximation from posterior-moment preservation. The 24-cell study does not support an extra complex risk selector. A learned posterior-aware HSE contribution remains contingent on the fixed-backbone comparison.
+
+## Not admissible as novelty
+
+Stable poles, Laplace synthesis, ordinary Gaussian KL, conditional mutual information decompositions, Gaussian block projection, and taking the minimum of a finite set are not new general results. Source labels, side information and codebook/layout indices must not become uncounted information. A proof of mathematical existence is not a learned-model performance guarantee.
+
+## Primary sources
+
+- HSE: https://doi.org/10.1016/j.inffus.2025.103277
+- LLapDiff: https://arxiv.org/abs/2605.19805 ; official code https://github.com/pixelhero98/LLapDiffusion
+- Score compression: https://arxiv.org/abs/1712.00012
+- Approximate sufficient representations: https://arxiv.org/abs/2501.04641v2
+- Bayesian low-rank approximation: https://doi.org/10.1137/140977308
+- Goal-oriented approximation: https://doi.org/10.1137/16M1082123
+- ContiFormer: https://arxiv.org/abs/2402.10635 (conference year 2023; preprint posted 2024)
+- t-PatchGNN: https://proceedings.mlr.press/v235/zhang24bw.html
+- CSDI: https://arxiv.org/abs/2107.03502
+- Time-IMM: https://arxiv.org/abs/2506.10412

@@ -1,86 +1,40 @@
 # HSE–LapDiff
 
-**Acquisition-Information Conditioning for Probabilistic Cross-Acquisition Representation**
+**Acquisition-calibrated conditioning for probabilistic cross-acquisition representation**
 
-Current research integration uses `dev`. `master` is unchanged by the Task A/B development integration. Start from `dev` to use the theory and compression experiment below:
+Use `dev` for current research. `master` remains the earlier baseline.
 
 ```bash
 git clone --branch dev https://github.com/liq22/P-18-HSE-Laplace-Unified-Representation.git
 cd P-18-HSE-Laplace-Unified-Representation
+bash paper/run.sh setup
+bash paper/run.sh all smoke
 ```
 
-The research question is whether fixed-budget HSE conditioning retains the information needed by the **same LLapDiff** to predict a canonical target across sampling rates, timestamps, masks and sensor responses.
+The active question is which acquisition information a finite HSE condition must retain for the same LLapDiff. Flow Matching is future work, not an active component.
 
-```text
-current acquisition O + encoder-visible descriptors
-    -> HSE tokens, masks and physical fields H
-    -> actual decoder condition C = (H, a_consumed)
-    -> LLapDiff conditional latent distribution
-```
+## Read the paper
 
-The analytical oracle uses known-pole physical coefficients. A learned LLapDiff uses a frozen reference-encoder latent target; these are not assumed identical. Fixed token shape is not a sufficiency or calibration guarantee.
+Start at [paper/README.md](paper/README.md): working abstract and Introduction, Chinese paragraph map, Method, nearest-work gaps, experiment matrix, and separate numerical results. Each numbered theoretical argument has one Markdown and one same-stem executable Notebook under `theory/`.
 
-## Status
+## Current evidence
 
-```text
-active method: HSE + Latent Laplace Diffusion
-Flow Matching: future work only
-implemented model: linear-Gaussian analytic oracle
-new analysis: exact compressed condition over a finite acquisition family
-new experiment: paired coefficient-space compression oracle (no trained model)
-learned HSE-LLapDiff / real PHM evidence: not started
-formal_claim_supported: false
-```
+- Full-statistic Gaussian and finite-design compressed-posterior oracles are retained.
+- A new fixed-header sampled-waveform experiment distinguishes precision coupling from posterior-moment preservation.
+- Nine new behavior tests and two new theory witnesses were executed locally; the PR records complete-repository CI separately.
+- Learned HSE–LLapDiff and real PHM have not been run. `formal_claim_supported: false`.
 
-The diagonal token implementation does not store all off-diagonal acquisition information. This can lose information **unless the actual side input already reconstructs it**. The original full-statistic oracle remains correct; it does not validate inference through the diagonal tokens.
+The 24 sampled designs do not justify the expensive risk selector over a magnitude rule. Moment-matching is a stronger analytic control, but it performs full posterior inference at the encoder. Equal stored header size is not equal compute or a learned-method success.
 
-## Install and verify
+## Run only the needed step
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-python -m pip install -e ".[notebooks,experiments]"
-python examples/analytic_hse_llapdiff_oracle.py
-python -m unittest discover -s tests -v
-python theory/run_notebooks.py --timeout 180
+bash paper/run.sh theory
+bash paper/run.sh oracle full
+bash paper/run.sh sampled full
+bash paper/run.sh figures outputs/paper/sampled-full/sampled_summary.csv outputs/paper/figures
 ```
 
-To retain executed copies, add `--output-dir theory/outputs --summary theory/outputs/summary.json` to the last command. Source Notebooks remain output-free. Execution establishes a finite witness, not general proof validity or novelty. CI runs on pull requests and pushes to `dev` and `master`.
+`all` covers implemented analytic/numerical tasks only. The separate official-baseline launcher uses an external LLapDiff installation and documented CLI; it does not substitute synthetic oracles for learned baselines. Outputs stay in ignored `outputs/`. Existing Task A/B reference results are not overwritten.
 
-## Read existing results without rerunning the experiment
-
-```bash
-python -m experiments.synthetic_known_pole.run_compression \
-  --plot-only paper/assets/compression_summary.csv \
-  --output-dir outputs/task_b_reference
-```
-
-This only reads the retained numerical table and regenerates the two SVG/PNG figures. It does not simulate new events, refit a posterior, or overwrite the retained CSV. Figure edits do not require repeating the full experiment.
-
-## Reproduce the paired compression experiment
-
-Run from the repository root:
-
-```bash
-python -m experiments.synthetic_known_pole.run_compression \
-  --events-per-seed 2048 --seeds 0 1 2 --bootstrap 1000 \
-  --output-dir outputs/task_b
-```
-
-This writes `compression_summary.csv`, `compression.svg/png` and `calibration.svg/png`. See `paper/results.md` for event-level intervals and limits. Exploratory outputs stay under ignored `outputs/`; the retained numerical table remains under `paper/assets/`.
-
-The exact compressed conditional differs from diagonal plug-in inference. Blocks remove the gap only when the retained coupling suffices; supplying the full operator to every arm removes all Bayes-information gaps. These controlled measurements are not a sampled-waveform HSE, a matched-storage comparison, or evidence that Diffusion is necessary.
-
-## Read
-
-| Path | Purpose |
-|---|---|
-| `theory/README.md` | One Markdown and one same-stem Notebook per result |
-| `paper/main.md` | Scientific argument and contribution candidates |
-| `paper/results.md` | Numerical checks and their limits |
-| `paper/experiments.md` | Theory, compression experiment, then learned integration |
-| `experiments/synthetic_known_pole/` | One exact-condition oracle and one runnable experiment |
-| `src/hse_laplace/` | Current analytical acquisition and token code |
-| `future_work/flow_matching.md` | Explicitly inactive direction |
-
-Next: verify acquisition coupling and actual side-input consumption in fixed-window HSE before selecting the smallest learned conditioner. Development merge status does not promote a scientific claim.
+No PHMFactory submodule is present in the inspected development tree. Paper code and plots do not import its internals. Optional framework-prepared data must use the explicit exported record contract in `paper/experiments.md`.

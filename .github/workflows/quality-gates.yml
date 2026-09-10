@@ -29,3 +29,10 @@ jobs:
         run: python -m experiments.synthetic_known_pole.run_compression --events-per-seed 64 --seeds 0 --bootstrap 64 --output-dir "$RUNNER_TEMP/task-b"
       - name: Redraw retained results without rerunning the experiment
         run: python -m experiments.synthetic_known_pole.run_compression --plot-only paper/assets/compression_summary.csv --output-dir "$RUNNER_TEMP/task-b-reference"
+      - name: Exercise paper sampled and plotting entry
+        env:
+          OUTPUT_ROOT: ${{ runner.temp }}/paper
+          OPENBLAS_NUM_THREADS: "1"
+        run: bash paper/run.sh sampled smoke
+      - name: Check external launcher syntax only
+        run: bash -n paper/run_official_baselines.sh

@@ -1,49 +1,35 @@
 schema_version: 5
 project_name: HSE-LapDiff
-stage: finite_design_paired_compression_oracle
+stage: sampled_waveform_budget_oracle
 language: English
 
 scope: >-
-  The same window-local event under declared acquisition operators; distinguish
-  known-pole coefficient oracles from frozen-reference-encoder latent targets.
+  Same window-local events under declared acquisition operators. Known-pole
+  coefficient oracles and frozen-reference latent targets remain distinct.
 
 active_method:
-  conditioner: fixed_budget_hse_with_declared_actual_side_information
+  conditioner: acquisition_calibrated_hse_candidate
   generative_model: latent_laplace_diffusion
-  target: frozen_reference_latent_in_learned_experiments
   flow_matching: future_work_only
 
 central_claim_under_test: >-
-  A minimal acquisition-coupling condition may reduce fixed-budget HSE
-  information loss and improve the same LLapDiff beyond equal-side-information
-  baselines. This is a candidate requiring paired and learned evidence.
-
-theory_status:
-  fixed_dimensional_sufficiency: full_b_J_or_reconstructible_actual_condition_only
-  closed_form_canonical_posterior: retained_linear_gaussian_result
-  acquisition_information_monotonicity: gaussian_loewner_order_only
-  general_uncertainty: posterior_averaging_under_degradation
-  paired_conditional_identifiability: retained_with_declared_observation_map
-  complete_invariance_risk_lower_bound: exact_paired_invariance_and_log_loss
-  posterior_sufficiency: retained_markov_condition
-  laplace_stability_and_gap_shift: inherited_supporting_results
-  conditioning_KL_decomposition: standard_identity_with_finite_witness
-  conditioning_denoising_projection: standard_projection_with_finite_witness
-  exact_compressed_acquisition_posterior: finite_design_bayes_derivation_with_witness
+  A budgeted actual condition may preserve posterior-relevant acquisition
+  information for the same LLapDiff. Equal token shape or retained coupling
+  magnitude alone is not a sufficiency or calibration guarantee.
 
 current_evidence:
-  analytic_oracle: existing_result_retained
-  actual_token_boundary_tests: locally_passed
-  task_b_theory_notebook: locally_passed
-  task_b_behavior_tests: eight_locally_passed
-  learned_model: not_started
-  coefficient_space_compression: completed_6144_events_per_prior_cell
-  sampled_waveform_compression: not_started
+  previous_analytic_and_finite_design_oracles: retained
+  sampled_gaussian_budget_experiment: locally_completed_24_designs
+  posterior_precision_bound: derivation_and_finite_witness
+  acquisition_only_layout_choice: restricted_oracle_no_gain_over_magnitude_in_grid
+  moment_header: strong_exact_encoder_control_not_learned
+  learned_hse_llapdiff: not_started
   real_phm: not_started
 
 formal_claim_supported: false
-next_decisive_experiment: sampled_window_actual_condition_and_budget_check
+paper_entry: paper/README.md
+experiment_entry: paper/run.sh
+next_decisive_experiment: fixed_backbone_same_information_learned_conditioner_pilot
 stop_condition: >-
-  Do not retain a coupling feature when actual side inputs already remove its
-  information gap. Do not claim Diffusion superiority when Gaussian or finite
-  mixture models are equivalent under the same condition and declared budget.
+  Simplify a candidate that cannot exceed the strongest simple posterior control
+  at declared storage, computation, teacher access and actual side information.
