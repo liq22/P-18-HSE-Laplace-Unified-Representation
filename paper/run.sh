@@ -15,10 +15,17 @@ case "$MODE" in
     "$PYTHON" -m experiments.synthetic_known_pole.run_compression --events-per-seed "$N" --seeds "${SEEDS[@]}" --bootstrap "$B" --output-dir "$OUT/oracle-$PROFILE" ;;
   sampled|ablation) "$PYTHON" -m experiments.sampled_conditioning.run --profile "$PROFILE" --output-dir "$OUT/sampled-$PROFILE"
            "$PYTHON" paper/plot_results.py --csv "$OUT/sampled-$PROFILE/sampled_summary.csv" --output-dir "$OUT/sampled-$PROFILE/figures" ;;
+  parameterization)
+    case "$PROFILE" in smoke) N=128;; full) N=2048;; *) echo 'profile must be smoke or full' >&2; exit 2;; esac
+    "$PYTHON" -m experiments.sampled_conditioning.parameterization_controls --events "$N" --output-dir "$OUT/parameterization-$PROFILE"
+    "$PYTHON" -m experiments.sampled_conditioning.parameterization_controls --plot-only "$OUT/parameterization-$PROFILE/parameterization.csv" --output-dir "$OUT/parameterization-$PROFILE/figures" ;;
   figures) "$PYTHON" paper/plot_results.py --csv "${2:?supply CSV}" --output-dir "${3:?supply figure directory}" ;;
+  parameterization-figures)
+    "$PYTHON" -m experiments.sampled_conditioning.parameterization_controls --plot-only "${2:?supply CSV}" --output-dir "${3:?supply figure directory}" ;;
   all) bash paper/run.sh theory
        bash paper/run.sh oracle "$PROFILE"
-       bash paper/run.sh sampled "$PROFILE" ;;
-  *) echo 'Usage: bash paper/run.sh setup|theory|oracle|sampled|ablation|all [smoke|full]' >&2
-     echo '       bash paper/run.sh figures sampled_summary.csv output-directory' >&2; exit 2 ;;
+       bash paper/run.sh sampled "$PROFILE"
+       bash paper/run.sh parameterization "$PROFILE" ;;
+  *) echo 'Usage: bash paper/run.sh setup|theory|oracle|sampled|ablation|parameterization|all [smoke|full]' >&2
+     echo '       bash paper/run.sh figures|parameterization-figures CSV output-directory' >&2; exit 2 ;;
 esac

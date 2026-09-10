@@ -34,5 +34,12 @@ jobs:
           OUTPUT_ROOT: ${{ runner.temp }}/paper
           OPENBLAS_NUM_THREADS: "1"
         run: bash paper/run.sh sampled smoke
+      - name: Exercise posterior parameterization and CSV-only plots
+        env:
+          OUTPUT_ROOT: ${{ runner.temp }}/paper
+          OPENBLAS_NUM_THREADS: "1"
+        run: |
+          bash paper/run.sh parameterization smoke
+          bash paper/run.sh parameterization-figures paper/assets/parameterization_controls.csv "$RUNNER_TEMP/parameterization-reference"
       - name: Check external launcher syntax only
         run: bash -n paper/run_official_baselines.sh

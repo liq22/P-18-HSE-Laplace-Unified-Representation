@@ -1,107 +1,135 @@
-# Theory 13 — Choosing a coupling layout without reading hidden targets
+# Theory 13 — Budgeted layouts, posterior moments and their deployment limits
 
-## Status and relation to prior work
+## Scope
 
-This is an exact prior-predictive calculation in a declared Gaussian oracle. Selecting the minimum of a finite candidate set is elementary; it is not a novel global optimization theorem. Bayesian low-rank and goal-oriented approximation already optimize posterior losses (Spantini et al., 2015, DOI 10.1137/140977308; 2017, DOI 10.1137/16M1082123). Our distinct constraint is a directly decodable, fixed-layout acquisition header, not a free low-rank update.
+Retain the correct acquisition-only expected-risk result, but compare different posterior parameterizations before selecting layouts. Finite-set minimization and Gaussian product projection are established mathematics. Spantini et al. (2015, DOI 10.1137/140977308) and goal-oriented Spantini et al. (2017, DOI 10.1137/16M1082123) are direct predecessors, not peripheral citations.
 
 ## 1. Assumptions
 
-The latent coefficient prior is `beta~N(0,S0)`, `S0` SPD, fixed from declared source information or the known simulator. The acquisition is `x=A beta+epsilon`, with known SPD noise covariance R independent of beta. Define
+For known independent acquisition design, let `beta~N(0,S0)`,
+`x=A beta+epsilon`, `epsilon~N(0,R)`, with `S0,R` SPD. Write
 
-$$J=A^TR^{-1}A,\quad b=A^TR^{-1}x,\quad
-\Lambda=S_0^{-1}+J,\quad\Sigma=\Lambda^{-1}.$$
+\[
+J=A^TR^{-1}A,\quad b=A^TR^{-1}x,\quad
+\Lambda=S_0^{-1}+J,\quad S=\Lambda^{-1},\quad\mu=Sb.
+\]
 
-A candidate layout s retains `J_s` and all b. Its approximate precision is `Q_s=S0^-1+J_s`, required SPD. It produces `q_s=N(Q_s^-1 b,Q_s^-1)`. This is a plug-in model, not automatically the true conditional given the compressed header. Both posterior laws refer to the same beta and same observation.
+A fixed candidate retains `J_g` and b, giving
+`Q_g=S0^-1+J_g`, `q_g=N(Q_g^-1 b,Q_g^-1)`.
+The prior, design, target and candidate set are declared before test events.
+This is a plug-in posterior, not automatically the true conditional after compression.
 
-The candidate layout may depend on the acquisition design J and declared prior, not the realized coefficient, task label or validation/test loss. Data-dependent masks would require conditioning the joint law on the selection mechanism; here all mask/timestamp designs are fixed independently of beta.
+## 2. Lemma: covariance of the exact posterior mean
 
-## 2. Lemma 13.1 — covariance of the full posterior mean
+\[
+E[\mu]=0,\qquad\operatorname{Cov}(\mu)=S_0-S.
+\]
 
-For `mu=E[beta|x,A,R]`,
+**Proof.** The tower property gives the mean. Total covariance gives
+`S0=E[Cov(beta|x)]+Cov(E[beta|x])`. The Gaussian conditional covariance is the constant S; subtract it. This does not assume a non-Gaussian posterior has constant covariance.
 
-$$E_x[\mu]=0,\qquad\operatorname{Cov}_x(\mu)=S_0-\Sigma.$$
+## 3. Theorem: acquisition-only prior-predictive risk
 
-### Proof
+With `D_g=Q_g^-1 Lambda-I`,
 
-The tower property gives `E[mu]=E[beta]=0`. The law of total covariance gives
+\[
+\boxed{\overline K_g(J)=\tfrac12[
+\operatorname{tr}(Q_gS)-m+\log\det\Lambda-\log\det Q_g
++\operatorname{tr}\{Q_gD_g(S_0-S)D_g^T\}].}
+\]
 
-$$S_0=E_x[\operatorname{Cov}(\beta|x,A,R)]+\operatorname{Cov}_x(E[\beta|x,A,R]).$$
+**Proof.** The approximate mean is `Q_g^-1 Lambda mu`, so its displacement is
+`D_g mu`. Insert this into the Gaussian KL formula. Only the quadratic mean term depends on x. Use `E[u^TBu]=tr(B Cov(u))` and the preceding lemma.
 
-The correctly specified Gaussian posterior covariance is the constant Sigma. Subtract it to obtain the statement. For non-Gaussian priors the posterior covariance generally depends on x and this exact constant formula is unavailable. QED.
+Minimizing this expression over a fixed finite layout list is optimal only over that list, prior and plug-in decoder. A design-dependent layout code is transmitted or reconstructed from common actual side information. A mask depending on hidden state, unknown poles/noise, or compressed b needs a new analysis. For an actual target L, use target posterior KL or the target denoiser discrepancy in Theory 12; this coefficient criterion is not automatically goal-oriented.
 
-## 3. Theorem 13.1 — design-only expected posterior KL
+## 4. Existing implementation and evidence
 
-Let `D_s=Q_s^-1 Lambda-I`. Then
+The current four-coefficient experiment has three disjoint pairings:
+`(01|23)`, `(02|13)`, `(03|12)`. Each sparse header contains 4 information-vector entries, 4 diagonal values, 2 couplings and 1 layout code: **11 allocated scalars**. Full information uses 15. The padded diagonal header is allocated the same space but contains less information.
 
-$$\boxed{
-\overline K_s(J)=E_x\operatorname{KL}(p(\beta|x,A,R)\|q_s)
-=\frac12\left[
-\operatorname{tr}(Q_s\Sigma)-m+\log\det\Lambda-\log\det Q_s
-+\operatorname{tr}\{Q_sD_s(S_0-\Sigma)D_s^T\}
-\right].
-}$$
+Risk and squared-coupling selectors inspect identical full designs and in the retained 24-design study choose identical layouts. This is identical subsequent computation, not independent statistical equivalence. The expensive selector has no demonstrated incremental value in those cells. Neither this observation nor a frequency-rule tie proves selectors are universally useless.
 
-### Detailed proof
+## 5. Theorem: the forward-KL product projection
 
-The approximate mean is `Q_s^-1 b=Q_s^-1 Lambda mu`, so its displacement from mu is `D_s mu`. The Gaussian KL is
+For any density p and fixed disjoint coordinate groups `G_j`, let
+`q_M=product_j p_{G_j}`. For any product density `q=product_j q_j`, assuming the KL terms are finite,
 
-$$\tfrac12[\operatorname{tr}(Q_s\Sigma)-m+\log\det\Lambda-\log\det Q_s
-+\mu^TD_s^TQ_sD_s\mu].$$
+\[
+\boxed{KL(p\|q)=KL(p\|q_M)+\sum_j KL(p_{G_j}\|q_j).}
+\]
 
-Only the last term depends on x. Use `E[u^TBu]=tr(B Cov(u))+(Eu)^TB(Eu)` and Lemma 13.1. Cyclic invariance of trace yields the displayed formula. It requires neither the hidden beta nor an observed task label. QED.
+**Proof.** Insert the product of true marginals in the log ratio. Integrate the first term under p. Every remaining logarithm depends only on one group, so its integral uses that marginal. Nonnegativity gives optimality and equality exactly when all retained marginals agree almost everywhere.
 
-## 4. Corollary — finite-budget choice and its strict limits
+For `p=N(mu,S)`, this gives `q_M=N(mu,blockdiag_g(S))`, and
 
-For a predeclared finite layout set S with equal encoded storage, choose
+\[
+KL(p\|q_M)=\tfrac12\log\frac{\det\operatorname{blockdiag}_g(S)}{\det S}.
+\]
 
-$$s^*(J)=\arg\min_{s\in S}\overline K_s(J).$$
+For fixed grouping, mean and symmetric block covariance need the same number of scalars as information vector and symmetric precision blocks. Consequently **precision truncation cannot claim pure forward-KL superiority at that storage budget**.
 
-Then `Kbar_s* <= Kbar_s` for every candidate. Ties use the first listed layout. This is optimal only for this prior, forward model, approximate decoder, loss and candidate family. It is not a bound for arbitrary neural HSEs, an optimum over all token encodings, or a guarantee under prior shift.
+The comparison with `S0^-1+blockdiag(J)` is a product comparison only if the retained prior precision is also block diagonal in those groups. For a dense cross-group prior the plug-in may not belong to this family; do not extend the dominance statement silently.
 
-The selected layout identifier must be transmitted or inferable from the same actual side input. Otherwise the decoder cannot reconstruct the intended matrix and the premise fails. If the layout identifier reveals acquisition information, that information is part of H, not a hidden free resource.
+## 6. Lemma: truncating precision underestimates marginal uncertainty
 
-## 5. Implemented equal-layout-budget experiment
+Partition an SPD posterior precision Q into a group G and its complement. Gaussian elimination gives
 
-For two oscillatory modes beta has four coordinates. The three layouts are perfect matchings:
+\[
+S_{GG}=(Q_{GG}-Q_{G,-G}Q_{-G,-G}^{-1}Q_{-G,G})^{-1}.
+\]
 
-```
-0: (0,1), (2,3) — within-mode cosine/sine
-1: (0,2), (1,3)
-2: (0,3), (1,2)
-```
+The subtracted term is PSD. Inversion reverses the SPD order, hence
 
-Each retains diagonal J and two off-diagonal entries. Permuting coordinates makes each retained matrix two principal 2x2 blocks, so it is PSD when J is PSD. Adding the prior makes its precision SPD. The actual header contains 4 score entries, 4 diagonal entries, 2 coupling entries and 1 layout code: 11 stored scalars. The full oracle uses 15 including its code and is not budget-matched. A padded diagonal baseline has the same allocated storage but less informative content.
+\[
+\boxed{S_{GG}\succeq Q_{GG}^{-1}.}
+\]
 
-Two selectors are compared: the above risk oracle and the simpler maximum retained squared-coupling rule. Both inspect the same full design at the encoder and send the same header layout. Their compute is not matched: the risk oracle solves three small posterior problems. If they select the same layouts, prefer the cheaper rule; do not claim a new practical benefit for the risk oracle.
+Thus precision truncation can lose the correct mean, the within-group uncertainty and cross-group dependence. Compare four controls: full posterior, natural blocks, exact mean with the same precision-block covariance, and exact mean with marginal covariance blocks. The first has greater storage; the latter three share a fixed grouping and storage count.
 
-## 6. Full-side-input control and physical scope
+## 7. Modal phase coordinates and a cheaper counterexample
 
-If all decoders actually receive A and R, they can reconstruct full J regardless of the header. Their Bayes-information advantage is zero. The implementation explicitly makes this reconstruction instead of pretending the side inputs were unused.
+For block rotations `U=diag(U_1,...,U_M)` acting on complete cosine/sine pairs, and groups made from complete pairs,
 
-The finite sampled designs evaluate damped sinusoids at fixed-P,K timestamps, with optional jitter and missing entries. They do not resample an acquired noisy high-rate record, model anti-alias filter hardware, or establish a PHM label relation. Noise is independently generated for separate acquisitions and shared across methods within an acquisition.
+\[
+\mathcal B_g(UJU^T)=U\mathcal B_g(J)U^T.
+\]
 
-## 7. Witness and interpretation
+**Proof.** U has no entries between different modal groups; selecting principal groups commutes with the block congruence. Transform the prior as well:
+`Q0'=UQ0U^T`, `h0'=Uh0`. Then inverse congruence and transformed natural parameters give `mu'=Umu`, `S'=USU^T`; moment block projection obeys the same relation.
 
-The Notebook verifies the design-only expectation by independent prior-predictive Monte Carlo, header round-trip without hidden J, exact finite-family choice, and the full-side-input null. The 24-cell waveform sweep is separately reported in `paper/results_sampled.md`. Its risk oracle and magnitude selector select identical layouts in every cell. This is retained as a negative result for additional selector complexity.
+This does not hold for arbitrary coordinate matchings `(02|13)` or `(03|12)`. Those existing baseline layouts remain useful numerical controls but are not declared phase-covariant physical groups.
 
-Any future learned contribution must exceed the simpler selector at fixed P,K,D, include layout information in the budget, account for encoder computation, and use the same LLapDiff architecture and targets. Theorem 12 bounds the resulting Gaussian plug-in distortion; it does not make the plug-in the exact compressed posterior.
+The cheaper operator
 
-## 8. Strong same-storage control: match posterior moments, not likelihood precision
+\[
+\mathcal I(J)=\bigoplus_m\tfrac12\operatorname{tr}(J_{mm})I_2
+\]
 
-For a fixed partition into the two declared coordinate pairs, consider all Gaussian q whose covariance is block diagonal in that partition. For any full Gaussian p=N(mu,Sigma), the forward-KL minimizer is
+is also phase-covariant: each modal trace is invariant under its rotation, and a scalar identity commutes with it. For three modes it uses 6 information-vector plus 3 trace scalars, not 19. Therefore phase covariance alone cannot justify full blocks. This is a coordinate change, not physical translation invariance of a damped waveform.
 
-$$q_{\rm moment}=N(\mu,\operatorname{blockdiag}(\Sigma)).$$
+## 8. Direct low-rank and goal-oriented controls
 
-**Proof.** Write its block means and covariances as `(a_b,V_b)`. The q-dependent part of twice the KL is a sum of
+Given prior covariance S0 and exact posterior S, form
+`D=S0^-1/2(S0-S)S0^-1/2`. With its ordered eigenpairs `(d_i,u_i)`, the covariance
 
-$$\log\det V_b+\operatorname{tr}(V_b^{-1}\Sigma_{bb})
-+(a_b-\mu_b)^TV_b^{-1}(a_b-\mu_b).$$
+\[
+S_r=S_0^{1/2}(I-\sum_{i=1}^r d_i u_i u_i^T)S_0^{1/2}
+\]
 
-For fixed V_b the unique minimizing mean is mu_b. Writing `V_b=Sigma_bb^(1/2) B Sigma_bb^(1/2)`, the remaining variable part is `logdet B+tr(B^-1)`. Every eigenvalue lambda>0 minimizes `log(lambda)+1/lambda` at lambda=1. Thus V_b=Sigma_bb. Substitution gives
+is the prior-whitened negative-update family studied by Spantini et al. Pair it with the exact mean for the covariance-only control. Its stored factor needs `m*r` scalars, in addition to m mean entries and any nonshared prior/basis description. Degrees of freedom and finite-precision transmission cost are not equated.
 
-$$\boxed{\operatorname{KL}(p\|q_{\rm moment})=
-\tfrac12\log\frac{\det\operatorname{blockdiag}(\Sigma)}{\det\Sigma}.}$$
+For a full-row-rank target L, apply the same construction to
+`S_Z0=L S0 L^T` and `S_Z=L S L^T`. This accounts for the goal, unlike blindly projecting a parameter-space truncation. The implemented dense oracle uses the full posterior and is **not** a reproduction of the paper's scalable matrix-free algorithm. All encoder solves are charged. A two-dimensional fixed goal can transmit its exact Gaussian moments in only five scalars; it does not thereby represent every other physical target.
 
-It follows that moment matching is no worse in forward KL than the precision plug-in for the same partition, preserves the exact mean and all univariate marginals, but generally loses cross-block dependence. This is the standard information-projection property, not a new theorem of Gaussian families. It explains why marginal calibration alone does not establish joint sufficiency.
+## 9. Costs and stronger deployment boundary
 
-The implemented control transmits four exact posterior means, four variances, two selected covariances and one pattern code: still 11 scalars. It requires full posterior computation at the encoder, so equal header storage does not mean equal computation or a learned-model advantage. The best moment partition minimizes the displayed log-determinant ratio over the same three partitions. Unknown priors, unknown operators and non-Gaussian posteriors are not covered. This strong baseline must be retained before proposing a learned posterior token.
+The new six-dimensional reviewer witness uses a fixed, protocol-shared `4+2` grouping: 19 statistics and zero per-event layout entries for all three block controls. A variable grouping needs its identifier; a 19-value statistic vector is then not a 19-value total message. Do not confuse this witness with the existing adaptive 11-scalar four-dimensional study.
+
+Natural likelihood statistics are additive over conditionally independent observation batches and reusable with a changed prior. With a fixed linear block operator, `B(sum J_i)=sum B(J_i)`. This is a standard algebraic property, not proof of a runtime advantage. Correlated views require their joint noise model. Switching the grouping after truncation cannot reconstruct discarded entries. Posterior moments can also support exact information updates if the full covariance is retained; only the constrained block approximation is at issue.
+
+The primary single-window, fixed-prior accuracy comparison uses moment blocks as the default strong reference. Streaming, prior reuse and finite encoder computation are separately measured deployment conditions, not post-hoc excuses to rescue a losing parameterization.
+
+## Witness and admission
+
+The same-stem Notebook retains prior-predictive Monte Carlo, actual header round-trip and full-side-information null checks. New checks cover the product identity, Schur order, mean/variance/dependence decomposition, phase-prior transformation, trace-isotropic control and direct low-rank controls. Target ranking is checked in Theory 12's paired Notebook. No learned-method claim is admitted until the actual frozen LLapDiff target improves against these controls at declared total cost.

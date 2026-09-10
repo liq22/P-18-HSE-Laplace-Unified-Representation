@@ -1,39 +1,44 @@
-# Verified related work and exact gap (10 September 2026)
+# Related work and the exact unresolved gap
 
-Primary-source reading includes the LLapDiff paper and released README, Oko et al. Proposition 3 and its proof, Bayesian approximation papers, and the official irregular-time model pages. This is a focused novelty review, not a proof that no equivalent work exists.
+Primary-source check: 10 September 2026. This is a focused comparison, not an assertion that no equivalent work exists. The Introduction uses 16 distinct references, 10 from Nature Reviews Physics, IEEE TPAMI, ICML, NeurIPS, ICLR or CVPR. The six direct specialist/preprint references remain because relevance takes priority over venue counts. See `introduction_outline.md` and `../literature/references.bib`.
 
-| Work | What is already established | What this project must add, or stop claiming |
+| Predecessor | What is already established | What remains to test here |
 |---|---|---|
-| HSE, Information Fusion 123:103277 (2025) | Temporal-aware patching and fusion for heterogeneous fault-diagnosis signals | Do not reclaim a fixed heterogeneous interface; preserve P,K,D and compare the actual original HSE |
-| LLapDiff, arXiv:2605.19805 (2026) | Latent diffusion, stable Laplace-modal prediction, gap-aware conditioning and arbitrary-time synthesis | Changing the history condition, not adding the same modal generator again; no one-step inference claim |
-| Alsing–Wandelt, arXiv:1712.00012 | Score-based Fisher-preserving compression | Fisher preservation is not general posterior sufficiency of arbitrary tokens |
-| Oko et al., arXiv:2501.04641v2 (2025) | Approximate sufficiency, conditional denoising bounds and a sampling corollary | Generic conditional KL and denoising projection identities are prior analytical machinery |
-| Spantini et al., DOI 10.1137/140977308 (2015) | Optimal low-rank Gaussian posterior approximations, including KL-related objectives | Our constrained directly decoded header is a different restriction, not a new general posterior optimality theory |
-| Spantini et al., DOI 10.1137/16M1082123 (2017) | Goal-oriented posterior approximation | Do not claim that task-aware Bayesian compression is new |
-| ContiFormer, NeurIPS 2023; arXiv:2402.10635 | Continuous-time attention and expressive irregular-series modeling | Strong point-prediction counterpart; it does not itself provide our Gaussian header guarantee |
-| t-PatchGNN, ICML 2024/PMLR 235 | Transformable patches and asynchronous multivariate correlations | Required patch-based external baseline where task and inputs match |
-| CSDI, arXiv:2107.03502 (2021) | Conditional diffusion for probabilistic imputation | Compare imputation against imputation, not against target-only forecast results |
-| Time-IMM, arXiv:2506.10412 (2025) | Cause-driven multimodal irregularity taxonomy and benchmark | Use its irregularity taxonomy as external stress-test context, not PHM evidence or a model row |
+| HSE, Information Fusion 2025 | Heterogeneous signal patching and a common embedding interface | Preserve original P,K,D and test the actual consumed condition, not a replacement oracle |
+| LLapDiff, arXiv:2605.19805 | Latent-trajectory diffusion, stable modal prediction, gap-aware conditioning, arbitrary-time evaluation | Does a target-aware condition improve this same generator? No inherited modal or one-step claim |
+| Alsing–Wandelt, MNRAS Letters 2018 | Fisher-preserving score compression under stated assumptions | Complete posterior preservation cannot be inferred for arbitrary diagonal tokens |
+| Oko et al., arXiv:2501.04641 | Approximate sufficient representations connected to conditional diffusion | A specific conditioner and measurable loss under its actual side inputs, not a new generic sufficiency principle |
+| Spantini et al., SIAM JSC 2015 | Prior- and likelihood-informed low-rank posterior approximation | Mandatory prior-whitened low-rank numerical control with actual encoder/storage costs |
+| Spantini et al., SIAM JSC 2017 | Goal-oriented posterior covariance and mean approximation | Target-aware inference is not new; compare on the frozen target, not only all physical coefficients |
+| Neural Laplace, ICML 2022 | Learning dynamics through Laplace-domain representations | Inherited coordinate machinery, not proof that learned latent poles are physical |
+| Neural CDE, NeurIPS 2020; ContiFormer, NeurIPS 2023 | Continuous-time irregular-sequence modeling | Task-compatible external models; no invented predictive density for a point predictor |
+| t-PatchGNN, ICML 2024 | Transformable temporal patches and asynchronous multivariate dependence | Relevant learned patch baseline after matching observations, task and budget |
+| CSDI, NeurIPS 2021 | Conditional probabilistic imputation | Compare imputation to imputation; do not import its results into forecast ranking |
+| Time-IMM, NeurIPS 2025 Datasets and Benchmarks | Cause-driven irregular multimodal time-series evaluation | Protocol context, not PHM evidence or a model row |
+| Latent diffusion, CVPR 2022; likelihood-weighted score training, NeurIPS 2021 | Learned latent generation and qualified links from objectives to likelihood | Freeze the actual target and schedule; arbitrary denoising MSE is not an endpoint guarantee |
 
-## Surviving gap
+## The gap after incorporating the strongest controls
 
-The reviewed works do not settle the particular deployment question tested here: under the actual side information, what must a finite HSE condition retain about acquisition-induced modal coupling so that the same LLapDiff can represent the correct conditional target, and what is the cost of approximating that condition?
+A likelihood header is not necessarily the best posterior message for a fixed prior and target. At a fixed Gaussian partition, exact posterior moments give the forward-KL-optimal product approximation. The current natural blocks may be useful for prior reuse or independent-evidence accumulation, but those algebraic properties require a deployment use case and measured cost benefit. They do not defeat moment matching on its own objective.
 
-The current answer is deliberately narrower than a new universal tokenizer. We provide a computable Gaussian distortion analysis, an explicit equal-storage header, and strong controls separating likelihood approximation from posterior-moment preservation. The 24-cell study does not support an extra complex risk selector. A learned posterior-aware HSE contribution remains contingent on the fixed-backbone comparison.
+The candidate research question is therefore: **under equal current-acquisition information, a frozen generation target and explicit encoder/transmission/decoder budgets, can an amortized HSE expose target-relevant posterior structure that the same finite LLapDiff otherwise uses inefficiently?** If actual conditions collide, study compression. If the side input already reconstructs full information, study computation. Do not claim both explanations from the same result without separating them.
 
-## Not admissible as novelty
+The proposed target-calibrated mean/covariance feature remains a candidate. Generic KL identities, Gaussian product projection, Schur complements, coordinate covariance and low-rank optimality are supporting tools. The new numerical controls falsify pure-accuracy preference for natural blocks; they do not yet establish learned superiority.
 
-Stable poles, Laplace synthesis, ordinary Gaussian KL, conditional mutual information decompositions, Gaussian block projection, and taking the minimum of a finite set are not new general results. Source labels, side information and codebook/layout indices must not become uncounted information. A proof of mathematical existence is not a learned-model performance guarantee.
+## Exact primary sources
 
-## Primary sources
+HSE: https://doi.org/10.1016/j.inffus.2025.103277
 
-- HSE: https://doi.org/10.1016/j.inffus.2025.103277
-- LLapDiff: https://arxiv.org/abs/2605.19805 ; official code https://github.com/pixelhero98/LLapDiffusion
-- Score compression: https://arxiv.org/abs/1712.00012
-- Approximate sufficient representations: https://arxiv.org/abs/2501.04641v2
-- Bayesian low-rank approximation: https://doi.org/10.1137/140977308
-- Goal-oriented approximation: https://doi.org/10.1137/16M1082123
-- ContiFormer: https://arxiv.org/abs/2402.10635 (conference year 2023; preprint posted 2024)
-- t-PatchGNN: https://proceedings.mlr.press/v235/zhang24bw.html
-- CSDI: https://arxiv.org/abs/2107.03502
-- Time-IMM: https://arxiv.org/abs/2506.10412
+LLapDiff: https://arxiv.org/abs/2605.19805 ; official code https://github.com/pixelhero98/LLapDiffusion
+
+Approximate sufficiency: https://arxiv.org/abs/2501.04641v2
+
+Score compression: https://doi.org/10.1093/mnrasl/sly029
+
+Prior-aware approximation: https://doi.org/10.1137/140977308
+
+Goal-oriented approximation: https://doi.org/10.1137/16M1082123
+
+Irregular patching: https://proceedings.mlr.press/v235/zhang24bw.html
+
+The bibliography also provides exact DOI/proceedings links for the Introduction's high-venue background papers. No acceptance status is invented for LLapDiff or Oko et al. Flow Matching remains future work.

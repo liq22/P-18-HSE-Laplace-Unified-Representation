@@ -1,109 +1,134 @@
-# Theory 12 — Posterior distortion from a budgeted information header
+# Theory 12 — Posterior parameter error, tighter bounds and the actual target
 
-## Status and role
+## Scope and assumptions
 
-A finite-dimensional Gaussian calculation, independently checked against the ordinary Gaussian KL formula. This is a supporting analysis for a specific conditioner, not a claim that Gaussian perturbation theory is new. The learned HSE and LLapDiff are outside the exact theorem. See Spantini et al. (2015), DOI 10.1137/140977308, for prior work on optimal posterior approximations.
+This is Gaussian supporting analysis, not a new general information theorem. Fix the same observation, prior, coordinates and base measure. Write
 
-## 1. Assumptions and actual information
+\[
+P=N(\mu,\Lambda^{-1}),\quad \mu=\Lambda^{-1}\eta,
+\qquad \widetilde P=N(Q^{-1}\widetilde\eta,Q^{-1}),
+\quad \Lambda,Q\succ0.
+\]
 
-Let the fixed-pole coefficient vector be beta in R^m. The full posterior has natural parameters `(Lambda,eta)` and the approximation has `(Q,eta_q)`, with both precision matrices real symmetric positive definite. They use the same latent coordinates and base measure. Their means and covariances are
+The actual decoder condition is `(H,a_consumed)` as in Theory 0. A calculation using full precision is an encoder/oracle diagnostic, not an uncounted decoder feature. `eta` is the natural parameter (information vector), not a diffusion score. The likelihood information and prior precision must be distinguished.
 
-$$p=N(\mu,\Lambda^{-1}),\quad\mu=\Lambda^{-1}\eta,
-\qquad q=N(\widetilde\mu,Q^{-1}),\quad\widetilde\mu=Q^{-1}\eta_q.$$
+Define
 
-The approximation must be measurable with respect to the actual transmitted header and decoder side information. A bound computed with full Lambda is an oracle/encoder diagnostic: it must not silently be an extra decoder feature. Prior precision is included in Lambda and Q. Omitting likelihood couplings while retaining the prior is not the same as diagonalizing the complete posterior.
+\[
+E=\Lambda^{-1/2}(Q-\Lambda)\Lambda^{-1/2},\quad
+r=\Lambda^{-1/2}(\widetilde\eta-\eta),\quad
+v=\Lambda^{-1/2}\eta,\quad w=r-Ev,\quad
+\kappa=\lambda_{\min}(I+E)>0.
+\]
 
-Define the symmetric normalized perturbation, natural-parameter error, and normalized full mean:
+No commutativity is assumed. All square roots are symmetric positive-definite roots.
 
-$$E=\Lambda^{-1/2}(Q-\Lambda)\Lambda^{-1/2},\qquad
-r=\Lambda^{-1/2}(\eta_q-\eta),\qquad v=\Lambda^{-1/2}\eta.$$
+## Lemma 12.1: simultaneous whitening
 
-Let `w=r-Ev` and `kappa=lambda_min(I+E)>0`. No commutativity between the two precision matrices is assumed.
+Under `y=Lambda^(1/2)(beta-mu)`, P becomes `N(0,I)` and the approximation becomes
 
-## 2. Lemma 12.1 — whitening the two posterior laws
+\[
+N((I+E)^{-1}w,(I+E)^{-1}).
+\]
 
-Under `y=Lambda^(1/2)(beta-mu)`, the full posterior is `N(0,I)`, while the approximate posterior is
+**Proof.** Factor `Q=Lambda^(1/2)(I+E)Lambda^(1/2)`. Transform its inverse by congruence. For the mean,
 
-$$N((I+E)^{-1}w,(I+E)^{-1}).$$
+\[
+\Lambda^{1/2}(Q^{-1}\widetilde\eta-\mu)
+=(I+E)^{-1}(v+r)-v=(I+E)^{-1}w.
+\]
 
-### Proof
+An invertible common coordinate change preserves KL. This proves the lemma.
 
-The transformed approximate covariance is
+## Theorem 12.1: exact joint precision/natural-parameter error
 
-$$\Lambda^{1/2}Q^{-1}\Lambda^{1/2}=(I+E)^{-1}.$$
+\[
+\boxed{2\,KL(P\|\widetilde P)
+=\operatorname{tr}E-\log\det(I+E)+w^T(I+E)^{-1}w.}
+\]
 
-For its mean, write `Q=Lambda^(1/2)(I+E)Lambda^(1/2)`. Then
+**Proof.** In the whitened coordinates the Gaussian log-density ratio has expectation
+`tr(B)-m-logdet(B)+a^TBa`, where `B=I+E`, `a=B^-1 w`.
+Expand its quadratic form and use `E_P[y]=0`, `E_P[yy^T]=I`.
+Substitution gives the result. It is forward KL, not reverse KL.
 
-$$\begin{aligned}
-\Lambda^{1/2}(Q^{-1}\eta_q-\mu)
-&=(I+E)^{-1}(v+r)-v\\
-&=(I+E)^{-1}(r-Ev).
-\end{aligned}$$
+The identity preserves the earlier correct result. It shows why precision and natural-parameter errors can cancel: `r=Ev` makes the entire mean-error term vanish; `r=-Ev` amplifies it. Bounding their norms separately discards this interaction.
 
-The same invertible affine change of variables applies to both laws, so KL is unchanged. This argument also shows why natural-parameter perturbation cannot be replaced by a precision norm alone. QED.
+## Lemma 12.2: tightened spectral remainder
 
-## 3. Theorem 12.1 — exact posterior discrepancy
+For `e>-1`, integration of `g'(e)=e/(1+e)` gives
 
-$$\boxed{
-2\operatorname{KL}(p\|q)
-=\operatorname{tr}(E)-\log\det(I+E)
-+w^T(I+E)^{-1}w.
-}$$
+\[
+g(e)=e-\log(1+e)=e^2\int_0^1\frac{t}{1+te}\,dt.
+\]
 
-### Detailed derivation
+The line segment from 1 to `1+e` stays above `min(1,1+e)`. Consequently
 
-For `p_y=N(0,I)` and `q_y=N(a,B^-1)`, the Gaussian log-density ratio averaged under p_y gives
+\[
+0\leq g(e)\leq \frac{e^2}{2\min(1,1+e)}.
+\]
 
-$$2\operatorname{KL}(p_y\|q_y)=\operatorname{tr}(B)-m-\log\det B+a^TBa.$$
+Summing the eigenvalue inequalities gives
+`tr(E)-logdet(I+E) <= ||E||_F^2/[2 min(1,kappa)]`.
+The earlier denominator `min(1,kappa)^2` remains valid but is looser.
 
-This follows by expanding `(y-a)^TB(y-a)`, using `E[y]=0`, `E[yy^T]=I`, and subtracting the standard-normal quadratic expectation m. Substituting `B=I+E` and `a=B^-1 w` proves the formula. The expression is directional: it is KL(p||q), not the reverse KL. QED.
+## Theorem 12.2: SPD bound and its cost
 
-## 4. Lemma 12.2 — spectral remainder control
+\[
+\boxed{KL(P\|\widetilde P)
+\leq \frac{\|E\|_F^2}{4\min(1,\kappa)}
++\frac{\|r-Ev\|^2}{2\kappa}.}
+\]
 
-For every eigenvalue `e>-1`, let `g(e)=e-log(1+e)`. It satisfies `g(0)=g'(0)=0` and `g''(t)=1/(1+t)^2`. Every point between zero and e has `1+t >= min(1,1+e)`. Taylor's integral remainder therefore yields
+**Proof.** Apply Lemma 12.2 to Theorem 12.1 and use
+`(I+E)^-1 <= kappa^-1 I`. If additionally `epsilon=||E||_2<1`, replace
+`kappa` by `1-epsilon` and `||w||` by `||r||+epsilon||v||`.
+Also `||mu_tilde-mu||_Lambda <= ||w||/kappa`.
 
-$$0\leq g(e)\leq\frac{e^2}{2\min(1,1+e)^2}.$$
+This is not automatically a useful online certificate. Full whitening and an eigenvalue computation are required. Report exact KL, both bounds, bound/exact ratios and candidate ordering. A small bound can certify a specified tolerance; a large bound cannot select the best layout. No diagonal loading or eigenvalue clipping is licensed by the theorem.
 
-Summing over eigenvalues, and using `1+e_i>=kappa`, gives
+The existing `core.precision_certificate` and historical sampled CSV retain the previous valid Taylor bound. `parameterization_controls.bounds` compares both bounds on identical inputs. Historical results are not silently relabeled as tight-bound results.
 
-$$\operatorname{tr}(E)-\log\det(I+E)
-\leq\frac{\|E\|_F^2}{2\min(1,\kappa)^2}.$$
+## Theorem 12.3: project to the declared target before evaluating a denoiser
 
-## 5. Theorem 12.2 — computable upper bound and small-error case
+Freeze a full-row-rank linear target `z0=L beta` for this diagnostic only. Let its exact and approximate posteriors be `N(m,V)` and `N(mq,W)`, obtained by transforming their respective means and covariances with L. No equivalence with a learned reference VAE is assumed.
 
-Since `(I+E)^-1 <= kappa^-1 I`, Theorem 12.1 and Lemma 12.2 imply
+At a common diffusion time, let `z_tau=alpha z0+sigma epsilon`, `sigma>0`, with independent standard Gaussian epsilon. Define
 
-$$\boxed{
-\operatorname{KL}(p\|q)
-\leq\frac{\|E\|_F^2}{4\min(1,\kappa)^2}
-+\frac{\|r-Ev\|^2}{2\kappa}.
-}$$
+\[
+M=\alpha^2V+\sigma^2I,\quad N=\alpha^2W+\sigma^2I,
+\quad B=M^{-1}-N^{-1},\quad\delta=m_q-m.
+\]
 
-If additionally `epsilon=||E||_2<1`, replace kappa by `1-epsilon` to obtain
+The exact Gaussian epsilon-predictors are
 
-$$\operatorname{KL}(p\|q)
-\leq\frac{\|E\|_F^2}{4(1-\epsilon)^2}
-+\frac{(\|r\|+\epsilon\|v\|)^2}{2(1-\epsilon)}.$$
+\[
+f_P(z)=\sigma M^{-1}(z-\alpha m),\qquad
+f_q(z)=\sigma N^{-1}(z-\alpha m_q).
+\]
 
-The general bound requires only SPD; it may be loose near singularity. The small-error bound is not used when its assumption fails. No clipping of eigenvalues or silent diagonal loading is authorized by this theorem.
+Their squared discrepancy under the **true** noisy target is
 
-The corresponding posterior mean obeys
+\[
+\boxed{D_\tau(P,q;L)=\sigma^2\left[
+\operatorname{tr}(BMB^T)+\alpha^2\delta^TN^{-2}\delta\right].}
+\]
 
-$$\|\widetilde\mu-\mu\|_\Lambda
-=\|(I+E)^{-1}w\|\leq\|w\|/\kappa.$$
+**Proof.** Gaussian conditional expectation gives each predictor. With
+`y=z-alpha m`, the difference is `sigma[B y+alpha N^-1 delta]`.
+Under P, `E[y]=0` and `Cov(y)=M`. Expanding the squared norm eliminates
+the cross term and yields the two displayed terms. This proves the result.
 
-## 6. Connection to conditioning and denoising
+For a variance-preserving schedule and `v=alpha epsilon-sigma z0`, the v discrepancy is `D_tau/alpha^2` when `alpha>0`. At `alpha=0`, compute directly from the conditional target means instead of dividing by zero. The x0 discrepancy is `sigma^2 D_tau/alpha^2` when `alpha>0`.
 
-Averaging a valid approximate decoder q over the same joint acquisition law, Theory 9 gives
+This is a Gaussian **plug-in predictor discrepancy**. It equals a Bayes compression-risk gap only when q is the true induced compressed conditional of Theory 10. It is not a learned-network or finite-sampler error bound.
 
-$$I(\beta;O\mid H,a)\leq E_{O,a}\operatorname{KL}(p(\beta\mid O,a)\|q(\beta\mid H,a)).$$
+## Target ranking boundary
 
-Thus the bound can upper-bound compression loss plus fitting error. It does not identify which portion is compression. In particular, a full-operator side input makes compression zero even when an intentionally approximate solver has fitting error.
+Data processing gives `KL(F#P || F#q) <= KL(P||q)` for a common measurable target map, but does not preserve rankings between q's. For `P=N(0,I2)`, mean-shifted approximations `(0,.9)` and `(1,0)` have joint KL `.405` and `.5`. Projecting onto the second coordinate gives `.405` and `0`: the ranking reverses. A target criterion must therefore use a frozen L or the actual frozen reference encoder, not whole-coefficient KL by default.
 
-For the same Gaussian forward perturbation `z_tau=alpha beta+sigma epsilon`, `sigma>0`, conditioning additionally on z_tau adds `alpha^2/sigma^2 I` to both precisions and `alpha z_tau/sigma^2` to both natural parameters. Reapplying the mean bound controls the difference of these two Gaussian denoising predictions. Epsilon-prediction differences multiply the beta-mean difference by `alpha/sigma`; this is not a finite reverse-sampler error guarantee or an unrestricted Bayes compression identity for a plug-in q.
+## Executable checks and admission
 
-## 7. Falsification and contribution admission
+The same-stem Notebook retains the original noncommuting SPD and zero-error tests, then checks the tighter bound, joint-error cancellation/amplification, target ranking and the target denoiser formula against Monte Carlo. It records bound looseness rather than merely checking an inequality.
 
-The Notebook checks noncommuting random SPD matrices with nonzero natural-parameter error, zero perturbation, the direct KL formula, the bound, and the dependence on natural-parameter magnitude. Finite checks cannot prove the universal statement.
-
-The contribution candidate is an explicit budgeted coupling representation whose measurable error is controlled. The general Gaussian formula and a large bound are not contributions by themselves. Unknown poles, estimated noise, mixture posteriors and learned VAE coordinates need separate validation.
+Spantini et al. (2015, 2017) and Oko et al. (2025) are direct analytical predecessors. The candidate novelty must come from a concrete target-relevant conditioner at declared information and computation budgets. None of the generic Gaussian identities alone is admitted as a new contribution.

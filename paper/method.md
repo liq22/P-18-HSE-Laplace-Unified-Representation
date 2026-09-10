@@ -1,63 +1,61 @@
-# Method: acquisition-calibrated conditioning
+# Method: target-aware posterior conditioning
 
-## 1. Targets and observations
+## 1. Declared target, observations and budget
 
-For one local event, use a fixed physical dictionary `Phi_Lambda(t)` and coefficient vector beta. The analytic measurement is
+The known-pole oracle is `x=A beta+epsilon`, with fixed dictionary, known SPD noise R and declared Gaussian prior. It is not the learned LLapDiff target. The latter is `Z0=E_ref(X_ref)` from one source-trained frozen reference encoder. A teacher used to assess condition compression receives the same current observation O and actual side input a as its comparators; a high-rate reference is common supervision, not privileged teacher input.
 
-$$x_d=A_d\beta+\epsilon_d,\quad\epsilon_d\sim N(0,R_d),\quad
-\beta\sim N(0,S_0).$$
+All conditions include every field actually consumed downstream: tokens, attention mask, timestamp/band/reliability fields and a. Count encoded scalars, layout identifiers, precision in bits, encoder computation, decoder computation and cache state separately. Fixed P,K,D is an additional neural-interface constraint, not established by a scalar-count oracle.
 
-Timestamps, sensor response, mask and declared noise determine A and R. A mask is applied to rows, not replaced by fabricated observations. The learned target will instead be `Z0=E_ref(X_ref)` from a frozen source-trained reference encoder. Physical coefficients, this latent trajectory, and the denoiser's predicted poles are different objects.
+The primary contract is single-window inference with a fixed prior and target. Streaming updates and prior reuse are secondary contracts; they cannot be introduced after seeing a precision-header loss merely to rescue that header.
 
-The actual generator condition is `C=(H,a_consumed)`. Audit all tokens, time/band features and masks. Unknown descriptor fields are not silently available to a teacher. A high-quality paired reference can provide supervision but is not an extra observation given only to one conditional model.
+## 2. Select posterior parameterization before layout
 
-## 2. Sufficient statistics and the compression problem
+Write `b=A^T R^-1 x`, `J=A^T R^-1 A`, `Q=S0^-1+J`, `h=S0^-1 mu0+b`, `S=Q^-1`, `mu=Sh`.
 
-The Gaussian sufficient quantities are `b=A^T R^-1 x` and `J=A^T R^-1 A`. Their dimensions are independent of observation length, but dense J costs quadratic storage. Its off-diagonal terms measure overlap of the observed basis columns. For example,
+For a fixed partition g and a block-diagonal prior in that partition, compare:
 
-$$J_{ij}=\sum_{n\in\mathcal I_{obs}}\phi_i(t_n)\phi_j(t_n)/\sigma_n^2.$$
+| Condition | Decoded posterior | Primary purpose |
+|---|---|---|
+| full | N(mu,S) | Upper-information reference |
+| natural blocks | N(Qg^-1 h,Qg^-1), Qg=S0^-1+B_g(J) | Prior-reusable likelihood approximation |
+| mean + precision blocks | N(mu,Qg^-1) | Isolate approximate-mean cost |
+| marginal moment blocks | N(mu,B_g(S)) | Forward-KL optimal product control |
+| modal trace-isotropic | N((S0^-1+I(J))^-1 h,(S0^-1+I(J))^-1) | Cheap phase-covariant control |
+| prior-aware low rank | Full mean + prior-whitened negative covariance update | Direct Spantini-family control |
 
-Finite windows, nearby modes and missing intervals prevent general orthogonality. A nominal frequency below Nyquist does not imply zero cross-mode coupling. Our sampled study evaluates these columns directly; it does not claim an ideal anti-alias null for a finite-window decaying sinusoid.
+The block-moment control dominates any product approximation at that partition in forward KL. It needs encoder-side posterior computation, which must be charged; no learned HSE is presumed to compute it for free. Truncated precision generally underestimates true marginal covariance by the Schur-complement relation. Report mean displacement, marginal uncertainty and joint dependence loss separately.
 
-## 3. Directly decoded equal-storage header
+The actual current four-coefficient adaptive headers use 11 scalars including layout. The review's six-coefficient fixed `4+2` grouping uses 19 statistics; no layout value is sent only because all arms share it in advance. Do not mix these budgets in one performance claim.
 
-For two modes, there are four coefficients. The sparse header has 11 stored scalars:
+## 3. Target-space analysis
 
-$$h_{\rm precision}=[b_1,\ldots,b_4,J_{11},\ldots,J_{44},J_{e_1},J_{e_2},s].$$
+For the analytical target `Z0=L beta`, project every candidate's moments through the same L before calculating posterior KL or denoising discrepancy. Theory 12 gives the exact Gaussian epsilon-predictor discrepancy under the true noisy target. The result depends on the schedule and target covariance; a better whole-beta KL does not guarantee a better Z0 or v-prediction objective.
 
-The layout s selects one of three disjoint pairings. The decoder reconstructs a block-diagonal information matrix from the header alone. Every compared sparse method transmits its layout code. The diagonal method pads the coupling slots; the full upper-information baseline transmits 15 scalars. These counts are physical storage layouts, not minimal information-theoretic bitrates.
+A goal-only oracle transmits the target moments directly. When the target has low dimension, this can be cheaper than any full-state header. It is a strong target-specific baseline, not a unified representation of all possible future tasks. The goal-oriented low-rank baseline uses the target prior and posterior covariances, as in the family studied by Spantini et al. (2017). The dense diagnostic is not a claimed reproduction of their matrix-free algorithm.
 
-Compare fixed within-mode pairs, maximum coupling magnitude, and a design-only posterior-risk oracle. All inspect the same acquisition metadata at the encoder; their computational costs differ. The risk oracle is not justified as a deployable addition if it chooses the same pattern as a cheaper rule.
+## 4. Candidate learned HSE intervention
 
-## 4. Error-aware selection and assessment
+The candidate is an **amortized target-calibrated posterior feature inside the existing HSE budget**, not a new denoiser. Freeze one reference encoder and the target grid. Reuse the actual HSE patch extractor; reserve a declared portion of each D-dimensional token for target-relevant mean and covariance-factor features, rather than append an uncounted stream. A neural covariance block is parameterized by a triangular factor with positive diagonal. This ensures validity, not calibration.
 
-With full precision Lambda and approximate precision Q, define normalized error `E=Lambda^-1/2(Q-Lambda)Lambda^-1/2`. Theory 12 derives the exact Gaussian KL including natural-parameter error and a computable SPD bound. The bound is an assessment of a particular approximate decoder, not automatically true compression mutual information.
+Compare the original HSE, explicit natural/coupling features and predicted moment features with the same P,K,D, common acquisition description, denoiser architecture and tuning budget. Any teacher or distillation supervision must be shared across matched controls. Start with the native LLapDiff loss only; add a distillation term only after the teacher posterior and its access to data are validated. An observation-residual penalty can alter the target posterior and is not added by default.
 
-For a zero-mean Gaussian source prior, Theory 13 integrates the mean-dependent term over the prior-predictive observation distribution. This enables a layout score using design information only, without test labels or hidden event coefficients. Its optimality is restricted to the three predeclared layouts, the stated prior and a plug-in posterior.
+For variance-preserving v prediction,
 
-## 5. Strong moment-matching control
+\[
+v=\alpha_\tau\epsilon-\sigma_\tau Z_0,
+\qquad \mathcal L=E\|v-v_\theta(Z_\tau,\tau,H_\psi(O,a),a)\|^2.
+\]
 
-A precision header can induce poor uncertainty after inversion even when it retains large interactions. Compare a second 11-scalar header:
+The proposed learned features are not implemented or validated by the Gaussian controls. Before training, verify forward consumption of every field, conditioner gradients, deterministic evaluation patches and 1/2/3-channel shape semantics. Physical coordinates and latent coordinates remain distinct.
 
-$$h_{\rm moment}=[\mu_1,\ldots,\mu_4,\Sigma_{11},\ldots,\Sigma_{44},\Sigma_{e_1},\Sigma_{e_2},s].$$
+## 5. Information-limited versus compute-limited interpretation
 
-The analytic encoder calculates full posterior moments before compressing them. The decoder receives only the header. The approximate posterior matches the full mean and block marginal covariance. For a fixed partition this minimizes forward Gaussian KL and preserves all univariate marginals; cross-block dependence can still be lost. Encoder-side inference cost must be reported. This is a mandatory analytic control, not a learned HSE success.
+If a is coarse, prove an actual same-condition collision or quantify the induced conditional KL before calling a gain information recovery. If a reconstructs A,R and b is retained, complete Gaussian information is already available. Any benefit is then computational accessibility to a finite network. Measure it against a metadata MLP, an explicit solver and a width-matched conditioner; do not use information-loss terminology.
 
-## 6. Proposed learned conditioner intervention
+## 6. Physical and software boundaries
 
-Preserve the original HSE patch points P, token count K and dimension D. Reserve a declared condition budget inside, rather than append an uncounted auxiliary stream. All baseline arms receive the same measured acquisition descriptors. Compare a precision-style coupling feature with a source-trained posterior-moment prediction feature. Any moment teacher must use the same observation O and declared a, or be explicitly labeled privileged supervision with a matched privileged baseline.
+Fixed-point and fixed-duration protocols are reported separately. The latter may use more observations at a higher rate and is not a matched-sample-budget experiment. The present modes are below nominal Nyquist: no private-band impossibility result follows from these cells. Small pole/filter misspecification is a required stress test before physical claims.
 
-Train each conditioner with the same LLapDiff denoiser architecture, identical target VAE weights and identical diffusion schedule. Keep v-prediction as the official default unless all arms use a declared alternative. The primary loss is the same native conditional denoising objective. A teacher-posterior distillation term is optional only after its calibrated teacher and target are specified; do not add an observation-residual penalty and assume it leaves the target posterior unchanged.
+Paper experiments consume arrays and explicit split/group information. They do not import PHMFactory internals, alter a submodule, use path injection or silently change datasets. A future PHMFactory export must supply waveform, timestamps, valid mask, rate, units, recording group and split; preprocessing fitting uses sources only. Independent acquisition noise and resampled correlated noise have different likelihoods.
 
-A schematic objective is
-
-$$\mathcal L=E\|v-v_\theta(z_\tau,\tau,H_\psi(O,a),a)\|^2
-+\lambda E\,D(p_{teacher}(Z_0|O,a),q_\psi(Z_0|H,a)).$$
-
-The second term is not currently implemented for real data. Test lambda=0 and matched supervision. The teacher may be exact only in the known-pole oracle. No theorem transfers coefficient sufficiency to arbitrary learned VAE coordinates.
-
-## 7. Falsification and complexity
-
-Full actual A,R is a required null control; it can make an additional information header redundant. Fixed-width output must include all side streams in the budget. Missing or invalid input must fail explicitly. Evaluate 1/2/3-channel shape and gradients before multichannel claims. Different channels can be stacked only with their actual noise covariance; two resampled copies of one noisy recording are not independent observations.
-
-The current implementation covers the analytic headers and sampled Gaussian study. The learned HSE intervention and official-model comparison are specified but not implemented here. Flow Matching remains future work until a validated posterior sampler has a measured latency limitation.
+Flow Matching remains future work. The active method is admitted only after target-space learned gains over the strongest simple condition under the declared cost contract.
