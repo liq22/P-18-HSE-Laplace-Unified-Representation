@@ -1,60 +1,68 @@
 # Paper workspace
 
-The integration target is `dev`; this work remains on Draft PR #8 until review. `master` is not changed.
+Start with [GOAL.md](GOAL.md). The active target is one valid native M/B1-aux comparison, not another theory-only round or the full benchmark. The current PR targets `dev`; no automatic merge is authorized.
 
-## Start here
+`main.md` contains the abstract and English Introduction; `introduction_outline.md` explains each paragraph and source. `method.md` defines the shared gradient and freezing paths. `experiments.md` separates acceptance, genuine-export pilot and later ablations. Proofs live only under `../theory/`, each with its same-stem Notebook.
 
-Read **[GOAL.md](GOAL.md)** for the Chinese execution package and comment decisions. `main.md` contains the English abstract and full Introduction; `introduction_outline.md` maps each paragraph to its purpose and verified references. `method.md`, `related_work.md` and `experiments.md` separate current analytical results from the candidate learned method.
-
-Results have distinct scopes: `results.md` is the inherited finite-design oracle, `results_sampled.md` is the 24-design sampled-header study, and `results_parameterization.md` is the new same-partition/target control. They must not be conflated. Proofs live only in `../theory/`, each paired with a same-stem Notebook.
-
-## Local execution
-
-From another working directory, use the absolute script path; it resolves the repository root. Installation is explicit:
+## Install explicitly
 
 ```bash
 bash paper/run.sh setup
-bash paper/run.sh all smoke
+bash paper/run.sh setup-neural
+export LLAPDIFF_ROOT=/absolute/path/to/LLapDiffusion
+bash paper/run.sh setup-native
 ```
 
-The implemented experiments can run separately:
+Use the PyTorch installation appropriate for the intended CPU/CUDA machine. The native source checkout is separate and remains unchanged. Its tested component interface is revision `0631e65`; `setup-native` installs that user-selected checkout without silently switching revisions or pulling all external dataset dependencies.
+
+## Execute separately
 
 ```bash
 bash paper/run.sh theory
+bash paper/run.sh native-acceptance
+bash paper/run.sh conditioner-probe full
+```
+
+`native-acceptance` runs the existing original-model loss, gradient and field-consumption checks on **explicit synthetic fixture inputs**, exports the native uniform-time schedule, and redraws the alignment CSV. It does not run HSE/reference extraction or prove method advantage. `conditioner-probe` is an explicitly synthetic shared-readout experiment, not a replacement for real exports.
+
+The original analytic tasks remain available:
+
+```bash
 bash paper/run.sh oracle full
 bash paper/run.sh sampled full
 bash paper/run.sh parameterization full
+bash paper/run.sh all smoke
 ```
 
-`ablation full` aliases the sampled run; it is not a second independent experiment. `all` runs theory, oracle, sampled and parameterization tasks only. It does not train the unimplemented HSE–LLapDiff.
+`all` runs only these analytic tasks plus theory. It never silently starts the real pilot, full five-arm study or external SOTA.
 
-Replot without rerunning any experiment:
+## Genuine frozen exports
+
+Use the schema and original-record provenance requirements in `GOAL.md`. No sample data are substituted when an export is missing.
 
 ```bash
-bash paper/run.sh figures outputs/paper/sampled-full/sampled_summary.csv outputs/paper/figures
-bash paper/run.sh parameterization-figures paper/assets/parameterization_controls.csv outputs/paper/parameterization-reference
+bash paper/run.sh native-batch --batch /absolute/train.npz --data-note /absolute/export_note.md
+bash paper/run.sh native-pilot --train /absolute/train.npz \
+  --validation /absolute/validation.npz --test /absolute/test.npz \
+  --data-note /absolute/export_note.md --device cuda:0 --seeds 0 1 2 \
+  --anchor-steps 150 --diffusion-steps 200 --draws 8 --sampler-steps 16 \
+  --output-dir outputs/native_pilot_01
 ```
 
-Exploratory outputs stay under ignored `outputs/`; retained numeric source tables stay in `paper/assets/`. SVG/PDF/PNG figures are reproducible from those tables. Plot editing does not overwrite reference numbers.
+A successful run on exported features is not on-the-fly HSE/VAE execution. Source validation and unseen acquisition tests remain separate. B1-aux and M share the fitted ordinary trunk; the former sends its complete code.
 
-## Official external baselines
-
-The checked CLI belongs to `pixelhero98/LLapDiffusion`. Install it in a separate environment/checkout, activate it, and provide its absolute root:
+## Redraw without training
 
 ```bash
-export LLAPDIFF_ROOT=/path/to/LLapDiffusion
-bash /path/to/this-repo/paper/run_official_baselines.sh train crypto
-export BASELINE_SOURCE_ROOT=/path/to/upstream-baseline-checkouts
-bash /path/to/this-repo/paper/run_official_baselines.sh forecasting crypto
-bash /path/to/this-repo/paper/run_official_baselines.sh imputation crypto
+bash paper/run.sh native-figures scores outputs/paper/conditioner-full/score_parts.csv outputs/readout_figures
+bash paper/run.sh native-figures alignment outputs/paper/native-component/native_loss_alignment.csv outputs/alignment_figures
+bash paper/run.sh native-figures comparison outputs/native_pilot_01/event_scores.csv outputs/pilot_figures
 ```
 
-The launcher does not silently install dependencies or replace the official model with an oracle. Only its shell syntax was tested here; data-dependent training commands were not run. The crypto preset is an upstream reproduction target, not PHM evidence.
+Figures use Matplotlib and editable SVG/PDF text, plus PNG previews. Comparison figures require exact paired rows, average within original groups and do not discard missing methods or seeds. Intervals condition on the executed training seeds. A one-group result has no between-group confidence interval.
 
-## Decoupling and plotting
+For upstream official baseline datasets use the separate `run_official_baselines.sh` and installed dependencies. Its syntax check is not a trained baseline. Full benchmark expansion is deferred until the small matched native experiment is interpretable.
 
-Paper experiments import neither PHMFactory nor submodule internals. The inspected branch has no PHMFactory gitlink. Any later framework integration exports the arrays and recording-level splits declared in `experiments.md`; the paper must still run without the external checkout.
+## Decoupling
 
-Figure conventions reference `Yuan1z0825/nature-skills/skills/nature-figure`: one scientific question, explicit source data and uncertainty, editable vector text and final physical dimensions. Python matplotlib remains the sole drawing backend. No image model generates quantitative data, no full figure-governance framework is copied, and no Nature submission certification is claimed.
-
-The inherited comparison plot uses a labeled symmetric-log scale. New parameterization panels use linear axes and categorical markers without joining method categories into a fictitious trajectory. The full source tables retain zero controls and equal results. Every caption distinguishes exact encoder-side inference, unequal storage and target-only representations.
+No paper module imports PHMFactory internals or requires its submodule. Any framework export supplies arrays, physical metadata and original recording-level splits. No repository-integrity or figure-governance framework is introduced. The supplied nature-figure reference informs scientific layout and vector exports, not a claim of Nature submission certification.

@@ -1,35 +1,34 @@
 schema_version: 5
 project_name: HSE-LapDiff
-stage: sampled_waveform_budget_oracle
+stage: native_component_acceptance_genuine_export_pilot_pending
 language: English
-
 scope: >-
-  Same window-local events under declared acquisition operators. Known-pole
-  coefficient oracles and frozen-reference latent targets remain distinct.
-
+  Same local events under declared acquisition operators. Known-pole coefficients,
+  frozen reference latents and native denoiser parameters remain distinct.
 active_method:
-  conditioner: acquisition_calibrated_hse_candidate
-  generative_model: latent_laplace_diffusion
+  conditioner: shared_supervised_statistical_prefix_and_ordinary_tail
+  primary_control: complete_shared_supervised_ordinary_code_B1_aux
+  generative_model: original_latent_laplace_diffusion
   flow_matching: future_work_only
-
 central_claim_under_test: >-
-  A budgeted actual condition may preserve posterior-relevant acquisition
-  information for the same LLapDiff. Equal token shape or retained coupling
-  magnitude alone is not a sufficiency or calibration guarantee.
-
+  A statistically anchored deterministic transformation of the same supervised
+  code may reduce finite-denoiser fitting cost. It cannot add Bayes information
+  relative to that deliberately nested control.
 current_evidence:
   previous_analytic_and_finite_design_oracles: retained
-  sampled_gaussian_budget_experiment: locally_completed_24_designs
-  posterior_precision_bound: derivation_and_finite_witness
-  acquisition_only_layout_choice: restricted_oracle_no_gain_over_magnitude_in_grid
-  moment_header: strong_exact_encoder_control_not_learned
-  learned_hse_llapdiff: not_started
-  real_phm: not_started
-
+  sampled_gaussian_budget_experiment: retained
+  moment_and_lowrank_controls: retained_with_declared_scope
+  shared_supervision_and_native_component: verified_on_explicit_synthetic_fixtures
+  native_uniform_schedule_export: executed
+  genuine_hse_reference_exports: not_available_in_this_execution
+  matched_genuine_export_pilot: not_executed
+  real_phm: not_executed
 formal_claim_supported: false
 paper_entry: paper/README.md
+goal_entry: paper/GOAL.md
 experiment_entry: paper/run.sh
-next_decisive_experiment: fixed_backbone_same_information_learned_conditioner_pilot
+next_decisive_experiment: genuine_frozen_export_M_vs_B1_aux_native_pilot
 stop_condition: >-
-  Simplify a candidate that cannot exceed the strongest simple posterior control
-  at declared storage, computation, teacher access and actual side information.
+  Report negative or equivalent results as completed evidence; retain the simpler
+  conditioner when no useful gain survives supervision and cost matching. Missing
+  native checkpoints or data block only the dependent execution slice.

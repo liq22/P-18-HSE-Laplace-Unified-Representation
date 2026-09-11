@@ -1,61 +1,110 @@
-# Method: target-aware posterior conditioning
+# Method: statistically anchored conditioning
 
-## 1. Declared target, observations and budget
+## 1. Task and the information available at inference
 
-The known-pole oracle is `x=A beta+epsilon`, with fixed dictionary, known SPD noise R and declared Gaussian prior. It is not the learned LLapDiff target. The latter is `Z0=E_ref(X_ref)` from one source-trained frozen reference encoder. A teacher used to assess condition compression receives the same current observation O and actual side input a as its comparators; a high-rate reference is common supervision, not privileged teacher input.
+Fix a source-trained HSE extractor and reference encoder. The history features are `F=HSE_0(O,a_enc)`; the generated target is `Z0=E_ref(X_ref)`. A source-defined linear functional `U=L vec(Z0)` supplies the moment-supervision target. The reference encoder, normalization and L are identical for all arms. A known-pole coefficient vector beta is an analytical surrogate, not automatically the reference latent or LLapDiff's predicted modal parameters.
 
-All conditions include every field actually consumed downstream: tokens, attention mask, timestamp/band/reliability fields and a. Count encoded scalars, layout identifiers, precision in bits, encoder computation, decoder computation and cache state separately. Fixed P,K,D is an additional neural-interface constraint, not established by a scalar-count oracle.
-
-The primary contract is single-window inference with a fixed prior and target. Streaming updates and prior reuse are secondary contracts; they cannot be introduced after seeing a precision-header loss merely to rescue that header.
-
-## 2. Select posterior parameterization before layout
-
-Write `b=A^T R^-1 x`, `J=A^T R^-1 A`, `Q=S0^-1+J`, `h=S0^-1 mu0+b`, `S=Q^-1`, `mu=Sh`.
-
-For a fixed partition g and a block-diagonal prior in that partition, compare:
-
-| Condition | Decoded posterior | Primary purpose |
-|---|---|---|
-| full | N(mu,S) | Upper-information reference |
-| natural blocks | N(Qg^-1 h,Qg^-1), Qg=S0^-1+B_g(J) | Prior-reusable likelihood approximation |
-| mean + precision blocks | N(mu,Qg^-1) | Isolate approximate-mean cost |
-| marginal moment blocks | N(mu,B_g(S)) | Forward-KL optimal product control |
-| modal trace-isotropic | N((S0^-1+I(J))^-1 h,(S0^-1+I(J))^-1) | Cheap phase-covariant control |
-| prior-aware low rank | Full mean + prior-whitened negative covariance update | Direct Spantini-family control |
-
-The block-moment control dominates any product approximation at that partition in forward KL. It needs encoder-side posterior computation, which must be charged; no learned HSE is presumed to compute it for free. Truncated precision generally underestimates true marginal covariance by the Schur-complement relation. Report mean displacement, marginal uncertainty and joint dependence loss separately.
-
-The actual current four-coefficient adaptive headers use 11 scalars including layout. The review's six-coefficient fixed `4+2` grouping uses 19 statistics; no layout value is sent only because all arms share it in advance. Do not mix these budgets in one performance claim.
-
-## 3. Target-space analysis
-
-For the analytical target `Z0=L beta`, project every candidate's moments through the same L before calculating posterior KL or denoising discrepancy. Theory 12 gives the exact Gaussian epsilon-predictor discrepancy under the true noisy target. The result depends on the schedule and target covariance; a better whole-beta KL does not guarantee a better Z0 or v-prediction objective.
-
-A goal-only oracle transmits the target moments directly. When the target has low dimension, this can be cheaper than any full-state header. It is a strong target-specific baseline, not a unified representation of all possible future tasks. The goal-oriented low-rank baseline uses the target prior and posterior covariances, as in the family studied by Spantini et al. (2017). The dense diagnostic is not a claimed reproduction of their matrix-free algorithm.
-
-## 4. Candidate learned HSE intervention
-
-The candidate is an **amortized target-calibrated posterior feature inside the existing HSE budget**, not a new denoiser. Freeze one reference encoder and the target grid. Reuse the actual HSE patch extractor; reserve a declared portion of each D-dimensional token for target-relevant mean and covariance-factor features, rather than append an uncounted stream. A neural covariance block is parameterized by a triangular factor with positive diagonal. This ensures validity, not calibration.
-
-Compare the original HSE, explicit natural/coupling features and predicted moment features with the same P,K,D, common acquisition description, denoiser architecture and tuning budget. Any teacher or distillation supervision must be shared across matched controls. Start with the native LLapDiff loss only; add a distillation term only after the teacher posterior and its access to data are validated. An observation-residual penalty can alter the target posterior and is not added by default.
-
-For variance-preserving v prediction,
+The complete conditioner input is
 
 \[
-v=\alpha_\tau\epsilon-\sigma_\tau Z_0,
-\qquad \mathcal L=E\|v-v_\theta(Z_\tau,\tau,H_\psi(O,a),a)\|^2.
+C_F=(F,M_F,a_{\mathrm{consumed}}).
 \]
 
-The proposed learned features are not implemented or validated by the Gaussian controls. Before training, verify forward consumption of every field, conditioner gradients, deterministic evaluation patches and 1/2/3-channel shape semantics. Physical coordinates and latent coordinates remain distinct.
+`M_F` is the history-token mask, True for observed/valid. The side vector is explicitly named and includes any timestamps, acquisition descriptors or quality fields not already represented in F. It never includes target values, target labels or arbitrary dataset IDs as shortcuts. All comparators receive the same fields. A high-rate reference is common training supervision, not extra input given only to a teacher.
 
-## 5. Information-limited versus compute-limited interpretation
+The history mask is consumed before the global code is formed. Invalid entries are excluded explicitly and an empty history is rejected. The current native LLapDiff receives a dense global summary through `cond_summary`, not a patch-indexed mask; `target_mask` instead controls the supervised target loss. A global summary slot is not assigned a fictitious original patch time. No second `cond_summary_raw` stream carries an uncounted copy of the moments.
 
-If a is coarse, prove an actual same-condition collision or quantify the induced conditional KL before calling a gain information recovery. If a reconstructs A,R and b is retained, complete Gaussian information is already available. Any benefit is then computational accessibility to a finite network. Measure it against a metadata MLP, an explicit solver and a width-matched conditioner; do not use information-loss terminology.
+## 2. One shared supervised path
 
-## 6. Physical and software boundaries
+Let `q=K D` be the fixed message size. A trainable trunk produces
 
-Fixed-point and fixed-duration protocols are reported separately. The latter may use more observations at a higher rate and is not a matched-sample-budget experiment. The present modes are below nominal Nyquist: no private-band impossibility result follows from these cells. Small pole/filter misspecification is a required stress test before physical claims.
+\[
+R_\theta=g_\theta(C_F)\in\mathbb R^q.
+\]
 
-Paper experiments consume arrays and explicit split/group information. They do not import PHMFactory internals, alter a submodule, use path injection or silently change datasets. A future PHMFactory export must supply waveform, timestamps, valid mask, rate, units, recording group and split; preprocessing fitting uses sources only. Independent acquisition noise and resampled correlated noise have different likelihoods.
+A global head reads **this same R**, not a detached or unrelated branch:
 
-Flow Matching remains future work. The active method is admitted only after target-space learned gains over the strongest simple condition under the declared cost contract.
+\[
+(m_\psi(R),B_\psi(R)),\qquad
+S_\psi(R)=B_\psi(R)B_\psi(R)^T+\lambda I.
+\]
+
+The lower-triangular B has softplus diagonal. The public setting `covariance_floor=lambda` is a model constraint in the squared units of the source-standardized target. It is not silent covariance repair. The implementation refactorizes S before packing its Cholesky factor.
+
+Stage one minimizes
+
+\[
+\mathcal L_G=\frac12\mathbb E_s\left[
+\log\det S_\psi(R_\theta)
++(U-m_\psi(R_\theta))^T S_\psi(R_\theta)^{-1}(U-m_\psi(R_\theta))\right].
+\]
+
+Both theta and psi receive the score gradient. A one-batch check verifies a nonzero gradient in the trunk and an actual change in the ordinary code later used by B1-aux. A detached-head counterexample is retained as a negative test.
+
+For a **fixed** R, unrestricted scoring identifies `E_s[U|R]` and `Cov_s(U|R)` when the conditional covariance is positive definite and the constraint is inactive. This does not prove that joint trunk training finds a globally sufficient R or that finite optimization attains the conditional moments. With a positive covariance floor, the constrained population optimum clips covariance eigenvalues at that floor; a strictly positive-factor implementation can approach the boundary without attaining it. Theory 12 gives the assumptions and proof.
+
+Save source training/validation score, log determinant, Mahalanobis term, minimum covariance eigenvalue and fraction near the floor. Select a single source-validation checkpoint. Constant-Gaussian and ridge-mean/homoskedastic controls use the same source data. Oracle moment RMSE is reported only when such oracle moments actually exist.
+
+## 3. Freeze once; compare two messages from the same checkpoint
+
+After stage one, freeze HSE, source preprocessing, the trunk and moment head. Set evaluation mode and fix patch selection; do not update dropout/normalization state. Freezing only the final head while changing its inputs is not the proposed method. The source-trained reference encoder and target definition remain fixed.
+
+For d-dimensional U, the statistical prefix costs `s=d+d(d+1)/2` scalars. Define
+
+\[
+H_{B1\text{-aux}}=R,\qquad
+H_M=[m(R),\operatorname{vech}(\operatorname{chol}S(R)),R_{s+1:q}].
+\]
+
+The same checkpoint defines both messages. For `K=4,D=8,d=2`, each message has 32 scalars; M has five statistical and 27 ordinary coordinates. B1-aux receives all 32 ordinary coordinates trained through the auxiliary score. It is not a control with a supervised but unused side branch. M0 uses the same prefix and a zero tail only as a later ablation.
+
+Both frozen message functions are evaluated before the same LLapDiff architecture. Stage two trains only the denoiser, with matched initialization, batches, perturbation noise, time sampling, update count and source-validation selection. The primary small pilot uses v-prediction, uniform nonzero training times and no weighting; other loss conventions are acceptance controls, not additional full training arms.
+
+## 4. What a gain over B1-aux would mean
+
+At the selected checkpoint, `H_M=T(R)` is deterministic. Thus
+
+\[
+I(Z_0;H_M)\leq I(Z_0;R),
+\]
+
+with common side inputs conditioned on when present. M cannot add Bayes information relative to this particular comparator. For a square-integrable native regression target V and common noisy latent/time input X, define the conditional means `f_R=E[V|X,R]` and `f_M=E[V|X,H_M]`. Then
+
+\[
+\mathcal R^*_M-\mathcal R^*_R=\mathbb E\|f_R-f_M\|^2\geq0.
+\]
+
+For fitted predictors, write their excess errors as `A_M` and `A_R`. The same projection argument gives
+
+\[
+\boxed{\mathcal R_M-\mathcal R_R=
+\underbrace{\mathbb E\|f_R-f_M\|^2}_{\text{possible information loss}}
++\underbrace{A_M-A_R}_{\text{finite fitting/accessibility difference}}.}
+\]
+
+A finite-model improvement requires a reduction in fitting/accessibility error larger than any additional Bayes loss. This is the interpretation of the deliberately nested control, not a universal comparison between independently learned same-budget compressors. No mutual information is inferred merely from a loss curve.
+
+Correct moments are not generally sufficient for non-Gaussian generation. The ordinary tail may preserve useful shape, but it also sacrifices prefix coordinates. Same-moment distinct-shape controls and oracle-moment replacement remain necessary: estimation error can itself encode observation identity.
+
+## 5. Native loss and actual consumption
+
+Use the installed original LLapDiff and `diffusion_loss`; do not replace them with an analytical denoiser. On the same batch, retain actual t, noisy targets, sampled noise, mask, prediction type, raw per-sample error, raw/effective weights and final scalar loss. Independently reconstruct the loss and compare all terms, not only the final scalar.
+
+For batch-normalized weights, normalize with that batch's realized denominator. In general
+
+\[
+\mathbb E\left[\frac{\sum_i w_i D_i}{\sum_i w_i}\right]
+\ne\frac{\mathbb E[wD]}{\mathbb E[w]}.
+\]
+
+The schedule CSV exporter describes an explicit uniform-time, non-batch measure; it is not a replacement for batch-level loss reconstruction. Randomly initialized native forward/update checks establish execution only.
+
+At fixed noisy input and time, perturb the prefix and tail separately and confirm that the original model output changes. Also compare the frozen conditioner state before and after a denoiser update. Statistical units are assessed at the raw readout; subsequent learned projection/normalization is allowed.
+
+## 6. Source, target and cost boundaries
+
+Training and validation use source acquisition conditions only. Report source holdout and unseen acquisition scores separately, without refitting the moment head or normalization. Frozen source moments do not imply target calibration. Original recording/event groups must be split before windowing or constructing views; checking exported strings alone cannot establish their provenance.
+
+Equal q is an interface constraint, not a complete compute match. Charge source supervision, all conditioner parameters, one-time extraction/anchor training, per-event message construction, denoiser training and repeated sampling separately. Fixed point count and fixed physical duration are different protocols. Independent measurements and resampled views of one noisy recording require different joint-noise models.
+
+Paper modules consume exported arrays through the declared interface. They neither import PHMFactory internals nor change submodule revisions. The original LLapDiff is installed in a separate checkout. Flow Matching stays future work.

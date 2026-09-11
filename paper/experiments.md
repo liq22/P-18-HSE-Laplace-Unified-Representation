@@ -1,86 +1,96 @@
-# Experiments, ablations and comparison contract
+# Experiments: native acceptance before expansion
 
-## 1. Runnable experiments and unimplemented studies
+## A. Integrate the current branch, not an obsolete overlay
 
-| Task | Command | Status and boundary |
-|---|---|---|
-| E0 theory | `bash paper/run.sh theory` | All numbered Markdown/Notebook witnesses; tests are not novelty approval |
-| E1 finite acquisition family | `bash paper/run.sh oracle full` | Existing true-compressed-conditional versus plug-in experiment, preserved |
-| E2 sampled-window study | `bash paper/run.sh sampled full` | Existing 24-design, 11-scalar header study, preserved |
-| E3 allocation ablations | `bash paper/run.sh ablation full` | Alias for E2, not an independent experiment |
-| P posterior parameterization | `bash paper/run.sh parameterization full` | New fixed-partition moment, precision, trace and low-rank controls |
-| F figures from existing data | `figures` or `parameterization-figures` modes | Read CSV only; no simulation or model fitting |
-| E4 official published baselines | `paper/run_official_baselines.sh` | Requires separately installed upstream code/data; launcher is not our new HSE integration |
-| E5 learned HSE–LLapDiff | Three-arm protocol below | Not implemented; no oracle substituted for a training command |
-| E6 real PHM | Explicit export and recording protocol below | Not executed |
+Read the actual PR head, AGENTS and existing implementations. Preserve the completed shared-supervision path and all earlier correct Gaussian/shape controls. Do not apply the old 799f2cf-based ZIP over a newer branch. Run all current tests and the complete same-stem Notebook corpus at the same final revision. Counts from different revisions are not additive.
 
-`all smoke` runs implemented local studies only. Read `GOAL.md` for the sequential execution goals and `results_parameterization.md` for the new negative controls.
+The theory stage is not another open-ended review. Only append implementation-relevant implications to existing Theory 12 and its Notebook. No new theory number, manager, registry or framework is required.
 
-## 2. Preserve the earlier sampled protocol
+## B. Original LLapDiff component and real upstream exports
 
-The earlier E2 uses four coefficients from N(0,I), damping 12/18 inverse seconds, frequencies 100 and 100+delta Hz, rates 1024/2048 Hz, context durations 0.08/0.2 s, delta 5/30 Hz and regular/jitter/block-missing designs (24 cells). It deterministically selects K=4 non-overlapping P=16 patches. Missing observations are removed rather than imputed.
+The original component must be installed from a declared checkout. First run `native-acceptance` on explicit synthetic fixtures. Verify shared auxiliary gradients, frozen states, actual field consumption, and exact native-loss conventions on one batch. The native scheduler export is separate from the realized batch-normalized objective.
 
-Full mode uses 2,048 events per simulator seed 0/1/2, with 384 reserved draws before evaluation. Coefficients recur across designs. Each acquisition gets separate measurement noise, shared across methods within that acquisition. The seven arms are diagonal, within-mode, magnitude, risk-oracle, within-mode moments, selected moments and full information, each under coarse/full-operator side inputs (336 rows). Sparse headers contain 11 scalars including layout code; full contains 15. Storage is matched across sparse arms, not inference cost or learned capacity.
+Then run a genuine exported batch. A source-trained HSE and frozen reference encoder must actually have produced the inputs. An interface check on synthetic features is not a substitute. The export note records original source classes and revisions, checkpoints, preprocessing, deterministic patch selection, normalization state, physical units and original group split. If dependencies are missing, stop only this dependent slice rather than inventing replacement models.
 
-Risk and magnitude select the same partition in all retained cells: equality follows from the same computation, not a nonsignificance test. Preserve the original numerical tables and valid older loose bounds; the new tighter bound is labeled separately.
+### Required export fields
 
-## 3. New fixed-partition parameterization controls
-
-At the same observation, prior and partition compare:
-
-1. full posterior, explicitly larger reference;
-2. natural blocks, retaining the information vector and likelihood blocks;
-3. full posterior mean plus inverse precision blocks;
-4. full posterior mean plus true marginal covariance blocks;
-5. trace-isotropic information per full cosine/sine mode;
-6. prior-whitened low-rank posterior covariance with exact mean.
-
-Add a target-only low-rank approximation and exact target moments, explicitly not full-state representations. The six-dimensional fixed example uses a 4+2 partition, 19 scalars for all three block parameterizations and zero per-event layout cost. The new four-dimensional sampled controls use fixed within-mode pairs and 10 scalars, whereas E2 uses adaptive 11-scalar headers. Never combine these counts in a single matched-budget claim.
-
-Report joint coefficient KL, target KL and exact Gaussian target-denoiser discrepancy under the same alpha/sigma. For fixed-point versus fixed-duration comparisons use separate tables: the latter changes P and observation count to preserve nominal physical cell duration. Do not describe these below-Nyquist direct samples as hardware anti-alias or private-band experiments.
-
-The low-rank implementation is a dense small-matrix oracle of the published approximation family. Charge full covariance computation, prior knowledge and any factor transmission to it. Do not claim a matrix-free large-scale implementation or embedded-device timing.
-
-## 4. Next minimal study: actual-condition and target audit
-
-Freeze a reference encoder and define Z0 before comparison. Read the actual HSE and LLapDiff forward paths to identify O, H and consumed a. Check field consumption, deterministic evaluation patches and 1/2/3-channel shapes/gradients. A high-rate reference is common supervision, not privileged teacher input hidden in only one arm.
-
-Two branches have different interpretations: when (H,a) loses information, estimate a true compression gap; when a reconstructs J and b is complete, test finite-network efficiency instead. Include a capacity-matched metadata MLP and an explicit solver. Do not remove available metadata to manufacture novelty.
-
-Keep frequencies fixed and vary one non-frequency factor (a missing interval or damping) before expanding the design grid. Add one small pole-estimation mismatch. All estimated poles/noise and any decision threshold use source training/validation only. Phase tests rotate the prior as well as A,b,J; cheaper trace-isotropic and moment controls must be included. Arbitrary scalar pairings are not full-mode phase-covariant groups.
-
-## 5. Learned comparison and ablations
-
-Freeze one source-trained target VAE and its weights. Keep denoiser architecture, prediction parameterization, schedule, time weights, reverse sampler, batch composition and target grid equal. Train each arm's denoiser and conditioner rather than selectively freezing one.
-
-| Arm | Condition and purpose |
+| Field | Shape and meaning |
 |---|---|
-| B0 | Original LLapDiff history summarizer + common a |
-| B1 | Original HSE with fixed P,K,D + the same a |
-| B2 | Metadata/capacity-matched HSE, with no hidden side stream |
-| M | Simplest target-calibrated HSE feature justified by the controls |
-| G / GM | Heteroscedastic Gaussian / finite mixture on the same condition |
+| tokens | `[N,K,D]`, genuine frozen HSE features |
+| attention_mask | bool `[N,K]`, True = valid history token |
+| side / side_names | `[N,A]` and names `[A]`; A=0 is explicit |
+| targets | `[N,d]`, declared moment target |
+| event_id / group_id / condition_id | `[N]`, event, original recording/run, acquisition condition |
+| z0 | `[N,H,Z]`, same frozen-reference latent target |
+| target_mask | bool `[N,H]`, supervised target positions |
+| query_time_s | `[N,H]`, actual query time in seconds |
+| target_map | `[d,H*Z]`, `targets=flatten(z0) @ target_map.T` |
 
-Use the same source-validation search space where applicable, 20 maximum trials per learned arm and matched maximum optimizer updates. Report parameters, FLOPs, encoder and decoder latency separately, memory, storage precision, cache policy and training wall-clock. A +/-5% parameter/FLOP match must be measured. Dataset ID may route a task head but must not enter the embedding.
+The global moment readout conditions on the selected R produced from tokens, history mask and side. Information not represented in tokens must be explicitly exposed when it is part of the actual readout condition. Do not silently replace missing masks with all-valid defaults. Distinct window IDs do not excuse overlap of their original group_id across train, validation and test.
 
-Primary metric: joint target Energy Score, with dependence diagnostics. Secondary: marginal CRPS, 50/80/90/95% condition-stratified coverage and width, observation-dependent prediction versus prior-only, paired retrieval and task log-loss/macro-F1. Approximate diffusion NLL is not interchangeable with exact mixture likelihood. Training seeds and posterior draws are distinct axes.
+The native dense summary has no reused patch mask: the history mask is already consumed in forming it. Target masks affect the loss, not summary availability. There is no unpriced second moment stream.
 
-Ablate natural/mean-corrected/moment parameterization at fixed groups; coarse versus full a; coefficient versus target metrics; diagonal/trace/full-mode blocks; shuffled coupling/layout fields; no distillation versus matched-teacher distillation; fixed points versus physical duration; exact versus estimated poles; and STFT/wavelet/direct-time features with the same decoder. Run sequentially rather than a giant cross-product. No unproved observation-residual penalty is assumed posterior-unbiased.
+### Native equality checks
 
-## 6. Strong external comparisons, not a claimed SOTA ranking
+Use the same z0, actual t and noise for native and independent loss calculation. Compare eps/v/x0 targets, per-sample valid-element normalization, raw/effective weights and final mean. Test none/global/batch normalization. For the batch scheme use its realized denominator. Exercise a denoiser update; intervene on prefix/tail at a fixed noisy input; confirm frozen conditioner parameters and state remain unchanged.
 
-LLapDiff is the direct parent. CSDI is for matching imputation; TimeGrad requires a matching autoregressive forecast protocol. ContiFormer, t-PatchGNN, Neural CDE and adaptable Warpformer belong in point-prediction tables unless a legitimate predictive law is provided. DLinear and PatchTST are required simple/patch forecasts. Physical controls include original HSE, Conv1D, STFT, wavelets and Prony/matrix pencil when modal estimation is compared. Spantini prior-aware and goal-oriented controls belong in analytic approximation tables. Time-IMM is an irregularity protocol reference, not a trained model.
+## C. First learned comparison: M versus effective B1-aux
 
-The official LLapDiff adapters may restrict baselines to scalar target-only inputs. Match that scope or mark comparisons informationally unmatched and supplementary. Large pretrained models require a separate data/compute regime. A missing implementation is reported, never replaced silently.
+One source-selected shared trunk/moment checkpoint is used for both arms. B1-aux sends R; M sends `[moments(R), tail(R)]`. The auxiliary Gaussian score updates the same trunk whose R reaches B1-aux. The detached auxiliary-head construction is an invalid-control negative test, not a baseline.
 
-## 7. Statistics and PHMFactory boundary
+The current minimal pilot exposes two arms. B1 remains a reference using the actual ordinary HSE path; do not substitute a random projection to fill its table. B0 may first confirm the official reference entry. M0 and the full five-arm table are deferred until the primary comparison runs correctly.
 
-Independent unit: latent event, later machine/bearing/run/recording. Compute paired per-event differences before bootstrap. The earlier E2 uses 1,000 percentile bootstrap replicates per design; their intervals are diagnostic, not multiplicity-corrected universal claims. The new parameterization table uses finite analytical controls and descriptive means, not a confirmatory test. Repeated coefficient draws, rates and training seeds do not create independent machines. Freeze practical/equivalence margins before looking at the test comparison; p>0.05 is not equivalence.
+Initial pilot settings are deliberately small: training seeds 0/1/2, 150 shared-readout updates, 200 native-denoiser updates, 8 posterior draws and 16 requested DDIM steps. The native model is one layer, two heads, 64-step cosine schedule, v prediction, uniform nonzero training times, no loss weighting and no dropout. Record actual runtime and generated function evaluations: requested sampler steps need not equal unique native time indices. These settings are a pilot, not a tuned final benchmark.
 
-No PHMFactory gitlink exists in the inspected branch. Do not add a submodule or import its internal factories to run this paper. Optional external preprocessing exports values[N,C], time_s[N] or [N,C], boolean valid_mask and a table containing recording_id, machine_id, split, sampling_rate_hz, units and sensor/channel identity. Paths are relative to an explicit data root; missing scientific fields are errors, not guessed defaults.
+Keep the same target/reference encoder, data access, masks, code dimension, denoiser initialization policy, batches/noise/time strategy, update budget and source-validation selection. The input HSE and reference encoder stay frozen. Do not refit any normalization, code or moment head using the unseen acquisition test set.
 
-For E6, first audit one licensed raw vibration source and its grouping keys. Split machines/recordings before windows or rate views, fit all preprocessing on source only, then evaluate an unseen intermediate rate. Record anti-alias responses and coupled noise; filtered copies of one noisy record are not independent likelihood factors. CWRU and PU remain candidates, not admitted data or current evidence. Cross-hardware and cross-machine generalization need separate evidence.
+### Primary endpoint and statistical unit
 
-## 8. Contribution decisions
+The primary endpoint is joint Energy Score on source-standardized reference latents, restricted to the declared valid target coordinates and divided by the square root of that event's valid target dimension. This normalizes scale; it does not make different masks the same task. Stratify source holdout and unseen acquisition and keep actual mask patterns comparable across methods.
 
-Under fixed prior and forward KL, prefer moment/goal-oriented controls unless a measured cost or required update constraint justifies natural blocks. Do not continue searching for favorable frequency cases. Promote a learned contribution only after M improves the actual frozen target under equal information and cost relative to B1/B2 and the strongest simple probability head. Analytical correctness and CI are not novelty approval. `formal_claim_supported: false`; Flow Matching remains future work.
+Use an unbiased cross-draw term for Energy Score with at least two independently initialized draws. Posterior draws are Monte Carlo accuracy, not independent equipment or training replicates. Report draw count, sampler configuration and native cost separately.
+
+For each acquisition condition, pair M/B1-aux by event and training seed. Average the executed paired seeds within event, events within original recording/group, then groups equally. Bootstrap original groups. The interval is conditional on these trained seeds; it does not establish an infinite-seed population claim. One original group cannot provide a between-group confidence interval. Missing method/event/seed pairs must not be silently dropped.
+
+Predeclare a practical/equivalence margin from source repeatability and task needs before reading the test ranking. `p>0.05`, wide intervals or three optimization seeds do not establish equivalence. Preserve unfavorable values and failed runs separately from completed scores.
+
+### Decision
+
+CONTINUE: native comparison is correct, target benefit is repeatable and meaningful at declared cost. Then expand the study.
+
+SIMPLIFY: M has no useful gain or is worse than equally supervised R. Keep the simpler conditioner and report the negative result.
+
+BLOCKED: a genuine export, checkpoint or native dependency is missing. Name that dependency; do not replace it with random data and claim the native pipeline is complete.
+
+Completion means correct implementation, valid comparison, reproducible outputs and an accurate conclusion. It never requires M to win.
+
+## D. Deferred ablations
+
+| Ablation | Question |
+|---|---|
+| B0 / B1 / B1-aux / M0 / M | inherited model, ordinary code, effective auxiliary supervision, moment bottleneck, candidate |
+| predicted moments replaced by oracle moments where available | whether prediction error itself carries condition identity |
+| remove or shuffle ordinary tail | whether non-Gaussian shape comes from ordinary features |
+| declared covariance floor / alternative explicit constraint | whether the score gains come from variance collapse or a changed feasible family |
+| two same-dimensional targets, one crossing a modal group | whether the target affects learned conditioning rather than only post-hoc scoring |
+| fixed points versus fixed physical duration | observation-budget and physical-support confounding |
+| equal/full actual side inputs | already-available information versus finite computational accessibility |
+| source holdout versus unseen acquisition | source statistical semantics versus target generalization |
+
+Do not add new modules because an ablation fails. Gaussian and finite-mixture conditional heads on the same features remain strong controls against claiming Diffusion is necessary from non-Gaussianity alone.
+
+## E. External strong methods, only after the pilot
+
+Maintain task compatibility. LLapDiff is the primary generative reference. CSDI is a probabilistic imputation comparison, not a substitute for forecasting. t-PatchGNN, ContiFormer and Neural CDE cover irregular-time prediction. Add Hi-Patch and HyperIMTS (ICML2025) as modern irregular multivariate representation/forecasting candidates. PatchTST and DLinear are point-forecast controls; do not invent their probability densities or rank them by an unavailable NLL.
+
+For a probability table, either use an explicitly trained matched probability head or report the method only on compatible point metrics. Official baseline commands are reference launchers; shell syntax passing is not baseline execution. No SOTA table receives guessed values.
+
+Analytical controls remain complete statistics, natural/precision blocks, true marginal moments, prior/goal-oriented low-rank approximations and the full-side-information null. Their dense exact inference cost is not equated with amortized HSE cost.
+
+## F. Real PHM and plotting boundary
+
+Only after the minimal native comparison is interpretable, use a licensed raw-recording source. Split original recording/machine groups first; construct anti-aliased rate views within each split. Native high/low hardware measurements and resampling one noisy recording have different noise dependence. No target labels, target normalization fit or target-based checkpoint selection is allowed. An offline single-source pilot is not cross-hardware or universal PHM evidence.
+
+Paper code consumes exported arrays and original split/group information, not PHMFactory factories or internal module paths. No submodule update is required for analytical/native component checks.
+
+Use CSV-only `paper/plot_native.py` for scoring parts, native equality checks and paired pilot effects. Each figure answers one question, retains editable SVG/PDF text and keeps negative/null outcomes. Quantitative figures never use generated image values. This follows the requested nature-figure data-first/vector principles without importing its full governance system.

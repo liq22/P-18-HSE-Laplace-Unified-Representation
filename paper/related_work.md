@@ -1,44 +1,28 @@
-# Related work and the exact unresolved gap
+# Related work: exact remaining question
 
-Primary-source check: 10 September 2026. This is a focused comparison, not an assertion that no equivalent work exists. The Introduction uses 16 distinct references, 10 from Nature Reviews Physics, IEEE TPAMI, ICML, NeurIPS, ICLR or CVPR. The six direct specialist/preprint references remain because relevance takes priority over venue counts. See `introduction_outline.md` and `../literature/references.bib`.
+The active method remains HSE-conditioned LLapDiff. The question is whether an explicitly supervised statistical prefix improves finite native-denoiser use relative to the complete ordinary code trained by the **same** supervision. The chosen comparator makes the messages nested, so this is not a claim to create new information.
 
-| Predecessor | What is already established | What remains to test here |
+| Predecessor | Established object | Remaining test here |
 |---|---|---|
-| HSE, Information Fusion 2025 | Heterogeneous signal patching and a common embedding interface | Preserve original P,K,D and test the actual consumed condition, not a replacement oracle |
-| LLapDiff, arXiv:2605.19805 | Latent-trajectory diffusion, stable modal prediction, gap-aware conditioning, arbitrary-time evaluation | Does a target-aware condition improve this same generator? No inherited modal or one-step claim |
-| Alsing–Wandelt, MNRAS Letters 2018 | Fisher-preserving score compression under stated assumptions | Complete posterior preservation cannot be inferred for arbitrary diagonal tokens |
-| Oko et al., arXiv:2501.04641 | Approximate sufficient representations connected to conditional diffusion | A specific conditioner and measurable loss under its actual side inputs, not a new generic sufficiency principle |
-| Spantini et al., SIAM JSC 2015 | Prior- and likelihood-informed low-rank posterior approximation | Mandatory prior-whitened low-rank numerical control with actual encoder/storage costs |
-| Spantini et al., SIAM JSC 2017 | Goal-oriented posterior covariance and mean approximation | Target-aware inference is not new; compare on the frozen target, not only all physical coefficients |
-| Neural Laplace, ICML 2022 | Learning dynamics through Laplace-domain representations | Inherited coordinate machinery, not proof that learned latent poles are physical |
-| Neural CDE, NeurIPS 2020; ContiFormer, NeurIPS 2023 | Continuous-time irregular-sequence modeling | Task-compatible external models; no invented predictive density for a point predictor |
-| t-PatchGNN, ICML 2024 | Transformable temporal patches and asynchronous multivariate dependence | Relevant learned patch baseline after matching observations, task and budget |
-| CSDI, NeurIPS 2021 | Conditional probabilistic imputation | Compare imputation to imputation; do not import its results into forecast ranking |
-| Time-IMM, NeurIPS 2025 Datasets and Benchmarks | Cause-driven irregular multimodal time-series evaluation | Protocol context, not PHM evidence or a model row |
-| Latent diffusion, CVPR 2022; likelihood-weighted score training, NeurIPS 2021 | Learned latent generation and qualified links from objectives to likelihood | Freeze the actual target and schedule; arbitrary denoising MSE is not an endpoint guarantee |
+| HSE (Information Fusion 2025) | Shared heterogeneous-signal embedding interface | Fixed-budget consumption by a conditional trajectory generator |
+| LLapDiff (ICML2026 accepted, author/institution record) | Latent trajectory diffusion, stable modal prediction, gap-aware conditioning | Change only the conditioner, retaining native objective and target |
+| Alsing–Wandelt (2018) | Score compression and Fisher-information preservation | Local information preservation is not arbitrary learned-token posterior sufficiency |
+| Oko et al. (2025) | Approximate sufficient representations and conditional-generation theory | A concrete shared-supervision code replacement; do not reclaim generic sufficiency-to-denoising theory |
+| Spantini et al. (2015,2017) | Prior-aware and goal-oriented posterior mean/covariance approximation | Fair comparison to strong analytical summaries; charge encoder inference |
+| Gneiting–Raftery (2007) | Proper scoring and statistical prediction | Explicit Gaussian moment scoring with finite optimization and floor diagnostics |
+| Koh et al. (ICML2020) | Supervised intermediate concept bottlenecks | Analogy for supervised semantics, not a proof of posterior moments |
+| Seitzer et al. (ICLR2022) | Heteroscedastic likelihood optimization pitfalls | Decomposed scoring diagnostics; do not infer a unique cause from validation deterioration |
 
-## The gap after incorporating the strongest controls
+Gaussian identities, Schur complements, product projections, data processing and conditional-expectation orthogonality are analytical background. A method contribution requires the actual matched intervention to be useful, with its failed or equivalent cases reported.
 
-A likelihood header is not necessarily the best posterior message for a fixed prior and target. At a fixed Gaussian partition, exact posterior moments give the forward-KL-optimal product approximation. The current natural blocks may be useful for prior reuse or independent-evidence accumulation, but those algebraic properties require a deployment use case and measured cost benefit. They do not defeat moment matching on its own objective.
+## Updated irregular-time baselines
 
-The candidate research question is therefore: **under equal current-acquisition information, a frozen generation target and explicit encoder/transmission/decoder budgets, can an amortized HSE expose target-relevant posterior structure that the same finite LLapDiff otherwise uses inefficiently?** If actual conditions collide, study compression. If the side input already reconstructs full information, study computation. Do not claim both explanations from the same result without separating them.
+Hi-Patch (Luo et al., ICML2025, PMLR267:41494–41519) uses hierarchical patch graphs to represent variable sampling scales. HyperIMTS (Li et al., ICML2025, PMLR267:35502–35518) connects observations through temporal and variable hyperedges. They are closer irregular-time representation comparisons than another generic backbone. t-PatchGNN, ContiFormer and Neural CDE remain relevant. None is claimed to solve or fail the specific supervised-prefix intervention without a task-compatible experiment.
 
-The proposed target-calibrated mean/covariance feature remains a candidate. Generic KL identities, Gaussian product projection, Schur complements, coordinate covariance and low-rank optimality are supporting tools. The new numerical controls falsify pure-accuracy preference for natural blocks; they do not yet establish learned superiority.
+CSDI is a probabilistic imputation comparison; LLapDiff is the primary native generative reference. PatchTST and DLinear are point-forecast controls, not likelihood models. Do not combine incompatible tasks into a single SOTA ranking. Hi-Patch/HyperIMTS and the broader external table are deferred until M/B1-aux is interpretable.
 
-## Exact primary sources
+## Status and primary-source use
 
-HSE: https://doi.org/10.1016/j.inffus.2025.103277
+LLapDiff's arXiv v2 and Bristol institutional record identify ICML2026 Spotlight acceptance. The citation records that status without inventing a proceedings volume or page range. PMLR supplies the 2025 graph-method metadata. The actual installed upstream component revision and API remain a separate implementation reference.
 
-LLapDiff: https://arxiv.org/abs/2605.19805 ; official code https://github.com/pixelhero98/LLapDiffusion
-
-Approximate sufficiency: https://arxiv.org/abs/2501.04641v2
-
-Score compression: https://doi.org/10.1093/mnrasl/sly029
-
-Prior-aware approximation: https://doi.org/10.1137/140977308
-
-Goal-oriented approximation: https://doi.org/10.1137/16M1082123
-
-Irregular patching: https://proceedings.mlr.press/v235/zhang24bw.html
-
-The bibliography also provides exact DOI/proceedings links for the Introduction's high-venue background papers. No acceptance status is invented for LLapDiff or Oko et al. Flow Matching remains future work.
+The Introduction intentionally uses relevant Nature-family, TPAMI and leading conference work for most citations while retaining all direct statistical predecessors. Venue count is not evidence of originality. Flow Matching remains future work and is not added to the current model or main comparison.
