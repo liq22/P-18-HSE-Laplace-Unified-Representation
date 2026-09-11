@@ -43,3 +43,35 @@ jobs:
           bash paper/run.sh parameterization-figures paper/assets/parameterization_controls.csv "$RUNNER_TEMP/parameterization-reference"
       - name: Check external launcher syntax only
         run: bash -n paper/run_official_baselines.sh
+  native-conditioner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/checkout@v4
+        with:
+          repository: pixelhero98/LLapDiffusion
+          ref: 0631e65cbac59d23822205573ebc7e180ecf0487
+          path: native_llapdiff
+      - name: Install CPU component runtime, not external dataset pipelines
+        run: |
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install numpy
+          python -m pip install -e native_llapdiff --no-deps
+      - name: Check shared gradients, frozen states and export boundaries
+        env:
+          OMP_NUM_THREADS: "1"
+        run: python -m unittest experiments.learned_conditioning.test_moment_conditioner experiments.learned_conditioning.test_feature_data -v
+      - name: Check native loss and field consumption on explicit synthetic component inputs
+        run: python -m experiments.learned_conditioning.native_forward --component-smoke --output-dir "$RUNNER_TEMP/native-check"
+      - name: Export native uniform training-time measure
+        run: python paper/export_llapdiff_schedule.py --output "$RUNNER_TEMP/native-check/schedule.csv" --prediction v --weight none --normalization none
+      - name: Retain native diagnostic numbers
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-conditioner-check
+          path: ${{ runner.temp }}/native-check/
+          if-no-files-found: error
