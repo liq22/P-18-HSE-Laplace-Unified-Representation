@@ -1,49 +1,34 @@
 schema_version: 5
 project_name: HSE-LapDiff
-stage: finite_design_paired_compression_oracle
+stage: native_component_acceptance_genuine_export_pilot_pending
 language: English
-
 scope: >-
-  The same window-local event under declared acquisition operators; distinguish
-  known-pole coefficient oracles from frozen-reference-encoder latent targets.
-
+  Same local events under declared acquisition operators. Known-pole coefficients,
+  frozen reference latents and native denoiser parameters remain distinct.
 active_method:
-  conditioner: fixed_budget_hse_with_declared_actual_side_information
-  generative_model: latent_laplace_diffusion
-  target: frozen_reference_latent_in_learned_experiments
+  conditioner: shared_supervised_statistical_prefix_and_ordinary_tail
+  primary_control: complete_shared_supervised_ordinary_code_B1_aux
+  generative_model: original_latent_laplace_diffusion
   flow_matching: future_work_only
-
 central_claim_under_test: >-
-  A minimal acquisition-coupling condition may reduce fixed-budget HSE
-  information loss and improve the same LLapDiff beyond equal-side-information
-  baselines. This is a candidate requiring paired and learned evidence.
-
-theory_status:
-  fixed_dimensional_sufficiency: full_b_J_or_reconstructible_actual_condition_only
-  closed_form_canonical_posterior: retained_linear_gaussian_result
-  acquisition_information_monotonicity: gaussian_loewner_order_only
-  general_uncertainty: posterior_averaging_under_degradation
-  paired_conditional_identifiability: retained_with_declared_observation_map
-  complete_invariance_risk_lower_bound: exact_paired_invariance_and_log_loss
-  posterior_sufficiency: retained_markov_condition
-  laplace_stability_and_gap_shift: inherited_supporting_results
-  conditioning_KL_decomposition: standard_identity_with_finite_witness
-  conditioning_denoising_projection: standard_projection_with_finite_witness
-  exact_compressed_acquisition_posterior: finite_design_bayes_derivation_with_witness
-
+  A statistically anchored deterministic transformation of the same supervised
+  code may reduce finite-denoiser fitting cost. It cannot add Bayes information
+  relative to that deliberately nested control.
 current_evidence:
-  analytic_oracle: existing_result_retained
-  actual_token_boundary_tests: locally_passed
-  task_b_theory_notebook: locally_passed
-  task_b_behavior_tests: eight_locally_passed
-  learned_model: not_started
-  coefficient_space_compression: completed_6144_events_per_prior_cell
-  sampled_waveform_compression: not_started
-  real_phm: not_started
-
+  previous_analytic_and_finite_design_oracles: retained
+  sampled_gaussian_budget_experiment: retained
+  moment_and_lowrank_controls: retained_with_declared_scope
+  shared_supervision_and_native_component: verified_on_explicit_synthetic_fixtures
+  native_uniform_schedule_export: executed
+  genuine_hse_reference_exports: not_available_in_this_execution
+  matched_genuine_export_pilot: not_executed
+  real_phm: not_executed
 formal_claim_supported: false
-next_decisive_experiment: sampled_window_actual_condition_and_budget_check
+paper_entry: paper/README.md
+goal_entry: paper/GOAL.md
+experiment_entry: paper/run.sh
+next_decisive_experiment: genuine_frozen_export_M_vs_B1_aux_native_pilot
 stop_condition: >-
-  Do not retain a coupling feature when actual side inputs already remove its
-  information gap. Do not claim Diffusion superiority when Gaussian or finite
-  mixture models are equivalent under the same condition and declared budget.
+  Report negative or equivalent results as completed evidence; retain the simpler
+  conditioner when no useful gain survives supervision and cost matching. Missing
+  native checkpoints or data block only the dependent execution slice.

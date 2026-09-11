@@ -1,69 +1,40 @@
-# HSE–LapDiff
+# Acquisition-Conditioned Statistical Representation for HSE–Laplace Modeling of Heterogeneous Industrial Time Series
 
-## Working title
+## Abstract — evidence-limited draft
 
-**Acquisition-Information Conditioning for Probabilistic Cross-Acquisition Representation**
+Industrial time-series models increasingly share one embedding interface across sensors, sampling rates and missingness patterns, yet an identical tensor shape does not imply that the evidence needed by a finite downstream model is equally accessible. This work studies that gap for HSE-conditioned Latent Laplace Diffusion. A source-supervised ordinary HSE code is trained together with a global statistical readout of a declared reference-latent target; after source validation, the whole conditioning path is frozen. The statistically anchored message replaces a fixed subset of ordinary coordinates by the predicted target moments while preserving the remaining code. Its strongest comparator transmits the complete ordinary code trained through exactly the same supervision. Hence the proposed message cannot create Bayes information relative to that comparator, and any benefit must arise from finite-model accessibility rather than from hidden additional observations. We define an acquisition-conditional accessibility profile and a routing-headroom estimand that determines whether a single representation, a static fusion, or a source-only acquisition-conditioned route is scientifically justified. Existing Gaussian posterior, conditional-projection and proper-scoring results are used as supporting analysis rather than reclaimed as general theory. Current repository evidence establishes analytical and native-component consistency only; learned PHM superiority, external-benchmark superiority and a routing gain are not yet claimed.
 
-## Problem and exact gap
+## 1. Introduction
 
-The same local event can produce different information under different sampling rates, timestamps, masks and sensor responses. A fixed embedding interface does not establish that a conditional generator receives the same physical evidence or should return the same uncertainty.
+Industrial monitoring rarely observes a physical process through one fixed acquisition system. Sensor transfer functions, sampling rates, channel availability, observation duration and missingness alter both the waveform and the evidence available to an algorithm. Physics-informed learning motivates the use of measurement structure rather than treating all variation as an arbitrary domain shift [@karniadakis2021physics]. HSE provides a common interface for heterogeneous fault-diagnosis signals [@li2025hse]. Recent industrial foundation models make the competition substantially stronger: FISHER represents heterogeneous industrial modalities and explicitly handles sampling-rate changes through time–frequency sub-bands [@fan2026fisher], while TF-ProFM targets generalizable bearing diagnosis through a prototype-based time–frequency foundation model [@pi2026tfprofm]. The problem is therefore not to claim the first unified industrial representation. It is to determine what information should be made accessible to a finite downstream model under a fixed conditioning budget.
 
-HSE supplies heterogeneous-signal tokenization. LLapDiff supplies stable modal prediction in a latent-trajectory diffusion model. Neither component is claimed here as new. The remaining question is whether an actual finite-budget HSE condition retains the cross-modal acquisition information required by that fixed generator.
+This question is distinct from generic irregular-time modeling. Neural CDE [@kidger2020cde], t-PatchGNN [@zhang2024tpatchgnn], ContiFormer [@chen2023contiformer], Hi-Patch [@luo2025hipatch] and HyperIMTS [@li2025hyperimts] model irregular timestamps, variable sampling scales or asynchronous multivariate observations. General-purpose time-series foundation models such as MOMENT [@goswami2024moment] and UniTS [@gao2024units] address multi-dataset or multi-task transfer. These methods establish strong representation baselines, but they do not imply that two equal-size conditions expose the same target-relevant evidence to a fixed probabilistic generator. Conversely, a new conditioner should not be credited for information that was already available through timestamps, masks or acquisition metadata.
 
-Statistical compression and approximate sufficient-representation theory already connect compressed conditions to conditional generation; see Alsing and Wandelt and Oko et al. in `related_work.md`. Our candidate difference must be a concrete, budgeted acquisition-information mechanism and its measurable effect, not a new name for those identities.
+Probabilistic trajectory models create a second requirement. Neural Laplace models dynamics in the Laplace domain [@holt2022neurallaplace], CSDI conditions diffusion for probabilistic imputation [@tashiro2021csdi], and LLapDiff generates low-dimensional latent trajectories using stable Laplace-domain modal prediction and gap-aware history conditioning [@you2026llapdiff]. We retain the LLapDiff target, scheduler and reverse process. The physical coefficients of a known-pole oracle, a frozen reference-encoder latent trajectory and LLapDiff's learned modal parameters are different random objects. Better inference of one does not automatically imply a better representation of another.
 
-## Three objects, one controlled comparison
+The analytical literature already rules out several easy novelty claims. Score compression can preserve Fisher information under its assumptions [@alsing2018compression]. Approximate-sufficiency theory connects representation quality with conditional generation [@oko2025sufficiency]. Goal-oriented Bayesian approximation directly studies posterior quantities relevant to a declared quantity of interest [@spantini2015lowrank; @spantini2017goal]. Proper scoring rules identify statistical targets when the scoring problem is correctly specified [@gneiting2007proper], while finite heteroscedastic neural optimization can behave poorly even when the population objective is sound [@seitzer2022pitfalls]. Thus neither “predict moments”, “retain more posterior entries”, nor “connect compression to diffusion” is by itself the contribution.
 
-The analytical target is a known-pole coefficient vector `beta` with `s(t)=Phi_Lambda(t) beta`. Under known linear-Gaussian acquisition,
+Our starting point is a deliberately strong matched control. A trainable trunk maps the complete frozen HSE condition to an ordinary code \(R\in\mathbb R^q\). A global moment head reads that same code and is trained by a Gaussian conditional score, so the auxiliary gradient acts on the ordinary path that the comparator will actually transmit. After source-validation checkpoint selection, the trunk and readout are frozen. The statistical message \(M=T(R)\) replaces a declared prefix of \(R\) by the predicted mean and Cholesky-factor entries of a target functional and retains the remaining coordinates. The comparator B1-aux sends the complete \(R\). Because \(M\) is a deterministic function of \(R\), it cannot increase Bayes information. It may still reduce the approximation or optimization error of a finite denoiser.
 
-\[
-x=A\beta+\epsilon,\quad b=A^TR^{-1}x,\quad J=A^TR^{-1}A.
-\]
+This observation suggests a falsifiable acquisition-conditioned hypothesis rather than a mandatory router. Let ℛ_j(a) denote the population risk of a fixed trained representation/model arm \(j\) under acquisition condition \(a\). We define **routing headroom** as the difference between the best global arm and an oracle that may choose an arm conditionally on \(a\). If the same arm dominates every acquisition condition, routing headroom is zero and the method must collapse to the simpler global choice. Only when the conditional risks cross by a practically meaningful margin is a source-only acquisition-conditioned gate justified. Static fusion and dynamic routing are therefore controls derived from an estimand, not modules added in advance.
 
-The learned target is instead `Z0=E_ref(X_ref)` from a source-trained frozen reference encoder. Its coordinates are not automatically the physical coefficients. LLapDiff's predicted modal parameters are a third object, not an assumed ground-truth physical state.
+For IEEE TII, the industrial claim is correspondingly narrow. The primary experiment must use recording-level vibration splits through PHMFactory and must separate acquisition heterogeneity from ordinary operating-condition domain shift. The reference model, best single representation, static fusion and dynamic routing receive the same raw observation, labels, metadata, target definition and training budget. External irregular and general time-series benchmarks test whether the conditioning principle transfers beyond vibration data; they do not substitute for industrial evidence. All empirical claims are withheld until the corresponding real-data experiments are run.
 
-The actual condition is
+## 2. Contributions under test
 
-\[
-H=T_\psi(O,a),\qquad C=(H,a).
-\]
+The contribution status is tracked in [contributions.md](contributions.md). At the present revision only two contributions are admissible as **candidates**:
 
-`O` includes all current-acquisition information visible to the conditioner encoder; `a` includes only the side input actually consumed by the generator. Teacher and student see the same underlying acquisition. A reference target is supervision, not extra input granted only to the teacher.
+1. **Acquisition-conditional accessibility as the method-selection object.** We formalize conditional risk profiles and routing headroom for the matched HSE–LLapDiff representation arms, distinguishing population Bayes information, finite-model fitting error and empirical source-validation risk.
+2. **A minimal statistically anchored conditioner with a matched control.** The statistical message and the equally supervised ordinary code use one checkpoint, one information set and one message budget. Static fusion and dynamic routing are activated only if the corresponding source-only headroom exists.
 
-## Analysis that guides the candidate method
+The eventual empirical contribution—industrial PHM and external-benchmark evidence under matched protocols—is not claimed until those experiments are complete.
 
-Theory 1 preserves the complete `(b,J)` sufficiency result. It also gives a collision through the existing diagonal tokenizer, with a positive control showing that full acquisition side information can reconstruct `J`. Therefore a missing matrix entry inside `tokens` is not by itself proof of complete-condition information loss.
+## 3. Paper map
 
-Theory 9 separates
-
-\[
-\mathbb E\operatorname{KL}(p(Z_0\mid O,a)\|q_\phi(Z_0\mid H,a))
-=I(Z_0;O\mid H,a)
-+\mathbb E\operatorname{KL}(p(Z_0\mid H,a)\|q_\phi(Z_0\mid H,a)).
-\]
-
-Theory 10 separates full-information Bayes error, the conditioning projection gap, and denoiser approximation error. The same result is converted explicitly between epsilon, x0 and v under a fixed schedule. These are established analytical tools applied to our interface, not standalone novelty claims.
-
-## Coefficient-space falsification and candidate method
-
-Theory 11 computes the true compressed conditional by mixing compatible acquisition designs with their posterior probabilities. In Task B, a Gaussian prior can therefore yield a non-Gaussian compressed posterior. Replacing J by its diagonal is a different, approximate probability model.
-
-The 6,144-event coefficient-space experiment supports a limited conclusion: within-mode blocks reduce information loss relative to diagonal summaries when the decoder lacks the distinguishing operator information. They are exactly sufficient in the no-cross-coupling control, but not when cross-mode coupling is hidden. Full operator side input removes the information gap in all arms. Scalar budgets are 8/10/14, so this is not a same-budget method win.
-
-Compare the original HSE against the smallest coupling feature supported by an actual sampled-window follow-up, initially a declared within-mode cosine/sine information block. Preserve the original patch/token budget and the LLapDiff target VAE, denoiser, training schedule and sampler. Report the real scalar storage and computation: a full `(b,J)` oracle is not a same-budget deployed baseline.
-
-Do not assume that `2x2` blocks suffice when cross-mode coupling is strong. If actual side information already recovers all of `J`, study genuine patch/compression or finite-capacity loss rather than hiding metadata to manufacture an advantage.
-
-## Contribution admission
-
-No new learned-method contribution is admitted yet. Candidates are:
-
-1. a concrete acquisition-coupling condition that improves the same LLapDiff at declared equal information and budget;
-2. analysis of that specific condition's posterior and denoising loss, using rather than reclaiming generic KL/projection theory;
-3. paired evidence that separates compression, fitting, correlated noise and reference-target uncertainty, including negative results.
-
-The finite witnesses and coefficient-space Monte Carlo experiment in `results.md` support only their stated constructions. They do not show learned sufficiency, calibration, superiority over mixtures, or PHM generalization.
-
-## Future work
-
-Flow Matching remains outside the active method. Consider sampler acceleration only after learned posterior validity is established and sampling latency is a measured bottleneck.
+- [Notation and estimands](notation.md)
+- [Theory main line](theory_main.md)
+- [Related work](related_work.md)
+- [Method](method.md)
+- [Experiments](experiments.md)
+- [Current results boundary](results_native.md)
+- [Execution goals](goals/README.md)

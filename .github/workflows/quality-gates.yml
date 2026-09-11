@@ -1,13 +1,10 @@
 name: hse-llapdiff-scientific-contract
-
 on:
   pull_request:
   push:
     branches: [master, dev]
-
 permissions:
   contents: read
-
 jobs:
   analytic-oracle:
     runs-on: ubuntu-latest
@@ -25,7 +22,76 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Execute all theory witnesses
         run: python theory/run_notebooks.py --timeout 180
+      - name: Execute TII routing-headroom toy
+        run: bash experiments/p19/run.sh toy
       - name: Exercise paired compression command and plots
         run: python -m experiments.synthetic_known_pole.run_compression --events-per-seed 64 --seeds 0 --bootstrap 64 --output-dir "$RUNNER_TEMP/task-b"
       - name: Redraw retained results without rerunning the experiment
         run: python -m experiments.synthetic_known_pole.run_compression --plot-only paper/assets/compression_summary.csv --output-dir "$RUNNER_TEMP/task-b-reference"
+      - name: Exercise paper sampled and plotting entry
+        env:
+          OUTPUT_ROOT: ${{ runner.temp }}/paper
+          OPENBLAS_NUM_THREADS: "1"
+        run: bash paper/run.sh sampled smoke
+      - name: Exercise posterior parameterization and CSV-only plots
+        env:
+          OUTPUT_ROOT: ${{ runner.temp }}/paper
+          OPENBLAS_NUM_THREADS: "1"
+        run: |
+          bash paper/run.sh parameterization smoke
+          bash paper/run.sh parameterization-figures paper/assets/parameterization_controls.csv "$RUNNER_TEMP/parameterization-reference"
+      - name: Check external launcher syntax only
+        run: bash -n paper/run_official_baselines.sh
+
+  native-conditioner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/checkout@v4
+        with:
+          repository: pixelhero98/LLapDiffusion
+          ref: 0631e65cbac59d23822205573ebc7e180ecf0487
+          path: native_llapdiff
+      - name: Install CPU component runtime, not external dataset pipelines
+        run: |
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install numpy matplotlib
+          python -m pip install -e native_llapdiff --no-deps
+      - name: Execute the advertised native acceptance entry and CSV redraw
+        env:
+          OMP_NUM_THREADS: "1"
+          OUTPUT_ROOT: ${{ runner.temp }}/paper
+        run: bash paper/run.sh native-acceptance
+      - name: Retain native diagnostic numbers and vector figures
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-conditioner-check
+          path: ${{ runner.temp }}/paper/native-component/
+          if-no-files-found: error
+
+  phmfactory-public-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/checkout@v4
+        with:
+          repository: PHMbench/PHM-Vibench
+          ref: 9b595f72498621ddb05741ead29d8e7e2b0b7896
+          path: external_phmfactory
+      - name: Install exact accepted main through its public package route
+        run: python -m pip install -e external_phmfactory
+      - name: Execute public offline acceptance path
+        run: |
+          phmfactory doctor
+          phmfactory preflight --config smoke
+          phmfactory demo
+      - name: State evidence boundary
+        run: |
+          echo 'PHMFactory public Dummy path passed. This is not real-data baseline_valid evidence and does not authorize a parent gitlink.'
