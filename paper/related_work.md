@@ -1,28 +1,35 @@
-# Related work: exact remaining question
+# Related Work — TII positioning
 
-The active method remains HSE-conditioned LLapDiff. The question is whether an explicitly supervised statistical prefix improves finite native-denoiser use relative to the complete ordinary code trained by the **same** supervision. The chosen comparator makes the messages nested, so this is not a claim to create new information.
+The paper is positioned against three different literatures. Missing an abstract or inaccessible full text is never used as evidence that a prior paper did not study an issue; novelty statements below are limited to what the cited primary source or official project explicitly supports.
 
-| Predecessor | Established object | Remaining test here |
-|---|---|---|
-| HSE (Information Fusion 2025) | Shared heterogeneous-signal embedding interface | Fixed-budget consumption by a conditional trajectory generator |
-| LLapDiff (ICML2026 accepted, author/institution record) | Latent trajectory diffusion, stable modal prediction, gap-aware conditioning | Change only the conditioner, retaining native objective and target |
-| Alsing–Wandelt (2018) | Score compression and Fisher-information preservation | Local information preservation is not arbitrary learned-token posterior sufficiency |
-| Oko et al. (2025) | Approximate sufficient representations and conditional-generation theory | A concrete shared-supervision code replacement; do not reclaim generic sufficiency-to-denoising theory |
-| Spantini et al. (2015,2017) | Prior-aware and goal-oriented posterior mean/covariance approximation | Fair comparison to strong analytical summaries; charge encoder inference |
-| Gneiting–Raftery (2007) | Proper scoring and statistical prediction | Explicit Gaussian moment scoring with finite optimization and floor diagnostics |
-| Koh et al. (ICML2020) | Supervised intermediate concept bottlenecks | Analogy for supervised semantics, not a proof of posterior moments |
-| Seitzer et al. (ICLR2022) | Heteroscedastic likelihood optimization pitfalls | Decomposed scoring diagnostics; do not infer a unique cause from validation deterioration |
+## 1. Industrial heterogeneous-signal and fault-diagnosis representation
 
-Gaussian identities, Schur complements, product projections, data processing and conditional-expectation orthogonality are analytical background. A method contribution requires the actual matched intervention to be useful, with its failed or equivalent cases reported.
+HSE provides a plug-and-play heterogeneous-signal embedding interface for fault-diagnosis foundation models [@li2025hse]. FISHER, accepted by IEEE TII, goes further toward multimodal industrial foundation modeling: its official project states that it handles sound, vibration and voltage, accepts arbitrary sampling rates, and represents sampling-rate increments through STFT sub-bands before a ViT encoder [@fan2026fisher]. TF-ProFM is a recent TII prototype-based time–frequency foundation model for generalizable bearing diagnosis [@pi2026tfprofm]. Recent TII cross-domain diagnosis work such as MSIHAN also shows that target/source relevance and negative transfer remain active industrial concerns [@li2025msihan].
 
-## Updated irregular-time baselines
+These works rule out claims of being the first industrial foundation representation, the first sampling-rate-aware industrial representation, or the first cross-domain fault-diagnosis model. The remaining question here is narrower: with the same HSE observation access and fixed output budget, does an explicitly supervised statistical reparameterization change what a finite native LLapDiff/diagnostic head can exploit, and does that effect depend on the acquisition condition?
 
-Hi-Patch (Luo et al., ICML2025, PMLR267:41494–41519) uses hierarchical patch graphs to represent variable sampling scales. HyperIMTS (Li et al., ICML2025, PMLR267:35502–35518) connects observations through temporal and variable hyperedges. They are closer irregular-time representation comparisons than another generic backbone. t-PatchGNN, ContiFormer and Neural CDE remain relevant. None is claimed to solve or fail the specific supervised-prefix intervention without a task-compatible experiment.
+## 2. General and irregular time-series representation
 
-CSDI is a probabilistic imputation comparison; LLapDiff is the primary native generative reference. PatchTST and DLinear are point-forecast controls, not likelihood models. Do not combine incompatible tasks into a single SOTA ranking. Hi-Patch/HyperIMTS and the broader external table are deferred until M/B1-aux is interpretable.
+MOMENT [@goswami2024moment] and UniTS [@gao2024units] provide multi-dataset or multi-task time-series foundation-model baselines. PatchTST [@nie2023patchtst] and DLinear [@zeng2023dlinear] are strong simple regular-time references. For irregular observations, Neural CDE [@kidger2020cde], t-PatchGNN [@zhang2024tpatchgnn], ContiFormer [@chen2023contiformer], Hi-Patch [@luo2025hipatch] and HyperIMTS [@li2025hyperimts] address continuous time, transformable patches, hierarchical scales or hypergraph dependencies. Adaptive Time Encoding provides a recent NeurIPS classification baseline for irregular multivariate series [@lee2025ate].
 
-## Status and primary-source use
+These methods are compared only on task-compatible benchmarks. A point forecaster without a density is not assigned a fabricated NLL; an imputation model is not ranked as if it were a fault classifier. External benchmarks test transfer of the conditioning principle, not industrial validity.
 
-LLapDiff's arXiv v2 and Bristol institutional record identify ICML2026 Spotlight acceptance. The citation records that status without inventing a proceedings volume or page range. PMLR supplies the 2025 graph-method metadata. The actual installed upstream component revision and API remain a separate implementation reference.
+## 3. Conditional generation, compression and goal-oriented statistics
 
-The Introduction intentionally uses relevant Nature-family, TPAMI and leading conference work for most citations while retaining all direct statistical predecessors. Venue count is not evidence of originality. Flow Matching remains future work and is not added to the current model or main comparison.
+Neural Laplace [@holt2022neurallaplace] and LLapDiff [@you2026llapdiff] motivate the Laplace-domain target and irregular-time trajectory generation. CSDI [@tashiro2021csdi] is a direct conditional diffusion reference for imputation. Alsing and Wandelt [@alsing2018compression] study score compression and Fisher information. Oko et al. [@oko2025sufficiency] connect approximate sufficient representations to downstream conditional generation. Spantini et al. [@spantini2015lowrank; @spantini2017goal] derive prior-aware and goal-oriented posterior approximations. Gneiting and Raftery [@gneiting2007proper] provide the scoring-rule foundation for statistical targets, while Seitzer et al. [@seitzer2022pitfalls] document finite neural optimization pitfalls for heteroscedastic likelihoods.
+
+Accordingly, the generic statements “compression affects conditional generation”, “target moments can be supervised”, and “goal-oriented posterior summaries can be lower dimensional” are antecedents. Our candidate difference is operational: a matched HSE code and its deterministic statistical reparameterization are compared inside the same native generator, and acquisition-conditional risk is used to decide whether global selection or routing is warranted.
+
+## 4. Direct comparison matrix
+
+| Work | Industrial fault task | Heterogeneous acquisition | Probabilistic target | Same-information representation control | Acquisition-conditional selection |
+|---|---:|---:|---:|---:|---:|
+| HSE | yes | yes | no | not this question | no |
+| FISHER | yes | yes, including sampling rate | not the present conditional target | not this question | not claimed here |
+| TF-ProFM | yes | multisource/time–frequency | diagnostic prototype | not this question | not claimed here |
+| MOMENT / UniTS | broad | multi-domain/task | task dependent | no | no |
+| t-PatchGNN / Hi-Patch / HyperIMTS | no PHM-specific claim | irregular sampling | forecasting/classification dependent | no | no |
+| LLapDiff | no PHM-specific claim | irregular history | latent trajectory diffusion | inherited reference | no |
+| This study | primary PHM + external | explicit acquisition descriptor | frozen-reference latent + downstream diagnosis | yes: B1-aux vs M | only if routing headroom is positive |
+
+The final row is a research contract, not a performance claim. Until the real experiments are complete, `formal_claim_supported=false` remains the correct status.

@@ -22,6 +22,8 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Execute all theory witnesses
         run: python theory/run_notebooks.py --timeout 180
+      - name: Execute TII routing-headroom toy
+        run: bash experiments/p19/run.sh toy
       - name: Exercise paired compression command and plots
         run: python -m experiments.synthetic_known_pole.run_compression --events-per-seed 64 --seeds 0 --bootstrap 64 --output-dir "$RUNNER_TEMP/task-b"
       - name: Redraw retained results without rerunning the experiment

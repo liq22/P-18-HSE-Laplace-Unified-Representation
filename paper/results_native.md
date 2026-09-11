@@ -1,53 +1,58 @@
-# Native acceptance and supporting finite witnesses
+# Results — current evidence and empty slots that must remain empty
 
-## Scope
+## R0. Remote native acceptance at current PR head
 
-This file records component acceptance, not a trained-method result. The existing remote source inspected for the native result was `a36f011`, PR #8 targeting dev. No original HSE extraction, reference-VAE export or real-PHM evaluation was performed by that component check.
+The current PR head before this TII-writing commit was `d8ea36fc8b3274dc007ccb40af6064f45fe87f14`. GitHub Actions run `34602707154` completed both `analytic-oracle` and `native-conditioner` jobs successfully. The native job installed the original `pixelhero98/LLapDiffusion` component at revision `0631e65cbac59d23822205573ebc7e180ecf0487` and executed the advertised `bash paper/run.sh native-acceptance` entry.
 
-## Existing native CI evidence
+Actual native-component values from that run:
 
-Workflow run 34590958894, native-conditioner job 103235904425, completed 2026-09-11. It installed the original `pixelhero98/LLapDiffusion` component at revision `0631e65cbac59d23822205573ebc7e180ecf0487`. Artifact `native-conditioner-check` contains native_check.json, native_loss_alignment.csv and schedule.csv.
-
-| Check | Actual recorded result |
+| Check | Value |
 |---|---:|
-| Shared-gradient/frozen/export behavior suite | 14 tests passed |
-| Native loss comparison configurations | 24 |
-| Per-batch comparison rows | 96 |
-| Maximum absolute native/reconstructed loss difference | 1.1920928955e-7 |
-| Auxiliary gradient L1 on the consumed trunk | 49.30367923 |
-| Ordinary-code maximum change after auxiliary step | 0.01159522310 |
-| B1-aux prefix / tail intervention effect | 0.00081454217 / 0.00069965422 |
-| M prefix / tail intervention effect | 0.00071845949 / 0.00056587160 |
-| Frozen conditioner state after native updates | unchanged |
-| Extra cond_summary_raw bypass | absent |
-| Native uniform-time schedule export | completed |
-| Original HSE/reference executed | false |
-| M advantage tested | false |
+| shared-gradient/export behavior tests | 14 passed |
+| native loss comparison configurations | 24 |
+| comparison rows | 96 |
+| maximum absolute native/reconstructed loss difference | 2.3841857910e-7 |
+| auxiliary gradient L1 reaching the ordinary trunk | 49.30367953 |
+| ordinary-code maximum change after auxiliary step | 0.01159522310 |
+| B1-aux prefix intervention effect | 0.00081458688 |
+| B1-aux tail intervention effect | 0.00069965422 |
+| M prefix intervention effect | 0.00071845204 |
+| M tail intervention effect | 0.00056588650 |
+| frozen conditioner changed by denoiser update | false |
+| extra raw-summary bypass | false |
+| genuine HSE/reference extraction executed | false |
+| method advantage tested | false |
 
-The effects are from a randomly initialized native component after one update on explicit synthetic fixtures. They show consumption, not trained usefulness. The loss measures cover eps/v/x0 and none/global/batch normalization on the same batch. They do not validate all upstream data trainers or arbitrary time-sampling configurations.
+These numbers establish component consumption and loss consistency only. They are **not** a learned HSE–LLapDiff result, PHM result or evidence that M is better than B1-aux.
 
-## This revision's Theory 12 witness
+## R1. Existing finite theory witnesses
 
-The original Gaussian tests remain. Locally, the modified Notebook was executed in an independent kernel with selected inspected source dependencies, not a full repository checkout. Full repository execution belongs to CI on the final commit.
+Retain the prior analytical records: actual-token collision/full-side-input control, conditional KL decomposition, denoising projection, same-moment non-Gaussian collision, Gaussian posterior parameterization controls and the source-supervised shared-code checks. They delimit possible mechanisms; none authorizes an industrial performance claim.
 
-| Finite witness | Result and boundary |
-|---|---|
-| Gaussian conditional score excess | 0.5114114552, equal to the Gaussian moment KL |
-| Same-moment distinct smooth laws | Bayes epsilon gap 0.0224274361995 at alpha=.8, sigma=.6 |
-| Grid refinement, 40,001 to 80,001 points | 3.47e-18 difference |
-| R versus T(R), both Bayes-sufficient for R squared | affine prediction risks 2/9 and approximately zero |
-| Alternative target R, message R squared | irreversible Bayes loss 2/3 |
-| Realized batch normalization versus ratio of expectations | 0.7 versus 0.9 |
-| V eigenvalues .01 and 2, public floor .1 | closed constrained optimum eigenvalues .1 and 2 |
+The new TII main-theory estimand is routing headroom. `experiments/p19/toy_routing.py` supplies only a finite algebraic witness. A positive toy headroom is not empirical evidence of acquisition routing in real data.
 
-The affine example illustrates accessibility but does not predict LLapDiff performance. The same-moment result does not favor M over an ordinary message that already retains the law identity. The covariance floor changes the feasible family; positive-definite covariance alone is not a calibration guarantee.
+## R2. PHM main table — intentionally empty
 
-## Updated run and figure entry
+Required rows: reference B1, B1-aux, M, source-selected best single, static fusion, dynamic acquisition route, plus compatible industrial baselines. Required columns include recording-macro macro-F1, worst-acquisition F1, reference-latent Energy Score, parameters, latency and memory.
 
-`bash paper/run.sh native-acceptance` now resolves the advertised native checks and CSV redraw in one explicit command. `paper/plot_native.py` does no training or simulation. Its M/B1-aux comparison requires exact event/condition/seed pairing, aggregates within original groups and reports intervals conditional on the executed seeds. Missing pairs are rejected; a one-group result has no group-level confidence interval.
+**No values are inserted until the exact PHMFactory real-data protocol is accepted and executed.** Dummy smoke cannot fill this table.
 
-The local alignment figure was redrawn from the downloaded existing CI artifact, not a newly generated model comparison. The five plotting behavior tests check pairing and grouping with small fixtures; those fixtures are not empirical method evidence.
+## R3. External benchmark table — intentionally empty
 
-## What remains open
+Benchmark families and compatible metrics are defined in `experiments.md` and `experiments/DATA_DOWNLOAD_SOP.md`. Download links or successful parsing do not count as integrated benchmark results.
 
-Actual HSE/reference checkpoints and genuine exports are required for the two-arm pilot. No sample scores or full SOTA table are filled in before that run. Report M minus B1-aux and its declared cost even if M is worse. `formal_claim_supported: false` remains unchanged.
+## R4. Ablation and routing table — intentionally empty
+
+The routing row is admitted only after group-level source estimates show practical headroom. If the best single representation dominates, the correct result is `routing_not_justified` and the simpler method is retained.
+
+## R5. Negative-result policy
+
+A result may change the final paper identity:
+
+- M ≤ B1-aux at comparable cost → simplify to the ordinary supervised code;
+- static fusion matches dynamic routing → remove the router;
+- dynamic source gain reverses on unseen acquisition → report transportability failure;
+- Gaussian/mixture probability head matches Diffusion → do not claim Diffusion necessity;
+- PHM gains disappear under recording-level splits → reject the window-level claim.
+
+No failed central hypothesis is repaired by adding a new model or changing the test set after seeing results.
