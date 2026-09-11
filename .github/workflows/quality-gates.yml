@@ -42,6 +42,7 @@ jobs:
           bash paper/run.sh parameterization-figures paper/assets/parameterization_controls.csv "$RUNNER_TEMP/parameterization-reference"
       - name: Check external launcher syntax only
         run: bash -n paper/run_official_baselines.sh
+
   native-conditioner:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -71,3 +72,26 @@ jobs:
           name: native-conditioner-check
           path: ${{ runner.temp }}/paper/native-component/
           if-no-files-found: error
+
+  phmfactory-public-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/checkout@v4
+        with:
+          repository: PHMbench/PHM-Vibench
+          ref: 9b595f72498621ddb05741ead29d8e7e2b0b7896
+          path: external_phmfactory
+      - name: Install exact accepted main through its public package route
+        run: python -m pip install -e external_phmfactory
+      - name: Execute public offline acceptance path
+        run: |
+          phmfactory doctor
+          phmfactory preflight --config smoke
+          phmfactory demo
+      - name: State evidence boundary
+        run: |
+          echo 'PHMFactory public Dummy path passed. This is not real-data baseline_valid evidence and does not authorize a parent gitlink.'
