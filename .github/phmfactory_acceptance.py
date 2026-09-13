@@ -68,7 +68,7 @@ def main():
     public_main(["preflight", *cli_args])
     result = public_main(cli_args)
     (output / "direct_outputs.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
-    resolved = analyze_config(config, override_values=overrides).to_resolved_config()
+    resolved = analyze_config(config, override_values=overrides).runtime_config()
     (output / "resolved_config.json").write_text(json.dumps(resolved, indent=2), encoding="utf-8")
     cfg = dict_to_namespace(resolved)
     env, data_args, model_args, task_args, trainer_args = [
