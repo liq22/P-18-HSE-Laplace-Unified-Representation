@@ -75,23 +75,47 @@ jobs:
 
   phmfactory-public-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
+    env:
+      OMP_NUM_THREADS: "1"
+      MPLBACKEND: Agg
+      WANDB_MODE: disabled
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - uses: actions/checkout@v4
         with:
           repository: PHMbench/PHM-Vibench
-          ref: 9b595f72498621ddb05741ead29d8e7e2b0b7896
+          ref: a0db97364e6d38a927c3ea30c643ebbb821d54d7
           path: external_phmfactory
-      - name: Install exact accepted main through its public package route
-        run: python -m pip install -e external_phmfactory
-      - name: Execute public offline acceptance path
+      - name: Install the exact accepted main using its public package
+        run: |
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e external_phmfactory
+      - name: Execute public offline entrypoints
         run: |
           phmfactory doctor
           phmfactory preflight --config smoke
           phmfactory demo
-      - name: State evidence boundary
-        run: |
-          echo 'PHMFactory public Dummy path passed. This is not real-data baseline_valid evidence and does not authorize a parent gitlink.'
+      - name: Prepare official MFPT through PHMFactory only
+        working-directory: external_phmfactory
+        run: python -m scripts.prepare_mfpt_baseline --output "$RUNNER_TEMP/p18-mfpt-data"
+      - name: Run the unchanged real configuration and independently restore/recompute/export
+        working-directory: external_phmfactory
+        run: >-
+          python ../.github/phmfactory_acceptance.py
+          --data "$RUNNER_TEMP/p18-mfpt-data"
+          --output "$RUNNER_TEMP/p18-mfpt-acceptance"
+      - name: Retain numerical diagnostics, not raw or derived waveform arrays
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfpt-acceptance
+          path: |
+            ${{ runner.temp }}/p18-mfpt-acceptance/*.csv
+            ${{ runner.temp }}/p18-mfpt-acceptance/*.json
+            ${{ runner.temp }}/p18-mfpt-acceptance/runs/**/run_summary.json
+            ${{ runner.temp }}/p18-mfpt-acceptance/runs/**/all_results.csv
+          if-no-files-found: warn
