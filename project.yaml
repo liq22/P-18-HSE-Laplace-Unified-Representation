@@ -1,49 +1,18 @@
-schema_version: 5
-project_name: HSE-LapDiff
-stage: finite_design_paired_compression_oracle
-language: English
-
-scope: >-
-  The same window-local event under declared acquisition operators; distinguish
-  known-pole coefficient oracles from frozen-reference-encoder latent targets.
-
-active_method:
-  conditioner: fixed_budget_hse_with_declared_actual_side_information
-  generative_model: latent_laplace_diffusion
-  target: frozen_reference_latent_in_learned_experiments
-  flow_matching: future_work_only
-
-central_claim_under_test: >-
-  A minimal acquisition-coupling condition may reduce fixed-budget HSE
-  information loss and improve the same LLapDiff beyond equal-side-information
-  baselines. This is a candidate requiring paired and learned evidence.
-
-theory_status:
-  fixed_dimensional_sufficiency: full_b_J_or_reconstructible_actual_condition_only
-  closed_form_canonical_posterior: retained_linear_gaussian_result
-  acquisition_information_monotonicity: gaussian_loewner_order_only
-  general_uncertainty: posterior_averaging_under_degradation
-  paired_conditional_identifiability: retained_with_declared_observation_map
-  complete_invariance_risk_lower_bound: exact_paired_invariance_and_log_loss
-  posterior_sufficiency: retained_markov_condition
-  laplace_stability_and_gap_shift: inherited_supporting_results
-  conditioning_KL_decomposition: standard_identity_with_finite_witness
-  conditioning_denoising_projection: standard_projection_with_finite_witness
-  exact_compressed_acquisition_posterior: finite_design_bayes_derivation_with_witness
-
-current_evidence:
-  analytic_oracle: existing_result_retained
-  actual_token_boundary_tests: locally_passed
-  task_b_theory_notebook: locally_passed
-  task_b_behavior_tests: eight_locally_passed
-  learned_model: not_started
-  coefficient_space_compression: completed_6144_events_per_prior_cell
-  sampled_waveform_compression: not_started
-  real_phm: not_started
-
+project_name: HSE-Laplace
+venue: IEEE Transactions on Industrial Informatics
+active_method: statistically_anchored_HSE_conditioning_for_LLapDiff
+working_branch: dev
 formal_claim_supported: false
-next_decisive_experiment: sampled_window_actual_condition_and_budget_check
-stop_condition: >-
-  Do not retain a coupling feature when actual side inputs already remove its
-  information gap. Do not claim Diffusion superiority when Gaussian or finite
-  mixture models are equivalent under the same condition and declared budget.
+scope: same_observation_target_supervision_message_budget
+phm_data_authority: PHMFactory
+phmfactory_revision: a0db97364e6d38a927c3ea30c643ebbb821d54d7
+phm_reference_acceptance: MFPT_three_seed_checkpoints_and_independent_metrics_passed
+real_HSE_reference_export: pending_local_checkpoint_and_extraction
+learned_method_comparison: pending_local_GPU
+external_domains: [physionet2012, uci_har, ushcn_monthly, ett, japanese_vowels]
+external_method_evidence: not_executed
+routing_scope: fixed_arm_hard_selection_distinct_from_soft_fusion
+flow_matching: future_work_only
+local_hardware: 8_RTX_4090
+first_pilot_gpus: 1
+two_gpu_training: forbidden

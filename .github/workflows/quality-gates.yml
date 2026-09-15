@@ -1,13 +1,10 @@
 name: hse-llapdiff-scientific-contract
-
 on:
   pull_request:
   push:
     branches: [master, dev]
-
 permissions:
   contents: read
-
 jobs:
   analytic-oracle:
     runs-on: ubuntu-latest
@@ -17,15 +14,130 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install package, notebooks and experiment plotting
+      - name: Install paper runtime
         run: python -m pip install -e ".[notebooks,experiments]"
-      - name: Run HSE-LLapDiff analytic oracle
-        run: python examples/analytic_hse_llapdiff_oracle.py
-      - name: Run scientific behavior tests
-        run: python -m unittest discover -s tests -v
-      - name: Execute all theory witnesses
-        run: python theory/run_notebooks.py --timeout 180
-      - name: Exercise paired compression command and plots
-        run: python -m experiments.synthetic_known_pole.run_compression --events-per-seed 64 --seeds 0 --bootstrap 64 --output-dir "$RUNNER_TEMP/task-b"
-      - name: Redraw retained results without rerunning the experiment
-        run: python -m experiments.synthetic_known_pole.run_compression --plot-only paper/assets/compression_summary.csv --output-dir "$RUNNER_TEMP/task-b-reference"
+      - name: Execute analytical oracle and all scientific tests/Notebooks
+        run: |
+          python examples/analytic_hse_llapdiff_oracle.py
+          bash experiments/p19/run.sh theory
+      - name: Execute routing/fusion controls, paired statistics and CSV-only figures
+        run: |
+          bash experiments/p19/run.sh toy --events 1024 --output "$RUNNER_TEMP/toy_routing.csv"
+          bash experiments/p19/run.sh statistics --input "$RUNNER_TEMP/toy_routing_events.csv" --reference best_single --output "$RUNNER_TEMP/toy_effects.csv" --bootstrap 128
+          bash experiments/p19/run.sh plot --input "$RUNNER_TEMP/toy_effects.csv" --method hard_source_route --output-dir "$RUNNER_TEMP/toy-figures"
+          bash experiments/p19/run.sh --help
+          bash experiments/p19/run.sh sota --help
+      - name: Exercise inherited posterior experiments and reference redraw
+        env:
+          OUTPUT_ROOT: ${{ runner.temp }}/paper
+          OPENBLAS_NUM_THREADS: "1"
+        run: |
+          python -m experiments.synthetic_known_pole.run_compression --events-per-seed 64 --seeds 0 --bootstrap 64 --output-dir "$RUNNER_TEMP/task-b"
+          python -m experiments.synthetic_known_pole.run_compression --plot-only paper/assets/compression_summary.csv --output-dir "$RUNNER_TEMP/task-b-reference"
+          bash experiments/p19/run.sh ablation sampled smoke
+          bash experiments/p19/run.sh ablation parameterization smoke
+          bash paper/run.sh parameterization-figures paper/assets/parameterization_controls.csv "$RUNNER_TEMP/parameterization-reference"
+      - name: Check real source commands and manuscript references
+        run: |
+          bash -n experiments/p19/run.sh paper/run.sh paper/run_official_baselines.sh
+          python - <<'PY'
+          import csv, re
+          from pathlib import Path
+          import numpy as np
+          bib=Path('literature/references.bib').read_text()
+          keys=set(re.findall(r'@\w+\{([^,]+),',bib))
+          for path in (Path('paper/main.md'),Path('paper/related_work.md')):
+              used=set(re.findall(r'@([A-Za-z0-9_]+)',path.read_text()))
+              assert used <= keys, (path,used-keys)
+          import os
+          with open(Path(os.environ['RUNNER_TEMP'])/'toy_routing.csv') as f: actual=list(csv.DictReader(f))
+          with open('paper/assets/routing_controls.csv') as f: reference=list(csv.DictReader(f))
+          assert len(actual)==len(reference)==24
+          for a,b in zip(actual,reference):
+              assert (a['scenario'],a['method'])==(b['scenario'],b['method'])
+              for key in ('test_mse','source_empirical_headroom','source_static_alpha'):
+                  np.testing.assert_allclose(float(a[key]),float(b[key]),rtol=0,atol=1e-10)
+          print('Citation keys and 24 retained finite-control rows agree.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p19-cpu-controls
+          path: |
+            ${{ runner.temp }}/toy_routing.csv
+            ${{ runner.temp }}/toy_effects.csv
+            ${{ runner.temp }}/toy-figures/
+            outputs/p19/theory/theory_main.executed.ipynb
+          if-no-files-found: error
+
+  native-conditioner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/checkout@v4
+        with:
+          repository: pixelhero98/LLapDiffusion
+          ref: 0631e65cbac59d23822205573ebc7e180ecf0487
+          path: native_llapdiff
+      - name: Install CPU component runtime
+        run: |
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install numpy matplotlib
+          python -m pip install -e native_llapdiff --no-deps
+      - name: Execute native acceptance and real feature CLI interfaces
+        env:
+          OMP_NUM_THREADS: "1"
+          OUTPUT_ROOT: ${{ runner.temp }}/paper
+        run: |
+          bash paper/run.sh native-acceptance
+          bash experiments/p19/run.sh external uci_har --help
+          bash experiments/p19/run.sh ablation native --help
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-conditioner-check
+          path: ${{ runner.temp }}/paper/native-component/
+          if-no-files-found: error
+
+  phmfactory-real-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OMP_NUM_THREADS: "1"
+      MPLBACKEND: Agg
+      WANDB_MODE: disabled
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the accepted submodule with its required CPU runtime
+        run: |
+          python -m pip install 'torch==2.6.0' 'torchvision==0.21.0' --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e external/phmfactory
+      - name: Execute public offline entrypoints
+        run: |
+          phmfactory doctor
+          phmfactory preflight --config smoke
+          phmfactory demo
+      - name: Prepare MFPT exclusively through PHMFactory
+        run: bash experiments/p19/run.sh phm-prepare --output "$RUNNER_TEMP/p18-mfpt-data"
+      - name: Restore and independently evaluate the unchanged three-seed reference
+        run: |
+          bash experiments/p19/run.sh phm --data "$RUNNER_TEMP/p18-mfpt-data" --output "$RUNNER_TEMP/p18-mfpt-acceptance"
+          bash experiments/p19/run.sh phm-metrics --predictions "$RUNNER_TEMP/p18-mfpt-acceptance/predictions.csv" --reference "$RUNNER_TEMP/p18-mfpt-acceptance/acceptance.csv" --output "$RUNNER_TEMP/p18-mfpt-acceptance/recomputed.csv"
+      - name: Retain numeric diagnostics only, never waveform arrays
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfpt-acceptance
+          path: |
+            ${{ runner.temp }}/p18-mfpt-acceptance/*.csv
+            ${{ runner.temp }}/p18-mfpt-acceptance/*.json
+            ${{ runner.temp }}/p18-mfpt-acceptance/runs/**/run_summary.json
+            ${{ runner.temp }}/p18-mfpt-acceptance/runs/**/all_results.csv
+          if-no-files-found: warn
