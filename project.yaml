@@ -1,34 +1,18 @@
-schema_version: 5
-project_name: HSE-LapDiff
-stage: native_component_acceptance_genuine_export_pilot_pending
-language: English
-scope: >-
-  Same local events under declared acquisition operators. Known-pole coefficients,
-  frozen reference latents and native denoiser parameters remain distinct.
-active_method:
-  conditioner: shared_supervised_statistical_prefix_and_ordinary_tail
-  primary_control: complete_shared_supervised_ordinary_code_B1_aux
-  generative_model: original_latent_laplace_diffusion
-  flow_matching: future_work_only
-central_claim_under_test: >-
-  A statistically anchored deterministic transformation of the same supervised
-  code may reduce finite-denoiser fitting cost. It cannot add Bayes information
-  relative to that deliberately nested control.
-current_evidence:
-  previous_analytic_and_finite_design_oracles: retained
-  sampled_gaussian_budget_experiment: retained
-  moment_and_lowrank_controls: retained_with_declared_scope
-  shared_supervision_and_native_component: verified_on_explicit_synthetic_fixtures
-  native_uniform_schedule_export: executed
-  genuine_hse_reference_exports: not_available_in_this_execution
-  matched_genuine_export_pilot: not_executed
-  real_phm: not_executed
+project_name: HSE-Laplace
+venue: IEEE Transactions on Industrial Informatics
+active_method: statistically_anchored_HSE_conditioning_for_LLapDiff
+working_branch: dev
 formal_claim_supported: false
-paper_entry: paper/README.md
-goal_entry: paper/GOAL.md
-experiment_entry: paper/run.sh
-next_decisive_experiment: genuine_frozen_export_M_vs_B1_aux_native_pilot
-stop_condition: >-
-  Report negative or equivalent results as completed evidence; retain the simpler
-  conditioner when no useful gain survives supervision and cost matching. Missing
-  native checkpoints or data block only the dependent execution slice.
+scope: same_observation_target_supervision_message_budget
+phm_data_authority: PHMFactory
+phmfactory_revision: a0db97364e6d38a927c3ea30c643ebbb821d54d7
+phm_reference_acceptance: MFPT_three_seed_checkpoints_and_independent_metrics_passed
+real_HSE_reference_export: pending_local_checkpoint_and_extraction
+learned_method_comparison: pending_local_GPU
+external_domains: [physionet2012, uci_har, ushcn_monthly, ett, japanese_vowels]
+external_method_evidence: not_executed
+routing_scope: fixed_arm_hard_selection_distinct_from_soft_fusion
+flow_matching: future_work_only
+local_hardware: 8_RTX_4090
+first_pilot_gpus: 1
+two_gpu_training: forbidden

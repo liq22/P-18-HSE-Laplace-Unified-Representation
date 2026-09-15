@@ -1,19 +1,17 @@
-# Introduction paragraph map — IEEE TII
+# 引言意群与引用位置
 
-This is an author-facing logic map. Manuscript prose lives in `main.md`.
+正文唯一位置是 `main.md`。本表是作者修改依据，不放入投稿正文。
 
-| ¶ | Job | Key sources | Required transition / boundary |
-|---:|---|---|---|
-| 1 | Establish industrial acquisition heterogeneity and state that HSE already provides a heterogeneous interface. Introduce current industrial foundation-model competition. | Nature Reviews Physics for physics-informed framing; HSE; FISHER; TF-ProFM. | The gap is not “first unified industrial representation”; it is target-relevant accessibility under a fixed condition budget. |
-| 2 | Separate our question from irregular-time modeling and generic time-series foundation models. | Neural CDE, t-PatchGNN, ContiFormer, Hi-Patch, HyperIMTS, MOMENT, UniTS. | Handling timestamps/sampling scale does not imply equal accessibility to one finite downstream generator. |
-| 3 | Introduce the probabilistic target and retain LLapDiff rather than reinventing it. Distinguish physical oracle coefficients, frozen reference latent and learned Laplace parameters. | Neural Laplace, CSDI, LLapDiff. | Better analytical posterior approximation is not automatically better reference-latent generation. |
-| 4 | Close generic theoretical novelty. | Alsing–Wandelt; Oko; Spantini 2015/2017; Gneiting–Raftery; Seitzer. | The paper must contribute a concrete industrial intervention and falsifiable estimand, not generic information identities. |
-| 5 | Define the matched intervention R versus M. State `M=T(R)` and same-supervision/same-budget control. | Current method; Theory 12 antecedents. | A gain cannot be attributed to new Bayes information; it must come from finite accessibility/fitting. |
-| 6 | Introduce acquisition-conditional accessibility and routing headroom. | New mathematical object for this manuscript; generic routing/MoE is not claimed as new. | Router is activated only if the conditional risk profiles cross beyond a practical margin. |
-| 7 | State TII evidence contract: recording-level PHM first, external benchmark second, empty Results cells until executed. | PHMFactory protocol; industrial baselines. | Contributions are conditional candidates until real experiments promote them. |
+| 段落 | 推进的问题 | 核心论据与引用作用 | 过渡与边界 |
+|---|---|---|---|
+| 1 | 工业采集为什么使表征问题发生变化？ | 物理过程先经过传感、采样与缺失；Nature Reviews Physics 支持物理结构背景，TPAMI 支持表示与预测任务关系；HSE、FISHER 是直接工业先例。 | 不声称首次统一工业信号，转向有限下游模型可利用的证据。 |
+| 2 | 已有异构/不规则方法做到了什么？ | Neural CDE、t-PatchGNN、Hi-Patch、HyperIMTS 处理时间结构；MOMENT、UniTS 提供通用强参照。 | 不从未见内容推断其没有研究某问题；明确本文控制的信息与预算。 |
+| 3 | 为什么选 HSE–LLapDiff，目标是什么？ | 继承 Neural Laplace/CSDI/LLapDiff，而非重新发明扩散；区分物理系数、参考 latent、预测模态参数。 | 系数 KL 不是实际生成效果。 |
+| 4 | 哪些理论已存在？ | Alsing、Spantini、Oko；新增直接先例 Xu 的预测 V-information；评分与有限优化引用 Gneiting、Seitzer。 | 从 Bayes 信息转到固定有限模型的条件使用能力，不把一般恒等式认领为创新。 |
+| 5 | 最小干预是什么？ | R 与 M=T(R)；共同监督、同 checkpoint、冻结路径、同消息预算。 | 待测的是有限拟合收益是否超过信息代价。 |
+| 6 | 为什么必须比较最佳单表示、静态融合和路由？ | Mao 2024/2025 已研究多专家回归与路由；本文区分固定专家硬选择与软混合。 | 风险交叉不是优于静态融合的证据，源域选择不是目标域保证。 |
+| 7 | 如何形成 TII 的实证链？ | PHMFactory 工业数据为主；五类外部时序按任务分开。 | 真实工业效益待执行，不用 toy 或基线验收替代方法结果。 |
 
-## Citation discipline
+使用 22 篇不同引文，其中 15 篇属于 Nature-family、IEEE TPAMI、ICML、NeurIPS 或 ICLR（按作者公开注明的 ICML 接收信息计 LLapDiff；不计该项仍为 14/22）。该比例只是作者引用检查，不是学术贡献。直接 SIAM、统计学和工业先例不得为比例被删掉。
 
-Most Introduction citations should come from Nature/Science-family reviews, IEEE TPAMI, ICML, NeurIPS, ICLR, CVPR and directly relevant IEEE TII work. Direct predecessors outside those venues remain mandatory when they define the actual theoretical boundary. Venue prestige never replaces relevance.
-
-Do not write “prior work does not study X” from a missing abstract or inaccessible full text. Use only a positive, source-supported statement about what the original work establishes, followed by the narrower object tested here.
+阅读记录见 `related_work.md`；会议题名/卷页从正式 PMLR 校验，LLapDiff 未确认的正式卷页不填写。不要让题名、摘要或仓库说明替代涉及新颖性的全文检查。

@@ -1,132 +1,124 @@
-# Main-paper theory: from nested information to conditional routing
+# Conditional accessibility: fixed representations, selection and fusion
 
-This file contains only the results needed by the TII narrative. Detailed Gaussian posterior calculations remain in `../theory/12_posterior_precision_distortion.md` and `../theory/13_acquisition_only_budget_choice.md`. The statements below apply standard conditional-expectation and model-selection arguments to the actual matched conditioner; they are not claimed as new general probability theory.
+## Objects and scope
 
-## Proposition 1 — nested-message risk decomposition
+Fix the source-trained HSE, reference encoder, supervised conditioner checkpoint and each downstream predictor before the following population comparison. Write $R=g_\theta(C_F)$ for the complete ordinary message and $M=T_\psi(R)$ for its statistically anchored reparameterization. Both use the same actual side inputs. Let $A$ be the deployment-available acquisition descriptor. Let $X$ include the noisy latent, diffusion time, **A**, and common side information. A target mask or random native weight must either be part of this declared information or be handled under the native weighted population measure; an unweighted identity is not silently applied to a different batch-normalized objective.
 
-Fix a trained checkpoint. Let \(R\) be the complete ordinary code and \(M=T(R)\) the statistical-prefix message. Let \(X\) contain the noisy latent, diffusion time and common side information, and let \(V\) be the square-integrable native regression target. Define
+Population expectations below integrate over an independent evaluation event and any stated diffusion noise, conditional on the fixed training result. Finite source-validation averages carry hats. The prediction family and training budget are fixed; a newly trained fusion model is a different arm.
 
-\[
+The results use standard conditional projection and fixed-expert selection arguments. They specialize these tools to the actual matched HSE messages; they are not new general information or routing theory. Predictive V-information already formalizes observer-dependent usable information (Xu et al., ICLR 2020); multi-expert regression/deferral and cost-aware two-stage routing are direct precedents (Mao, Mohri and Zhong, ICML 2024/2025).
+
+## Proposition 1 — nested-message finite-risk decomposition
+
+Assume $\mathbb E\|V\|^2<\infty$ for a common regression target $V$. Put
+
+$$
 f_R=\mathbb E[V\mid X,R],\qquad f_M=\mathbb E[V\mid X,M].
-\]
+$$
 
-For fitted predictors \(\widehat f_R,\widehat f_M\), let
+The fitted predictors $d_R,d_M$ are measurable in their respective inputs and square-integrable. Define
 
-\[
-A_j=\mathbb E\|\widehat f_j-f_j\|^2.
-\]
+$$
+\Gamma(a)=\mathbb E[\|f_R-f_M\|^2\mid A=a],\quad
+\mathcal E_j(a)=\mathbb E[\|d_j-f_j\|^2\mid A=a].
+$$
 
-Then
+For almost every $a$,
 
-\[
-\boxed{\mathcal R(\widehat f_M)-\mathcal R(\widehat f_R)
-=\mathbb E\|f_R-f_M\|^2+A_M-A_R.}
-\]
-
-### Proof
-
-Because \(M\) is measurable with respect to \(R\), `(X,M)` is a sub-information set of `(X,R)`. Expand
-
-\[
-V-f_M=(V-f_R)+(f_R-f_M).
-\]
-
-The cross term has zero expectation because `E[V-f_R|X,R]=0`. This gives the Bayes-risk difference. For either fitted predictor, expand \(V-\widehat f_j=(V-f_j)+(f_j-\widehat f_j)\); its cross term also vanishes after conditioning on the arm's information set. Subtract the two identities.
-
-### Consequence
-
-M cannot beat R by adding Bayes information. It can win for a finite model only when the reduction in finite approximation/optimization error exceeds the nonnegative information penalty. This is the precise interpretation of an M-over-B1-aux gain.
-
-## Definition — acquisition-conditional accessibility profile
-
-Let \(A\) be the deployment-available acquisition condition. For every fixed trained arm j, define
-
-\[
-\rho_j(a)=\mathbb E[\ell_j\mid A=a].
-\]
-
-The collection ρ(a) is the **accessibility profile**. It is an estimand of the complete trained system, not a latent label assigned by the router.
-
-For the nested pair, condition Proposition 1 on `A=a` to obtain
-
-\[
-\rho_M(a)-\rho_R(a)=\Gamma_{M\mid R}(a)+A_M(a)-A_R(a).
-\]
-
-A condition-dependent advantage therefore has an explicit competing explanation: lower finite fitting error versus lost Bayes information.
-
-## Proposition 2 — routing headroom
-
-For fixed trained arms \(j\in\mathcal J\), define
-
-\[
-\mathcal H_{route}
-=\min_j\mathbb E_A\rho_j(A)-\mathbb E_A\min_j\rho_j(A).
-\]
-
-Then
-
-\[
-\boxed{\mathcal H_{route}\ge0.}
-\]
-
-It is strictly positive only if no single global arm attains the conditionwise minimum almost surely and the positive conditional gaps have nonzero measure.
+$$
+\boxed{\rho_M(a)-\rho_R(a)=\Gamma(a)+\mathcal E_M(a)-\mathcal E_R(a),\qquad \Gamma(a)\ge0.}
+$$
 
 ### Proof
 
-For every j and every a,
+Since $M=T(R)$, $\sigma(X,M)\subseteq\sigma(X,R)$. Conditional on $(X,R)$, $V-f_R$ has zero mean. Expanding
 
-\[
-\min_k\rho_k(a)\le\rho_j(a).
-\]
+$$
+\|V-f_M\|^2=\|V-f_R\|^2+\|f_R-f_M\|^2
++2\langle V-f_R,f_R-f_M\rangle
+$$
 
-Take expectations and then minimize the right-hand side over j. Equality holds when one global arm is a conditionwise minimizer almost surely; otherwise a strict inequality occurs whenever the losing gap contributes positive mass.
+and conditioning on $A$ eliminates the cross term by the tower property; this is valid because $A$ was included in $X$. For each $j$, expand $V-d_j=(V-f_j)+(f_j-d_j)$ and eliminate its cross term in the same way. Subtract the two resulting identities. These conditional expectations are defined almost surely, not pointwise at every unsupported acquisition value. ∎
 
-### Interpretation
+### Consequence and boundary
 
-The result is a **go/no-go test for routing**. If the estimated headroom is below a predeclared practical margin, the final method must use the best single representation. The existence of several representations does not justify a router.
+An M-over-R gain requires $\mathcal E_R(a)-\mathcal E_M(a)>\Gamma(a)$. The statistical message does not create new observation information. This identity concerns the stated square-loss target; it is not an Energy Score, macro-F1 or finite reverse-sampler guarantee. Gaussian-score moment identification and the same-moment/non-Gaussian counterexample remain in the existing detailed theory files.
 
-## Proposition 3 — plug-in routing regret under conditional risk estimation
+## Definition — a fixed-system conditional risk profile
 
-Assume a source-valid estimator satisfies, on the deployment-relevant acquisition set,
+For a finite set of fixed trained arms $\mathcal J$, define
 
-\[
-|\widehat\rho_j(a)-\rho_j(a)|\le\epsilon(a)
-\quad\text{for every }j.
-\]
+$$
+\rho_j(a)=\mathbb E[\ell_j\mid A=a],\qquad
+\mathcal R_j=\mathbb E_{A\sim\pi}\rho_j(A).
+$$
 
-Let \(\widehat j(a)=\arg\min_j\widehat\rho_j(a)\) and \(j^*(a)=\arg\min_j\rho_j(a)\). Then
+The acquisition weighting $\pi$ is declared. A balanced-condition benchmark and a prevalence-weighted deployment are different estimands. Loss must be integrable and common across arms. For diagnostic routing, use a declared per-event proper/classification loss to fit the selector; recompute macro-F1 from final predictions instead of treating it as an additive event loss.
 
-\[
-\boxed{\rho_{\widehat j(a)}(a)-\rho_{j^*(a)}(a)\le2\epsilon(a),}
-\]
+## Proposition 2 — hard-selection headroom, not a fusion theorem
 
-and consequently
+Define
 
-\[
-\mathcal R_{\widehat{route}}-\mathcal R_{oracle\ route}
-\le2\mathbb E_A\epsilon(A).
-\]
+$$
+\mathcal H_{\rm hard}=\min_j\mathbb E_\pi\rho_j(A)
+-\mathbb E_\pi\min_j\rho_j(A).
+$$
+
+Then $\mathcal H_{\rm hard}\ge0$. For finite $\mathcal J$ it is zero exactly when at least one globally best arm is also conditionwise optimal almost surely (ties allowed).
 
 ### Proof
 
-By optimality of the empirical choice,
+For every fixed $j$, $\min_k\rho_k(a)\le\rho_j(a)$. Integrate and minimize the right-hand side. If equality holds, choose a global minimizer $j_0$, which exists because the set is finite. The nonnegative integrable gap $\rho_{j_0}(A)-\min_k\rho_k(A)$ has expectation zero and thus vanishes almost surely. The converse is immediate. ∎
 
-\[
-\widehat\rho_{\widehat j}\le\widehat\rho_{j^*}.
-\]
+### Counterexample — zero hard headroom can coexist with a fusion gain
 
-Add and subtract the two true risks and apply the two estimation-error bounds. Integrate over A.
+Let $A$ have two equally likely values, target $Y=0.25$ or $0.40$, and fixed predictions $f_R=0,f_M=1$. R is better under both conditions, so $\mathcal H_{\rm hard}=0$. Its MSE is $0.11125$. Static prediction fusion $f_\alpha=(1-\alpha)f_R+\alpha f_M$ with $\alpha=0.325$ has MSE $0.005625$. Conditional weights $\alpha(A)=Y(A)$ have zero MSE in this constructed example. Therefore a zero hard headroom does **not** rule out static or soft fusion; a positive one does **not** prove a router beats static fusion.
 
-### Boundary
+These are fixed scalar-predictor witnesses. For probability forecasts, define a mixture distribution and evaluate its proper score. Interpolating two diffusion latent samples or two condition tokens is not automatically that mixture.
 
-This is a conditional guarantee, not a claim that the source estimator has the stated error on an unseen target domain. The experiments must measure source and unseen-acquisition behavior separately. If the transportability assumption fails, the bound is not invoked.
+## Proposition 3 — plug-in regret with an explicit transportability error
 
-## Counterexamples and validation
+Let $\widehat\rho^s_j(a)$ be source-only estimates and suppose, on the target support,
 
-1. **No routing headroom:** ρ_R(a)<ρ_M(a) for every a. A learned router should collapse to R; a nontrivial router is unnecessary complexity.
-2. **Positive routing headroom:** R is better at low missingness while M is better at high missingness. The oracle conditional selector beats either global arm even if their overall means are close.
-3. **Spurious empirical crossing:** small validation groups create sign changes but group-bootstrap intervals cover a practical zero margin. Routing remains HOLD.
-4. **Target conditional shift:** source risk crossings reverse on an unseen acquisition. A source-only router fails; the result is reported as a transportability failure, not repaired with target labels.
+$$
+|\widehat\rho^s_j(a)-\rho^s_j(a)|\le\epsilon(a),\quad
+|\rho^s_j(a)-\rho^t_j(a)|\le b(a)
+$$
 
-`experiments/p19/toy_routing.py` executes the first two algebraic cases and the plug-in-regret calculation. The toy is a theorem witness, not PHM evidence.
+for every arm. Both bounds are assumptions unless separately established. Use the same declared target weighting $\pi$ when evaluating the quantities below. Set $e=\epsilon+b$ and $\widehat j(a)=\arg\min_j\widehat\rho^s_j(a)$ with a fixed tie rule. Then
+
+$$
+\boxed{\mathcal R_t(\widehat j)-\mathcal R_t(j_t^*)\le2\mathbb E_\pi e(A).}
+$$
+
+Moreover,
+
+$$
+|\widehat{\mathcal H}_{s,\pi}-\mathcal H_{t,\pi}|\le2\mathbb E_\pi e(A).
+$$
+
+### Proof
+
+By the triangle inequality, each estimated risk differs from the target risk by at most $e(a)$. Add and subtract the estimated risks of the selected and target-optimal arms. Their estimated difference is nonpositive, leaving at most $2e(a)$. Integrate. For headroom, the minimum of finitely many real numbers is 1-Lipschitz in the sup norm. Apply that fact once to the minimum of global risks and once to the conditionwise minimum, then add the two bounds. ∎
+
+If the selector incurs additional cost $c_g(A)$ priced by a declared $\lambda$, its gain over the target-best fixed arm is at least
+
+$$
+\widehat{\mathcal H}_{s,\pi}-4\mathbb E_\pi e(A)-\lambda\mathbb E_\pi c_g(A).
+$$
+
+This is a conditional lower bound, not a claim that target errors or a universal cost conversion are known. Arm-dependent cost must be included in each risk before selection. No unseen-condition guarantee is invoked when source conditional order reverses.
+
+## Empirical selection and falsification
+
+Use disjoint source groups for fitting predictors, selecting checkpoints/gates, and evaluating the final comparison. A positive in-sample $\min\widehat\rho$ gap is upward-biased evidence for selection because the same noise chooses the winner. An independent held-out source evaluation or group cross-fitting is required before promotion. Target test groups never choose a gate, threshold, fusion coefficient or covariance floor.
+
+The same-stem Notebook executes the finite hard/soft distinction and the regret algebra. `experiments/p19/toy_routing.py` additionally generates independent source/test events, fits selectors on source predictions, and evaluates no-crossing, crossing, fusion-only and target-reversal controls. It is not a simulation of the complete HSE or LLapDiff architecture. The existing two-arm native pilot remains the first learned experiment.
+
+## References and originality boundary
+
+- Xu et al. (2020), *A Theory of Usable Information under Computational Constraints*, ICLR; arXiv:2002.10689, Definitions 1–3.
+- Mao, Mohri and Zhong (2024), *Regression with Multi-Expert Deferral*, ICML/PMLR 235:34738–34759.
+- Mao, Mohri and Zhong (2025), *Mastering Multiple-Expert Routing: Realizable H-Consistency and Strong Guarantees for Learning to Defer*, ICML/PMLR 267:43035–43066, Section 2.
+
+The candidate contribution is a statistically anchored **industrial conditioning intervention**, tested against its fully supervised ordinary code. Conditional profiles and the bounds above define falsifiable interpretation and selection criteria; merely renaming standard routing headroom is not an independent theoretical invention.

@@ -1,52 +1,39 @@
-# Goal 06 — Local GPU execution on 8×4090
+# Goal 06 — local GPU boundary: genuine HSE–LLapDiff
 
-## Trigger
+## Scope and missing prerequisites
 
-Use this Goal only after CPU/theory checks, data Goal, PHMFactory Goal (for PHM), and genuine HSE/reference export validation pass. The repository changes up to that boundary can be reviewed/merged without pretending GPU results exist.
+The machine has 8×RTX 4090. This update stops before expensive learned experiments. Required local inputs are a genuine source-trained HSE checkpoint, a source-trained reference encoder/checkpoint, audited raw-group splits and the exact exported features/targets. MFPT reference acceptance does not supply those representation checkpoints. Identify or train them with the existing upstream source path; do not replace them with random or analytic features.
 
-## Hardware rule
+PHMFactory remains a separate installed environment. Original LLapDiff is independently installed via `LLAPDIFF_ROOT`; paper code does not import PHMFactory core. External raw converters/checkpoints remain dataset-specific pending prerequisites, not “already integrated” benchmarks.
 
-Available machine: 8 × RTX 4090. **Two-GPU execution is forbidden.**
+## Hardware and permissions
 
-- First genuine M/B1-aux pilot: one GPU only (`cuda:0`).
-- Independent seeds may run concurrently on separate single GPUs after the one-GPU command is validated, e.g. GPU 0, 1 and 2 as three independent processes.
-- For later large external/SOTA work use 1, 4 or 8 GPUs only when the official implementation actually supports distributed execution and the paper config declares it. Do not create a 2-GPU special path.
+First pilot: one GPU, GPU0. Run seeds 0/1/2 sequentially there. **No world-size-2 or two-GPU training.** Later official implementations may use 1, 4 or 8 GPUs only after their distributed entry is validated; independent single-GPU seed jobs are also allowed. No force-push, master edits, branch deletion, upstream core changes or automatic submission.
 
-## First required run
+## Actual commands
 
 ```bash
+bash paper/run.sh setup
+bash paper/run.sh setup-neural
+export LLAPDIFF_ROOT=/absolute/LLapDiffusion
+bash paper/run.sh setup-native
+bash paper/run.sh native-acceptance
+# This acceptance is a component check with explicitly synthetic input, not the next real run.
 CUDA_VISIBLE_DEVICES=0 bash paper/run.sh native-pilot \
-  --train /absolute/train.npz \
-  --validation /absolute/validation.npz \
-  --test /absolute/test.npz \
-  --data-note /absolute/export_note.md \
+  --train /absolute/exports/train.npz \
+  --validation /absolute/exports/validation.npz \
+  --test /absolute/exports/test.npz \
+  --data-note /absolute/exports/export_note.md \
   --device cuda:0 --seeds 0 1 2 \
-  --anchor-steps 150 --diffusion-steps 200 \
-  --draws 8 --sampler-steps 16 \
+  --anchor-steps 150 --diffusion-steps 200 --draws 8 --sampler-steps 16 \
   --output-dir outputs/native_pilot_01
+bash paper/run.sh native-figures comparison outputs/native_pilot_01/event_scores.csv outputs/native_pilot_01/figures
 ```
 
-This command is deliberately small. Do not start five arms, SOTA sweeps or all external benchmarks before the matched pilot is interpretable.
+## Products and acceptance
 
-## Parallel single-GPU seeds after validation
-
-```bash
-CUDA_VISIBLE_DEVICES=0 <seed-0-command> &
-CUDA_VISIBLE_DEVICES=1 <seed-1-command> &
-CUDA_VISIBLE_DEVICES=2 <seed-2-command> &
-wait
-```
-
-Each process remains a single-GPU experiment and writes a distinct output directory.
-
-## Acceptance
-
-- no CUDA fallback;
-- exact frozen export and config recorded in the local run note;
-- all three seeds finish or failures are retained;
-- M/B1-aux curves, final group-level scores and cost are written to CSV;
-- Results text reflects the sign of the actual comparison.
+One shared conditioner checkpoint per seed, real native denoiser checkpoints, event scores, source/unseen statistical diagnostics, training curves, parameters/time/draw counts and record-level paired comparison. Verify the actual HSE patch/mask/side path, source-only selection and frozen statistics before interpreting gains. M need not win: correctness, reproducibility, valid comparison and a faithful Results update complete the task.
 
 ## Failure handling
 
-OOM → reduce declared batch size equally for all compared arms and rerun all matched arms; do not silently change one method. Missing dependency/data → BLOCKED, not random substitute. M loses → SIMPLIFY, do not add a new module automatically.
+No checkpoint/data/export code: name the absent dependency and stop that slice. Native objective mismatch: correct the interface, not the target or comparison data. OOM: declare a common batch-size change and rerun all paired arms; do not silently use two GPUs. No gain against B1-aux or static fusion: preserve the negative result and use the simpler model.

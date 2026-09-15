@@ -1,31 +1,24 @@
-# Goal 02 — Theory and manuscript synchronization
+# Goal 02 — close the scientific argument
 
 ## Scope
 
-Maintain one chain: `problem → theory → method → estimand → experiment → claim`. Do not add another generic theorem unless an existing statement is mathematically insufficient for the implemented method.
+Maintain `M=T(R)`, matched statistical supervision, actual consumed condition and native target. Keep fixed-arm hard selection distinct from soft fusion. Do not rename standard usable-information or multi-expert-routing theory as an independent invention.
 
-## Deliverables
+## Products
 
-- `notation.md` defines all main random objects and risks;
-- `theory_main.md` contains nested-message risk, routing headroom and plug-in routing regret;
-- detailed existing Theory 12/13 remain the proof authority for Gaussian/statistical controls;
-- `main.md`, `contributions.md`, `method.md`, `experiments.md`, `results_native.md` use the same objects.
-
-## Acceptance
-
-- M is never described as creating information relative to R;
-- empirical source risk is never called population risk;
-- router claims are conditional on headroom and source-only acquisition descriptors;
-- no numerical PHM/SOTA result appears without an executed result file;
-- negative routing/M results have explicit simplify/stop decisions.
+`main.md`, `notation.md`, `method.md`, `theory_main.md` + `theory_main.ipynb`, `related_work.md`, `contributions.md`; preserve the historical numbered proofs and their finite counterexamples.
 
 ## Commands
 
 ```bash
 bash experiments/p19/run.sh theory
-bash experiments/p19/run.sh toy
+bash experiments/p19/run.sh toy --events 1024 --seed 0 --output outputs/p19/toy_routing.csv
 ```
+
+## Acceptance
+
+General assumptions/proofs and same-stem Notebook agree. Verify the 0.075 hard-headroom algebra, the zero-hard-headroom fusion counterexample, conditional transport-error regret, and source/test separation. Citation keys resolve in the existing bibliography. Read primary method/theorem sections before changing novelty claims. The Results section reports observed simulation scores without treating them as learned HSE results.
 
 ## Failure handling
 
-A failed toy/theory invariant blocks the dependent manuscript claim. Fix the mathematical statement or implementation; do not weaken the counterexample or delete the negative case.
+A proof or witness fails: narrow/correct that statement before experiment promotion. An existing theorem is background: keep attribution and test its method-specific consequence. Do not increase the theorem count or retitle the paper to hide a null method result.

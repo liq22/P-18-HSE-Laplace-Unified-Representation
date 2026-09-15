@@ -1,15 +1,7 @@
-# Literature boundary
+# Literature for the active question
 
-Read the active-method sources in this order:
+Start with HSE and the full LLapDiff v2 method/target definition, then the statistical-compression and target-posterior sources already in `references.bib`. For the current finite-model and routing interpretation, Xu et al. (ICLR 2020) and Mao–Mohri–Zhong (ICML 2024/2025) are direct theoretical predecessors, not peripheral citations.
 
-1. HSE — fixed latent interface for heterogeneous industrial signals;
-2. Latent Laplace Diffusion — stable modal latent trajectories and irregular-time probabilistic generation;
-3. CSDI — conditional diffusion as a probabilistic time-series baseline;
-4. Warpformer and t-PatchGNN — irregular and multi-rate deterministic encoders;
-5. Neural Laplace — Laplace-domain trajectory representation.
+Read `paper/related_work.md` for the exact inspected sections and source-access limits. The active candidate is a statistically supervised reparameterization of the same HSE code, not a claim of one calibrated physical posterior for every industrial signal. PHMFactory reference acceptance and a conditional routing toy cannot establish learned posterior calibration.
 
-Flow Matching is listed only as future work. It is not part of the current method or experiment plan.
-
-The exact candidate gap is:
-
-> fixed physical HSE tokens that encode acquisition evidence and information, conditioning LLapDiff to produce a calibrated posterior in one canonical Laplace modal space across paired heterogeneous acquisitions.
+Flow Matching remains future work. Existing valid literature and negative controls are retained; duplicated future-work prose was consolidated into the main project/paper entries.

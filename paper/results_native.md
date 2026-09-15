@@ -1,58 +1,48 @@
-# Results — current evidence and empty slots that must remain empty
+# Results and execution boundary
 
-## R0. Remote native acceptance at current PR head
+## 1. What the repository currently demonstrates
 
-The current PR head before this TII-writing commit was `d8ea36fc8b3274dc007ccb40af6064f45fe87f14`. GitHub Actions run `34602707154` completed both `analytic-oracle` and `native-conditioner` jobs successfully. The native job installed the original `pixelhero98/LLapDiffusion` component at revision `0631e65cbac59d23822205573ebc7e180ecf0487` and executed the advertised `bash paper/run.sh native-acceptance` entry.
+The retained results cover analytical posterior studies, native LLapDiff **component** checks, fixed-predictor routing counterexamples, and one real PHMFactory reference acceptance. They do not yet include trained HSE–LLapDiff on real frozen HSE features, learned static/dynamic routing, or the five external-domain method comparisons.
 
-Actual native-component values from that run:
+The original native loss/consumption measurements remain attributable to their recorded CI run, not a fresh real-data experiment. Native synthetic components and genuine feature extraction are explicitly different stages.
 
-| Check | Value |
-|---|---:|
-| shared-gradient/export behavior tests | 14 passed |
-| native loss comparison configurations | 24 |
-| comparison rows | 96 |
-| maximum absolute native/reconstructed loss difference | 2.3841857910e-7 |
-| auxiliary gradient L1 reaching the ordinary trunk | 49.30367953 |
-| ordinary-code maximum change after auxiliary step | 0.01159522310 |
-| B1-aux prefix intervention effect | 0.00081458688 |
-| B1-aux tail intervention effect | 0.00069965422 |
-| M prefix intervention effect | 0.00071845204 |
-| M tail intervention effect | 0.00056588650 |
-| frozen conditioner changed by denoiser update | false |
-| extra raw-summary bypass | false |
-| genuine HSE/reference extraction executed | false |
-| method advantage tested | false |
+## 2. Real MFPT reference acceptance
 
-These numbers establish component consumption and loss consistency only. They are **not** a learned HSE–LLapDiff result, PHM result or evidence that M is better than B1-aux.
+Exact PHMFactory revision: `a0db97364e6d38a927c3ea30c643ebbb821d54d7`. Original accepted config: `configs/baselines/01_mfpt/mfpt_global_average_linear.yaml`, seeds 17/18/19, five CPU epochs. Actions run **34765060233**, job **103744444769**, executed the public install/doctor/smoke/preflight/data preparation/train path, then independently restored all checkpoints and recomputed metrics.
 
-## R1. Existing finite theory witnesses
+| Seed | Test windows | Accuracy | Pooled-window macro-F1 | Selected epoch |
+|---:|---:|---:|---:|---:|
+| 17 | 96 | 0.500000 | 0.2222222222 | 4 |
+| 18 | 96 | 0.3333333333 | 0.1666666667 | 4 |
+| 19 | 96 | 0.1666666667 | 0.0952380952 | 4 |
 
-Retain the prior analytical records: actual-token collision/full-side-input control, conditional KL decomposition, denoising projection, same-moment non-Gaussian collision, Gaussian posterior parameterization controls and the source-supervised shared-code checks. They delimit possible mechanisms; none authorizes an industrial performance claim.
+Mean accuracy is 0.3333333 (sample standard deviation 0.1666667); mean F1 is 0.1613757 (sample standard deviation 0.0636572). This six-parameter reference is intentionally weak; its scores are not HSE method performance. Maximum independent accuracy difference from the framework was 9.94e-9 and maximum F1 difference 4.97e-9. Each test recording has 16 windows, so the independently recomputed recording-balanced pooled metric coincides here; that equivalence does not hold with unequal window counts.
 
-The new TII main-theory estimand is routing headroom. `experiments/p19/toy_routing.py` supplies only a finite algebraic witness. A positive toy headroom is not empirical evidence of acquisition routing in real data.
+Exported dataset shapes were train `[160,2048,1]` from 10 files, validation `[64,2048,1]` from 4 files, and test `[96,2048,1]` from 6 files. The split is disjoint by original File, not an assertion of independent machines/bearings. Raw and derived waveform arrays are excluded from CI uploads. Numeric diagnostics/predictions are retained in the run artifact; `paper/assets/mfpt_reference_recomputed.csv` records independent recomputation.
 
-## R2. PHM main table — intentionally empty
+The first acceptance run **34764636902** completed all three public trainings but then failed in the parent-side serialization of `ResolvedConfig`. Using the documented `runtime_config()` fixed that integration error. No upstream model, split, epochs or seed was changed to obtain a pass.
 
-Required rows: reference B1, B1-aux, M, source-selected best single, static fusion, dynamic acquisition route, plus compatible industrial baselines. Required columns include recording-macro macro-F1, worst-acquisition F1, reference-latent Energy Score, parameters, latency and memory.
+## 3. Fixed-predictor routing and fusion controls
 
-**No values are inserted until the exact PHMFactory real-data protocol is accepted and executed.** Dummy smoke cannot fill this table.
+Reproduction:
 
-## R3. External benchmark table — intentionally empty
+```bash
+bash experiments/p19/run.sh toy --events 1024 --seed 0 --output outputs/p19/toy_routing.csv
+```
 
-Benchmark families and compatible metrics are defined in `experiments.md` and `experiments/DATA_DOWNLOAD_SOP.md`. Download links or successful parsing do not count as integrated benchmark results.
+Four scenarios each contain 1,024 independent source events and 1,024 independent test events, with two acquisition views per event. Six methods yield 24 summary rows and 49,152 test-score rows. Repeated methods/views are paired, not additional independent events. Source estimates select arms/weights; only the selected rules are evaluated on test.
 
-## R4. Ablation and routing table — intentionally empty
+| Scenario | Best source-selected single | Static prediction fusion | Hard source route | Conditional soft control |
+|---|---:|---:|---:|---:|
+| No hard headroom | 0.25190793 | 0.13178764 | 0.25190793 | 0.13179010 |
+| Conditional crossing | 0.25037478 | 0.12711208 | 0.17848866 | 0.11676041 |
+| Fusion without hard crossing | 0.11125000 | 0.00562500 | 0.11125000 | approximately 0 |
+| Target ordering reversal | 0.25439336 | 0.12748929 | 0.32789204 | 0.16534586 |
 
-The routing row is admitted only after group-level source estimates show practical headroom. If the best single representation dominates, the correct result is `routing_not_justified` and the simpler method is retained.
+Entries are observed test MSEs in a declared simulation, not trained industrial models. The exact algebraic hard headroom is 0.075 in the crossing reference law and zero in the dominance law. The soft-control example proves that zero hard headroom cannot eliminate fusion. In the stochastic crossing cell the hard route improves over a source-selected single arm but loses to static fusion. Under target reversal it becomes worse than the selected single. These negative controls constrain the method claim and remain in the paper.
 
-## R5. Negative-result policy
+## 4. Manuscript result slots awaiting GPU/data
 
-A result may change the final paper identity:
+**Primary learned contrast:** M versus B1-aux with the same checkpoint, supervision, target and total cost. **Secondary contrasts:** B1 reference, best single, static prediction fusion, then justified hard routing. **Industrial table:** recording-balanced pooled-confusion macro-F1, conventional pooled metrics, Energy Score and costs. **External tables:** one task-compatible table per domain, never an average of incompatible metrics.
 
-- M ≤ B1-aux at comparable cost → simplify to the ordinary supervised code;
-- static fusion matches dynamic routing → remove the router;
-- dynamic source gain reverses on unseen acquisition → report transportability failure;
-- Gaussian/mixture probability head matches Diffusion → do not claim Diffusion necessity;
-- PHM gains disappear under recording-level splits → reject the window-level claim.
-
-No failed central hypothesis is repaired by adding a new model or changing the test set after seeing results.
+No values are entered for unrun models. A null/worse M result, static fusion matching routing, or source-to-target reversal completes the corresponding question and leads to simplification. CI acceptance cannot promote these empty method claims.

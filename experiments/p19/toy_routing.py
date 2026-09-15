@@ -1,64 +1,92 @@
-"""Finite witnesses for routing-headroom definitions; not PHM evidence."""
-from __future__ import annotations
+"""Observed finite simulations for fixed-arm routing, fusion and shift boundaries.
 
+The simulated predictors are declared stochastic measurement devices, not trained
+HSE models. Source selector fitting and test events are independent. CSVs are
+actual squared losses; exact population checks remain separately labelled.
+"""
+from __future__ import annotations
 import argparse
 import csv
 from pathlib import Path
+import numpy as np
+from .routing import weighted_headroom, select_fixed_arms, fit_static_squared
 
 
-def headroom(rows):
-    conditions = sorted({r["condition"] for r in rows})
-    arms = sorted({r["arm"] for r in rows})
-    by = {(r["condition"], r["arm"]): r["risk"] for r in rows}
-    global_risks = {arm: sum(by[(c, arm)] for c in conditions) / len(conditions) for arm in arms}
-    best_global = min(global_risks.values())
-    oracle = sum(min(by[(c, arm)] for arm in arms) for c in conditions) / len(conditions)
-    return best_global - oracle
+def check_boundaries():
+    p = np.array([.5, .5])
+    crossing = np.array([[.15, .30], [.35, .20]])
+    dominated = np.array([[.20, .25], [.30, .35]])
+    np.testing.assert_allclose(weighted_headroom(crossing, p), .075)
+    np.testing.assert_allclose(weighted_headroom(dominated, p), 0, atol=1e-15)
+    # R=0, M=1, y=.25 or .40: R wins both strata, but soft fusion helps.
+    targets = np.array([.25, .40])
+    risk = np.column_stack((targets**2, (1-targets)**2))
+    np.testing.assert_allclose(weighted_headroom(risk, p), 0, atol=1e-15)
+    alpha = fit_static_squared(np.tile([0., 1.], (2, 1)), targets)
+    np.testing.assert_allclose(alpha, .325)
+    np.testing.assert_allclose(np.mean((alpha-targets)**2), .005625)
+    return crossing, dominated
+
+
+def simulate(scenario, events, rng, shift=False):
+    a = np.tile(np.arange(2), events)
+    group = np.repeat(np.arange(events), 2)
+    if scenario == 'fusion_without_crossing':
+        y = np.where(a == 0, .25, .40)
+        pred = np.column_stack((np.zeros(len(a)), np.ones(len(a))))
+    else:
+        y = np.repeat(rng.normal(size=events), 2)
+        risk = np.array([[.20, .25], [.30, .35]]) if scenario == 'no_headroom' else np.array([[.15, .30], [.35, .20]])
+        if shift:
+            risk = risk[::-1]
+        pred = y[:, None] + rng.normal(size=(len(a), 2)) * np.sqrt(risk[a])
+    return group, a, y, pred
+
+
+def run(events, seed):
+    if events < 2:
+        raise ValueError('at least two independent events per split required')
+    check_boundaries()
+    event_rows, summary = [], []
+    scenarios = ['no_headroom', 'positive_headroom', 'fusion_without_crossing', 'target_reversal']
+    for k, scenario in enumerate(scenarios):
+        _, sa, sy, sp = simulate(scenario, events, np.random.default_rng(seed+100*k))
+        tg, ta, ty, tp = simulate(scenario, events, np.random.default_rng(seed+100*k+1), shift=scenario == 'target_reversal')
+        source_risk = np.vstack([np.mean((sp[sa == c]-sy[sa == c, None])**2, axis=0) for c in range(2)])
+        best, hard = select_fixed_arms(source_risk, [.5, .5])
+        alpha = fit_static_squared(sp, sy)
+        # This soft two-cell fit is a counterexample control, not our hard router.
+        soft = np.array([fit_static_squared(sp[sa == c], sy[sa == c]) for c in range(2)])
+        prediction = {'R': tp[:, 0], 'M': tp[:, 1], 'best_single': tp[:, best],
+                      'static_prediction_fusion': (1-alpha)*tp[:, 0]+alpha*tp[:, 1],
+                      'hard_source_route': tp[np.arange(len(tp)), hard[ta]],
+                      'soft_cell_control': (1-soft[ta])*tp[:, 0]+soft[ta]*tp[:, 1]}
+        for method, values in prediction.items():
+            loss = (values-ty)**2
+            summary.append(dict(scenario=scenario, method=method, test_mse=float(np.mean(loss)),
+                                source_empirical_headroom=weighted_headroom(source_risk, [.5,.5]),
+                                source_static_alpha=alpha, test_events=events, simulator_seed=seed))
+            for i, value in enumerate(loss):
+                event_rows.append(dict(scenario=scenario, method=method, condition_id=f'{scenario}:{ta[i]}',
+                    group_id=f'{scenario}:test:{tg[i]}', seed=seed, unit_id=str(tg[i]), value=float(value)))
+    return event_rows, summary
 
 
 def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("--output", default="outputs/p19/toy_routing.csv")
-    args = p.parse_args()
-    scenarios = {
-        "no_headroom": [
-            {"condition": "low_missing", "arm": "R", "risk": 0.20, "estimate": 0.205},
-            {"condition": "low_missing", "arm": "M", "risk": 0.25, "estimate": 0.245},
-            {"condition": "high_missing", "arm": "R", "risk": 0.30, "estimate": 0.304},
-            {"condition": "high_missing", "arm": "M", "risk": 0.35, "estimate": 0.346},
-        ],
-        "positive_headroom": [
-            {"condition": "low_missing", "arm": "R", "risk": 0.15, "estimate": 0.158},
-            {"condition": "low_missing", "arm": "M", "risk": 0.30, "estimate": 0.294},
-            {"condition": "high_missing", "arm": "R", "risk": 0.35, "estimate": 0.343},
-            {"condition": "high_missing", "arm": "M", "risk": 0.20, "estimate": 0.207},
-        ],
-    }
-    assert abs(headroom(scenarios["no_headroom"])) < 1e-12
-    assert abs(headroom(scenarios["positive_headroom"]) - 0.075) < 1e-12
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--events', type=int, default=512)
+    parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--output', type=Path, default=Path('outputs/p19/toy_routing.csv'))
+    args=parser.parse_args()
+    rows, summary=run(args.events,args.seed)
+    args.output.parent.mkdir(parents=True,exist_ok=True)
+    for path, data in [(args.output, summary), (args.output.with_name(args.output.stem+'_events.csv'), rows)]:
+        with path.open('w',newline='',encoding='utf-8') as f:
+            writer=csv.DictWriter(f,fieldnames=list(data[0])); writer.writeheader(); writer.writerows(data)
+    print('population hard headroom: crossing=0.075; dominated=0')
+    print('fusion counterexample: hard headroom=0; best static MSE=0.005625; soft MSE=0')
+    print(f'actual simulated summary_rows={len(summary)} event_rows={len(rows)}')
+    for r in summary:
+        print(f"{r['scenario']}/{r['method']}: {r['test_mse']:.8f}")
 
-    # Plug-in selector regret <= 2 epsilon for the declared uniform error bound.
-    for rows in scenarios.values():
-        eps = max(abs(r["estimate"] - r["risk"]) for r in rows)
-        conditions = sorted({r["condition"] for r in rows})
-        for c in conditions:
-            sub = [r for r in rows if r["condition"] == c]
-            chosen = min(sub, key=lambda r: r["estimate"])
-            oracle = min(sub, key=lambda r: r["risk"])
-            assert chosen["risk"] - oracle["risk"] <= 2 * eps + 1e-12
-
-    path = Path(args.output)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["scenario", "condition", "arm", "risk", "estimated_risk"])
-        w.writeheader()
-        for scenario, rows in scenarios.items():
-            for r in rows:
-                w.writerow({"scenario": scenario, "condition": r["condition"], "arm": r["arm"], "risk": r["risk"], "estimated_risk": r["estimate"]})
-    print(f"no_headroom={headroom(scenarios['no_headroom']):.6f}")
-    print(f"positive_headroom={headroom(scenarios['positive_headroom']):.6f}")
-    print(f"output={path}")
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':main()

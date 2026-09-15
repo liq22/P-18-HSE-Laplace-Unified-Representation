@@ -1,0 +1,4 @@
+[submodule "external/phmfactory"]
+	path = external/phmfactory
+	url = https://github.com/PHMbench/PHM-Vibench.git
+	branch = main

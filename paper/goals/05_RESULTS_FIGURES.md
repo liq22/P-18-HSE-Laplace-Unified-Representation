@@ -1,34 +1,28 @@
-# Goal 05 — Statistics and figures
+# Goal 05 — recompute statistics and draw from actual CSV
 
 ## Scope
 
-Aggregate only retained result CSV files; plotting never starts training or simulation.
+Additive event losses and nonlinear classification metrics use different estimators. Group resampling reflects original recording variation conditional on the evaluated seed set. Keep true interval endpoints even if a bootstrap interval does not contain the point estimate.
 
-## Deliverables
+## Products
 
-- paired group-level summary CSV;
-- practical-margin effect and interval for every main comparison;
-- SVG, PDF and PNG from the same summary;
-- Results prose that states the observed value and its claim boundary.
-
-## Acceptance
-
-- exact method/event-or-group/seed pairing; no silent inner-join deletion;
-- windows/draws are not treated as independent units;
-- source and unseen acquisition are separate;
-- one group produces no fake between-group confidence interval;
-- negative/null outcomes are plotted and retained;
-- figures use physical size, legible text and editable vector output.
+Recomputed reference metrics, paired group-effect CSV and editable SVG/PDF/PNG. Keep null/negative effects and number of original groups in labels. Plot commands never train or simulate.
 
 ## Commands
 
 ```bash
-bash experiments/p19/run.sh statistics --input /path/event_scores.csv \
-  --reference B1_aux --output outputs/p19/summary.csv
-bash experiments/p19/run.sh plot --input outputs/p19/summary.csv \
-  --output-dir outputs/p19/figures
+bash experiments/p19/run.sh phm-metrics --predictions /absolute/mfpt-check/predictions.csv --reference /absolute/mfpt-check/acceptance.csv --output outputs/p19/mfpt_recomputed.csv
+bash experiments/p19/run.sh statistics --input outputs/p19/toy_routing_events.csv --reference best_single --output outputs/p19/toy_effects.csv --bootstrap 1000
+bash experiments/p19/run.sh plot --input outputs/p19/toy_effects.csv --method hard_source_route --output-dir outputs/p19/hard-route-figures
+bash experiments/p19/run.sh plot --input outputs/p19/toy_effects.csv --method static_prediction_fusion --output-dir outputs/p19/static-figures
+# Native pilot output has a different, explicit column contract:
+bash paper/run.sh native-figures comparison outputs/native-pilot/event_scores.csv outputs/native-pilot/figures
 ```
+
+## Acceptance
+
+Duplicate/missing pairs fail rather than disappearing in a join. Unequal window counts cannot change recording weights. Macro-F1 is recomputed from pooled weighted confusion, never treated as a per-window additive metric. Figures are rendered and checked at final size; text remains editable in SVG/PDF. The reference nature-figure skill informs presentation only, not statistical conclusions.
 
 ## Failure handling
 
-If required pairs are missing, stop and repair the experiment record. Do not drop missing rows. If an interval crosses the practical equivalence margin, report uncertainty rather than declaring equality from a nonsignificant test.
+Malformed CSV or mismatched groups/budgets: stop that comparison. One group: report its descriptive estimate with undefined interval, do not invent population uncertainty. Keep raw outputs and explain the missing prerequisite instead of plotting expected curves.

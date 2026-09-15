@@ -1,51 +1,38 @@
-# Goal 01 — PHMFactory accepted-main synchronization and PHM data acceptance
+# Goal 01 — synchronize and qualify the dependency
 
 ## Scope
 
-PHM data in this paper come through PHMFactory. Do not build a second PHM reader in the parent. Validate the exact current `PHMbench/PHM-Vibench` accepted `main`, then one real PHM dataset through its public configuration/data path. Do not modify PHMFactory core for this paper.
+Read the parent branch/PR and upstream `main` before editing. The initially reviewed parent had no PHMFactory gitlink, so recording the accepted revision is an **initial submodule addition**, not a claimed fast-forward of an existing pointer. Preserve other branches and master.
 
-Read-only baseline when this Goal was updated: upstream `main = 9b595f72498621ddb05741ead29d8e7e2b0b7896`. Re-read the ref before local execution.
+## Products
 
-## Deliverables
-
-- exact upstream main commit;
-- public install / doctor / preflight smoke / Dummy demo result;
-- PHMFactory dataset source/metadata/config selected for the paper;
-- audited label mapping and original recording/bearing/run independent unit;
-- verified split-before-windowing or an explicit BLOCKED result if the executed protocol cannot guarantee it;
-- selected checkpoint restored for test;
-- configured primary metrics and independent recomputation;
-- PHMFactory export consumed by the paper without internal imports;
-- only after the real-data items pass: add/update parent `.gitmodules` and `external/phmfactory` gitlink.
-
-## Acceptance
-
-```text
-public smoke succeeds
-AND one PHMFactory real-data config uses the intended raw/metadata source
-AND label and original group identity are audited
-AND executed train/validation/test split is scientifically acceptable
-AND a real checkpoint is selected/restored
-AND every declared primary metric is finite and recomputed
-AND exported arrays preserve group/split/acquisition metadata
-```
-
-PHMFactory's current public documentation states that Dummy is smoke-only and real-data `baseline_valid` is not yet requalified. Therefore the gitlink remains absent until the real-data gate passes.
+`external/phmfactory` at the exact accepted revision, `.gitmodules`, the public acceptance command, numerical reference CSV and dependency scope in Results. No upstream core patch.
 
 ## Commands
 
 ```bash
-git -C /absolute/PHM-Vibench fetch origin
-git -C /absolute/PHM-Vibench switch main
-git -C /absolute/PHM-Vibench pull --ff-only origin main
-python -m pip install -e /absolute/PHM-Vibench
+git status --short
+git fetch origin
+git submodule update --init external/phmfactory
+git -C external/phmfactory status --short
+git -C external/phmfactory fetch origin main
+git -C external/phmfactory log -1 --oneline origin/main
+# For a later update, require the current pointer to be an ancestor of origin/main.
+git -C external/phmfactory merge-base --is-ancestor HEAD origin/main
+# In an isolated installed PHMFactory environment:
 phmfactory doctor
 phmfactory preflight --config smoke
 phmfactory demo
+bash experiments/p19/run.sh phm-prepare --output /absolute/data/mfpt
+bash experiments/p19/run.sh phm --data /absolute/data/mfpt --output /absolute/runs/mfpt-check
 ```
 
-Then use the exact real-data config and data root recorded in `PHM_DATA_NOTE.md`. Do not edit a maintained config to hide a protocol mismatch; use visible local overrides or an untracked explicit local config.
+Do not advance a later pointer before rerunning acceptance at that candidate revision. Run in a temporary/detached candidate checkout if the current parent pointer must remain unchanged during testing.
+
+## Acceptance
+
+Current accepted revision is `a0db97364e6d38a927c3ea30c643ebbb821d54d7`. Run 34765060233 restored three selected checkpoints and independently matched accuracy/F1 within 1e-6; 20 files and disjoint 10/4/6 train/val/test groups were checked. This qualifies only the exact MFPT reference path, not all upstream releases/configurations.
 
 ## Failure handling
 
-Any silent dataset replacement, sample dropping, group leakage, objective substitution, metric closure failure or checkpoint substitution rejects the slice. Report the mismatch and keep the parent gitlink unchanged. Do not patch PHMFactory core, change labels, silently switch datasets or add a fallback objective.
+Dirty worktree or non-descendant upstream: stop synchronization, keep the changes, do not reset/stash/force. Config/reader/split/checkpoint/metric failure: keep the existing pointer and report the actual failing command. A docs-only upstream change still receives the acceptance run before a new pointer is published.

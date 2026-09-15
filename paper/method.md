@@ -1,134 +1,63 @@
-# Method — statistically anchored HSE conditioning with conditional model selection
+# Method
 
-## 1. Fixed objects and information access
+## 1. Fixed feature and target paths
 
-Freeze a source-trained HSE extractor and a reference encoder. The observed history is \(O\), the deployment-available acquisition descriptor is \(a\), and
+Let $F=HSE_0(O,a_{enc})$ and $Z_0=E_{ref}(X_{ref})$. Freeze the source-trained HSE and reference encoder, define $U=L\operatorname{vec}(Z_0)$ before comparing arms, and make the complete conditioner input $C_F=(F,M_F,a)$ explicit. Actual side columns are ordered and named. Source-only normalization, masks and deterministic patch selection remain fixed. The high-rate/reference view can supply the target but cannot become an undeclared inference input for one arm.
 
-\[
-F=HSE_0(O,a_{enc}),\qquad Z_0=E_{ref}(X_{ref}),\qquad U=L\operatorname{vec}(Z_0).
-\]
+## 2. Shared statistical supervision
 
-The paper condition is
+A trunk outputs $R=g_\theta(C_F)\in\mathbb R^q$. A global head on the **same code** outputs
 
-\[
-C_F=(F,M_F,a),
-\]
+$$
+m_\psi(R),\quad S_\psi(R)=B_\psi(R)B_\psi(R)^\top+\lambda I.
+$$
 
-where \(M_F\) is the valid-history mask. A high-rate/reference view may define supervision but is never given to one comparator as a hidden inference input. The known-pole coefficient vector used by the analytical oracle is not identified with \(Z_0\) or with LLapDiff's learned modal parameters.
+The nonnegative covariance floor $\lambda$ is an explicit model constraint in source-standardized target units. Train trunk and head with
 
-## 2. One supervised ordinary code and one statistical reparameterization
+$$
+\mathcal L_G=\tfrac12\mathbb E_s\left[\log\det S_\psi(R)
++(U-m_\psi(R))^\top S_\psi(R)^{-1}(U-m_\psi(R))\right].
+$$
 
-A trainable source-side trunk produces a fixed-budget code
+The score gradient reaches the ordinary code used by B1-aux; an independent detached auxiliary head is not that control. Source validation selects one checkpoint. Log score, log-determinant, Mahalanobis term and covariance eigenvalues separately. The population optimum identifies moments conditional on R only under the stated function-class and covariance conditions; it does not establish calibration on an unseen acquisition.
 
-\[
-R=g_\theta(C_F)\in\mathbb R^q,
-\]
+## 3. Matched messages
 
-and a global moment head reads the **same R**:
+Freeze the entire feature/trunk/head path after selection. With $d=\dim U$ and $s=d+d(d+1)/2<q$, transmit
 
-\[
-m_\psi(R),\qquad
-S_\psi(R)=B_\psi(R)B_\psi(R)^\top+\lambda I.
-\]
+$$
+H_R=R,\qquad
+H_M=[m_\psi(R),\operatorname{vech}(\operatorname{chol}S_\psi(R)),R_{s+1:q}].
+$$
 
-The lower-triangular factor has a positive diagonal and λ is a public covariance constraint in standardized target units. Stage one minimizes
+Both contain q scalars and share a checkpoint. These are dense **global summary tokens**, not the original patch-indexed tokens: their output mask is all-valid. The input mask remains explicitly consumed upstream. Statistical semantics are evaluated at the unnormalized readout, before any learned denoiser projection. No raw-summary copy or extra prefix stream bypasses the budget. Prefix/tail interventions test actual native consumption, not only storage.
 
-\[
-\mathcal L_G=
-\frac12\mathbb E_s\!\left[
-\log\det S_\psi(R)+
-(U-m_\psi(R))^\top S_\psi(R)^{-1}(U-m_\psi(R))
-\right].
-\]
+## 4. Native conditional generation
 
-The score gradient updates both the moment head and the trunk that produces R. A detached auxiliary head is an invalid-control negative test. A single checkpoint is chosen using source validation only. Record total score, log-determinant, Mahalanobis term, minimum eigenvalue and fraction at the declared covariance floor; positive definiteness alone is not calibration.
+Use the same LLapDiff architecture, frozen reference target, prediction parameterization, scheduler, query times, target mask, optimizer updates, initialization policy and checkpoint rule for both arms. In the initial pilot: v prediction, 64-step cosine schedule, uniform nonzero training times, no loss weighting, one-layer/two-head denoiser, and no dropout. These are the implemented small pilot, not final tuned settings.
 
-For fixed R and an unrestricted function class, the Gaussian score identifies the conditional first two moments of \(U\mid R\). It does not identify the full conditional distribution, prove joint optimization succeeds, or imply target-domain calibration.
+Before training, independently recompute the native loss on the same batch/noise. If a later weighted objective uses a realized batch denominator, export and reuse it rather than replacing an expectation of a ratio by a ratio of expectations. Freeze means parameters, evaluation mode, buffers, preprocessing and patch realization, not `requires_grad` alone.
 
-## 3. Freeze once and form the matched messages
+## 5. Four comparison levels
 
-After stage-one selection, freeze HSE preprocessing, the trunk and the moment head; use evaluation mode and deterministic HSE patch selection. For \(d=\dim U\), let \(s=d+d(d+1)/2\). The matched messages are
+**Reference.** B1 uses the original ordinary HSE condition without the added source statistical objective; B0 runs the compatible official LLapDiff reference. These distinguish inherited model ability and extra supervision from message structure.
 
-\[
-H_{B1aux}=R,
-\]
+**Best single.** Train B1-aux and M with their shared selected conditioner. Select one complete trained arm using source validation. Never use target labels to choose the global winner.
 
-\[
-H_M=T(R)=
-[m_\psi(R),\operatorname{vech}(\operatorname{chol}S_\psi(R)),R_{s+1:q}].
-\]
+**Static fusion.** For fixed trained arms, mix predictions/distributions using a single source-selected weight. Squared-error point predictions use their convex combination; classification uses normalized class probabilities; probabilistic trajectories use an actual mixture of predictive distributions, with a fixed total sampling budget. Both-arm compute must be charged. Averaging generated trajectories is not automatically sampling from the mixture. A separate same-q token-fusion model may be trained as a structural ablation, but its risk is measured as a new arm.
 
-Both have exactly q transmitted scalars. B1-aux is the strongest same-supervision control because it sends the complete ordinary code that was actually trained by the auxiliary score. M is a deterministic function of R and therefore cannot create Bayes information relative to B1-aux.
+**Dynamic routing.** The minimal analyzed route selects one **fixed trained arm** from deployment acquisition descriptors using source-only risk estimates. It does not jointly change the denoisers. Hard headroom is only a necessary opportunity measure for such selection over those arms; compare its realized score and cost directly with static fusion. Refit neither gate nor normalization on target conditions. A soft token gate or jointly trained mixture is an optional empirical ablation with its own risk profile; it is not covered by the fixed-arm bound.
 
-The original HSE/LLapDiff conditioner B1 remains the **reference model**. B1-aux and M are the two principal **single representations**. B0 denotes the unmodified official LLapDiff reference entry where task compatibility permits.
+The real learned route/fusion integrations are not implemented by the toy simulator. First execute the existing two-arm native pilot. Do not build a router merely because two representations exist.
 
-## 4. The four comparison levels required by the theory
+## 6. Industrial downstream head and metrics
 
-### 4.1 Reference model
+Evaluate each frozen representation with the same linear diagnosis head, then one small MLP as a capacity control. PHMFactory alone defines PHM raw preparation, readers, labels and initial split. All exported windows retain the original file/run/bearing key available upstream. Derive acquisition views only within the frozen split. Speed/load shifts and sampling/missingness shifts are separate factors.
 
-`REF = B1`: the ordinary HSE condition without the new stage-one statistical supervision. It answers whether any gain merely comes from the extra source objective.
+Report reference-latent Energy Score independently from diagnosis. For diagnosis, use recording-balanced pooled-confusion macro-F1 and show the conventional pooled-window metric separately. Source selection may use a declared additive score but does not acquire a macro-F1 theorem from that score.
 
-### 4.2 Best single representation
+## 7. Costs, interpretation and limits
 
-Choose between B1-aux and M using source validation only:
+Report parameters and computation for HSE, shared trunk, moment head, gate, diagnosis head and denoiser separately; charge statistical pretraining, model selection, all-arm fusion and posterior draws. Equal q is an interface match, not equal total cost. M is deterministic in R and cannot add Bayes information. A favorable finite experiment is evidence of representation accessibility under its trained model and budget, not an unrestricted sufficiency or physical-state identification guarantee.
 
-\[
-j_{single}=\arg\min_{j\in\{R,M\}}\widehat{\mathcal R}^{src}_j.
-\]
-
-The target test set never chooses this arm.
-
-### 4.3 Static fusion
-
-As a low-complexity control, standardize R and M using source-only statistics and form
-
-\[
-H_{static}(\alpha)=\alpha\widetilde R+(1-\alpha)\widetilde M,
-\qquad \alpha\in[0,1].
-\]
-
-The scalar α is chosen on source validation and fixed for all acquisition conditions. The moment semantics are assessed before this fusion; the fused coordinates are ordinary conditioner features. This baseline adds one scalar parameter and no extra message dimension.
-
-### 4.4 Dynamic acquisition-conditioned routing
-
-Dynamic routing is **not activated by default**. First estimate routing headroom from group-level source validation as defined in `theory_main.md`. If the headroom exceeds a predeclared practical margin, fit the smallest source-only gate
-
-\[
-\alpha_\gamma(a)=\sigma(w^\top \widetilde a+b),
-\]
-
-and use
-
-\[
-H_{route}=\alpha_\gamma(a)\widetilde M+[1-\alpha_\gamma(a)]\widetilde R.
-\]
-
-The gate may use sampling rate, observed duration, missing fraction, channel availability and explicitly observed quality indicators. It may not use fault labels, target-test statistics, dataset identity as a shortcut, reference targets or future measurements. Gate parameters and latency are reported. If routing headroom is practically zero, the final method is the best single representation and the router is removed.
-
-Hard source-risk selection is the limiting diagnostic used in the theory. The soft gate above is an empirical finite model; no theorem asserts it reaches the oracle selector.
-
-## 5. Native LLapDiff stage
-
-All arms retain the same reference encoder, \(Z_0\), target map, native LLapDiff architecture, prediction parameterization, scheduler, target mask, optimizer/update budget and checkpoint rule. Stage two updates only the denoiser (and, for the routing experiment only, the explicitly declared small gate when the protocol calls for joint source training). No arm receives an additional `cond_summary_raw` copy.
-
-For the principal pilot, first keep the existing native setting: v-prediction, 64-step cosine schedule, uniform nonzero training times, one-layer/two-head denoiser, no dropout and no loss weighting. Other epsilon/x0/Min-SNR conventions are acceptance checks before becoming experiment factors.
-
-On the same batch and same noise, independently reconstruct native loss components: target, valid-coordinate reduction, raw loss, raw/effective weight and final mean. Batch-normalized weights use the realized batch denominator.
-
-## 6. Industrial diagnosis readout
-
-The representation paper must demonstrate industrial utility, not only latent generation. For PHM experiments, freeze the evaluated conditioner after representation training and attach the same diagnostic head to each arm. The minimum head is linear; a small MLP is a secondary capacity check. Training labels are used only in this downstream diagnostic stage. Report macro-F1 as the primary class metric, AUROC where class scores are valid, and group-level confidence intervals. No target-domain labels are used to adapt the representation or router.
-
-The reference-latent Energy Score and the diagnostic macro-F1 answer different questions and are never merged into one scalar ranking.
-
-## 7. Population, empirical and conditional claims
-
-Population quantities \(\mathcal R_j(a)\) and routing headroom are estimands. Their empirical counterparts are calculated from source-validation groups and can be noisy. A dynamic gate is justified only when the conditional ordering is reproducible at the independent-unit level and remains useful on an unseen acquisition condition.
-
-The learned gate carries no unconditional generalization theorem. The plug-in routing result in `theory_main.md` is invoked only under its stated conditional-risk estimation assumption. Source calibration does not imply target calibration.
-
-## 8. Cost and decoupling
-
-Report message scalars, HSE/trunk/head/gate/denoiser parameters, training updates, GPU memory, per-event latency, sampling time and repeated-draw cost. Equal q is only an interface match.
-
-`paper/` and `experiments/p19/` do not import PHMFactory internals. PHMFactory is invoked through its public CLI and exported arrays/configs. The parent repository receives an `external/phmfactory` gitlink only after the exact upstream revision has passed the real-data acceptance goal; until then the pointer is intentionally absent. No PHMFactory core code is changed to accommodate a paper-specific protocol.
+`paper/` and `experiments/p19/` consume public CLI outputs/exported arrays, never PHMFactory factories. A revision-specific acceptance script runs inside the isolated upstream environment only to restore the unchanged upstream model and export its own datasets. It does not alter PHMFactory core. The submodule revision is accepted only for the exact reproduced MFPT reference path; it is not blanket validation of every upstream dataset or release claim.

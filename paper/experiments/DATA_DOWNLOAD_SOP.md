@@ -1,146 +1,97 @@
-# Data SOP — PHM data through PHMFactory, external benchmarks through official sources
+# Data download and conversion SOP
 
-A download or metadata row is not evidence that a dataset is integrated. This paper uses **PHMFactory as the only PHM data execution path**. The parent paper repository does not maintain a second CWRU/Paderborn/MFPT reader or a duplicate PHM metadata table.
+## PHM: exclusively through PHMFactory
 
-## 1. PHM data authority: PHMFactory
-
-Current reviewed upstream: `PHMbench/PHM-Vibench` `main`. Re-read the exact revision before execution. PHMFactory's own data documentation states that non-Dummy experiments use a local data root containing a metadata file and `raw/<Name>/<File>`, with dataset readers under its data factory. It also lists its maintained external data sources (ModelScope/Hugging Face) but explicitly warns that source availability and licensing must be checked before publication or redistribution.
-
-The paper therefore follows this contract:
-
-```text
-official/raw source or PHMFactory-maintained data source
-        ↓
-PHMFactory metadata + public reader/config
-        ↓
-PHMFactory public preflight / execution
-        ↓
-exported waveform or representation arrays + label + acquisition metadata
-+ original recording/bearing/run group + frozen split
-        ↓
-experiments/p19 and paper statistics
-```
-
-The paper never imports `src.data_factory`, factories, registries or reader internals. A paper-specific need that PHMFactory cannot represent is reported as BLOCKED or upstream issue; the parent does not patch PHMFactory core.
-
-### Required PHMFactory local run note
-
-Keep an untracked `PHM_DATA_NOTE.md` with:
-
-- exact PHMFactory commit;
-- dataset `Name`/metadata row or accepted config;
-- original source and license/usage statement as recorded/verified by PHMFactory maintainers;
-- local `data.data_dir` and `data.metadata_file` (do not commit machine-local absolute paths);
-- label mapping;
-- independent unit: machine / physical bearing / run / original recording;
-- train/validation/test group lists or deterministic split command;
-- acquisition descriptors used by this paper: sampling rate, observed duration, channel/mask fields and any declared quality variable;
-- normalization fit set;
-- exact PHMFactory preflight/run command;
-- selected checkpoint and primary-metric recomputation command;
-- export command/path for the arrays consumed by `experiments/p19`.
-
-### Acceptance order
+Accepted parent dependency: `PHMbench/PHM-Vibench main` at `a0db97364e6d38a927c3ea30c643ebbb821d54d7`, checked 2026-09-15. The exact MFPT public path passed in Actions run 34765060233. Provider/source revision, source repository and declared CC BY-NC-SA 4.0 license are retained by PHMFactory metadata. This is the provider's license declaration, not a new blanket permission to redistribute original or derived waveforms. No raw data or exported waveform arrays are committed/uploaded by this project.
 
 ```bash
-python -m pip install -e /absolute/PHM-Vibench
+git submodule update --init external/phmfactory
+python -m venv .venv-phm
+source .venv-phm/bin/activate
+python -m pip install 'torch==2.6.0' 'torchvision==0.21.0' --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -e external/phmfactory
 phmfactory doctor
 phmfactory preflight --config smoke
 phmfactory demo
-
-# Then the exact accepted real-data config, for example only after its metadata/data exist:
-phmfactory preflight \
-  --config /absolute/PHM-Vibench/configs/demo/01_cross_domain/cwru_dg.yaml \
-  --override data.data_dir=/absolute/phm-data \
-  --override data.metadata_file=metadata.xlsx
-
-phmfactory \
-  --config /absolute/PHM-Vibench/configs/demo/01_cross_domain/cwru_dg.yaml \
-  --override data.data_dir=/absolute/phm-data \
-  --override data.metadata_file=metadata.xlsx
+bash experiments/p19/run.sh phm-prepare --output /absolute/phm-data/mfpt
+bash experiments/p19/run.sh phm --data /absolute/phm-data/mfpt --output /absolute/runs/mfpt-acceptance
 ```
 
-The CWRU demo above is only a wiring example until its exact current-source labels, split, checkpoint and metrics are accepted. At the reviewed upstream revision the config itself is still marked a draft. Do not promote it merely because it parses.
+Preparation creates `metadata_mfpt.csv` and `raw/RM_007_MFPT/{train_data,test_data}/*.mat`. Do not rerun into a nonempty output directory. Labels are 0 normal, 1 inner-race, 2 outer-race. The provider has 14 training and 6 test recordings; PHMFactory selects 10/4 source train/validation recordings. Windows are 2048×1. Verified independent separation is by original `File`; physical bearing identity is not established by this metadata alone.
 
-### PHM split rule
+The acceptance command runs the unchanged official config, restores each of the three best checkpoints, recomputes accuracy/F1, and exports PHMFactory-selected arrays. It does not provide HSE or reference-VAE features. Source-trained feature extraction is a subsequent local step recorded in Goal 06. No second MAT reader, alternate split or PHM core edit is permitted.
 
-PHMFactory must expose or allow auditing the original independent group **before** paper windows/views are created. If PHMFactory's executed split cannot guarantee that windows from one original recording/bearing/run stay in one set, the paper PHM slice is rejected. The parent repo must not reconstruct a different split after the fact and call it the PHMFactory result.
+## External sources: not PHMFactory datasets
 
-## 2. External non-PHM benchmark families
+These download steps are instructions, not claims that the data were downloaded here. Keep `data/manual/` ignored. Record archive name/retrieval date, literal license text, raw folder, target, original independent key, conversion choice and source-only normalization. Do not store a second repository-level integrity system.
 
-These are intentionally outside PHMFactory and follow their own official sources.
+### 1. PhysioNet / CinC Challenge 2012, version 1.0.0
 
-### PhysioNet/CinC Challenge 2012
-
-- Official version: PhysioNet Challenge 2012 v1.0.0.
-- Independent unit: patient/record.
+Official source: https://physionet.org/content/challenge-2012/1.0.0/ . The database page specifies Open Data Commons Attribution License v1.0; distinguish it from the article license. Each text record is one patient's first 48 hours. Static descriptors, time-stamped values and missing values are separate fields.
 
 ```bash
 mkdir -p data/manual/physionet2012
-wget -r -N -c -np https://physionet.org/files/challenge-2012/1.0.0/ \
-  -P data/manual/physionet2012
+cd data/manual/physionet2012
+for f in set-a.tar.gz set-b.tar.gz Outcomes-a.txt Outcomes-b.txt; do
+  curl -fL "https://physionet.org/files/challenge-2012/1.0.0/$f" -o "$f"
+done
+tar -xzf set-a.tar.gz
+tar -xzf set-b.tar.gz
 ```
 
-Verify the current dataset license/credential terms on PhysioNet before redistribution. Keep patients indivisible across splits.
+Use patient ID as the indivisible unit. For this planned protocol, deterministic source A train/validation (80/20 by sorted patient IDs) and B held-out evaluation are declared separately from any literature's alternative split. Convert time `hh:mm` to hours or seconds consistently; retain channel-specific observed masks and repeated-timestamp aggregation rules. Fit scaling on source train only. Outcomes such as in-hospital death are labels, not model inputs. For forecasting, restrict input to times before the query horizon; for imputation, declare the mask protocol. Do not conflate the two tasks.
 
-### UCI HAR
+### 2. UCI HAR, dataset 240
 
-- Official UCI dataset id 240, DOI 10.24432/C54S4K.
-- License shown by UCI: CC BY 4.0.
-- Independent unit: subject; preserve the official subject-level train/test separation unless a reproduced protocol explicitly differs.
+Official source: https://archive.ics.uci.edu/dataset/240/human+activity+recognition+using+smartphones ; DOI 10.24432/C54S4K; UCI declares CC BY 4.0.
 
 ```bash
-python -m pip install ucimlrepo
-python - <<'PY'
-from ucimlrepo import fetch_ucirepo
-fetch_ucirepo(id=240)
-print('UCI HAR fetched through the official UCI client')
-PY
+mkdir -p data/manual/uci_har
+curl -fL 'https://archive.ics.uci.edu/static/public/240/human%2Bactivity%2Brecognition%2Busing%2Bsmartphones.zip' -o data/manual/uci_har/har.zip
+unzip data/manual/uci_har/har.zip -d data/manual/uci_har
 ```
 
-### USHCN v2.5
+Use the nine `Inertial Signals` channels (three body acceleration, three gyroscope, three total acceleration), not `X_train.txt`'s 561 engineered features. Each existing window has 128 samples at 50 Hz and 50% overlap. Preserve official subject-level train/test separation; derive validation by holding out source subjects, not random windows. Labels 1–6 are the six published activities; conversion to 0–5 must be stored explicitly. Stack each signal file as `[window,128,channel]`; read `subject_*.txt` and `y_*.txt` alongside it. These are already processed windows, not untouched raw recordings.
 
-- Official NOAA/NCEI source: `https://www.ncei.noaa.gov/pub/data/ushcn/v2.5/`.
-- Independent unit: station; chronological time blocks for forecasting.
+### 3. USHCN monthly v2.5
+
+Official source and format: https://www.ncei.noaa.gov/pub/data/ushcn/v2.5/ and `readme.txt`. This is **monthly**, not the commonly used daily-USHCN irregular benchmark. Use a separate benchmark name `USHCN-monthly-v2.5`.
 
 ```bash
-mkdir -p data/manual/ushcn
-wget -c https://www.ncei.noaa.gov/pub/data/ushcn/v2.5/ushcn.tavg.latest.raw.tar.gz \
-  -O data/manual/ushcn/ushcn.tavg.latest.raw.tar.gz
-wget -c https://www.ncei.noaa.gov/pub/data/ushcn/v2.5/ushcn-v2.5-stations.txt \
-  -O data/manual/ushcn/ushcn-v2.5-stations.txt
+mkdir -p data/manual/ushcn_monthly
+for v in tavg tmin tmax prcp; do
+  curl -fL "https://www.ncei.noaa.gov/pub/data/ushcn/v2.5/ushcn.$v.latest.raw.tar.gz" -o "data/manual/ushcn_monthly/$v.raw.tar.gz"
+done
+curl -fL https://www.ncei.noaa.gov/pub/data/ushcn/v2.5/ushcn-v2.5-stations.txt -o data/manual/ushcn_monthly/stations.txt
 ```
 
-Record retrieval date because `latest` is mutable.
+`latest` is mutable; record the date-bearing inner filenames and retrieval date. Retain the official NOAA usage/citation statement rather than inventing a dataset-specific Creative Commons license. Parse station ID, year, 12 monthly fixed-width values and flags using the official readme. Mark -9999 missing, retain quality flags, temperature hundredths Celsius and precipitation tenths of millimetres per official format. Do not treat zero as missing. Align station/month across the four elements; preserve original station IDs. Freeze a chronological cutoff before training; report station-held-out and time-held-out protocols separately. Monthly target imputation/forecasting is not a reproduction of a daily result.
 
-### ETT
+### 4. ETTh1 / ETT original repository
 
-- Original project: `https://github.com/zhouhaoyi/ETDataset`.
-- Use the reproduced chronological split; do not randomize time rows.
+Official repository: https://github.com/zhouhaoyi/ETDataset ; reviewed `main` revision `1d16c8f4f943005d613b5bc962e9eeb06058cf07`. Its LICENSE is **CC BY-ND 4.0**. Keep locally transformed arrays private and review the terms before distributing any derivative data.
 
 ```bash
-git clone --depth 1 https://github.com/zhouhaoyi/ETDataset.git data/manual/ETDataset
+git clone https://github.com/zhouhaoyi/ETDataset.git data/manual/ETDataset
+git -C data/manual/ETDataset checkout 1d16c8f4f943005d613b5bc962e9eeb06058cf07
 ```
 
-Verify the current repository license before redistribution.
+Read `ETT-small/ETTh1.csv`, hourly date column and seven numerical variables. A conventional fixed 30-day-month protocol uses first 12×30×24 rows for train, next 4×30×24 for validation, next 4×30×24 for test; explicitly label this row-count convention rather than calendar-month semantics. Fit mean/std only on train. Validation/test may use prior context, but no forecast target may cross back into training. Independent uncertainty units are declared nonoverlapping time blocks, not adjacent overlapping forecast windows. Do not randomize time rows.
 
-### UEA multivariate time-series classification archive
+### 5. Japanese Vowels: UEA classification / original UCI 128
 
-- Official archive: `https://timeseriesclassification.com/`.
-- Independent unit: original case/series.
-- Preserve archive train/test splits where valid; verify each selected dataset's terms.
+Official archive description: https://timeseriesclassification.com/description.php?Dataset=JapaneseVowels ; original data https://archive.ics.uci.edu/dataset/128/japanese+vowels , DOI 10.24432/C5NS47, UCI declares CC BY 4.0.
 
 ```bash
-python -m pip install aeon
-python - <<'PY'
-from aeon.datasets import load_classification
-X, y, meta = load_classification('BasicMotions', meta_data=True)
-print(type(X), len(y), meta)
-PY
+mkdir -p data/manual/japanese_vowels
+curl -fL 'https://archive.ics.uci.edu/static/public/128/japanese%2Bvowels.zip' -o data/manual/japanese_vowels/vowels.zip
+unzip data/manual/japanese_vowels/vowels.zip -d data/manual/japanese_vowels
 ```
 
-## 3. Common external-data note
+The original sequences contain 12 speech coefficients over 7–29 frames, not raw audio. Parse blank-line-separated sequences from `ae.train`/`ae.test`. Labels are nine speaker identities: training has 30 sequences per speaker; test counts are 31,35,88,44,29,24,40,50,29, matching the published block order. Preserve the official 270/370 train/test assignment. Split validation within source series with a fixed declared rule. Native-length evaluation must be labelled separately from UEA's padded length-29 representation. Because speakers are the classes, this is not leave-speaker-out generalization.
 
-For every non-PHM external dataset keep an untracked `DATA_NOTE.md`: official source, version/retrieval date, license, raw path, label/target definition, independent unit, split, normalization fit set, conversion command and exclusions.
+## Feature conversion and acceptance before GPU
 
-No dataset is marked integrated until a parsed batch, split audit and task-compatible baseline run have succeeded.
+For each external dataset the local conversion must retain original group IDs, times, explicit masks, raw labels/targets, source split and transformation notes. It then exports genuine frozen HSE/reference features in the **existing** `experiments/learned_conditioning/feature_data.py` fields: tokens, attention_mask, side, side_names, targets, event_id, group_id, condition_id; native generation also requires z0, target_mask, query_time_s and target_map. A classification-only dataset is not silently assigned a latent-generation result without training a compatible source reference encoder.
+
+No universal raw-data converter or accepted feature checkpoint for these five domains is shipped by this update. Implement each declared local conversion and one parsed-batch/split check before using the native external entry. Missing data, export code or checkpoint is a named prerequisite, not a GPU failure and not an excuse to substitute synthetic features. The first learned stop point remains the genuine HSE/reference export plus local GPU pilot.

@@ -1,22 +1,15 @@
-# Contribution ledger for the TII manuscript
+# Contribution-to-evidence map
 
-Only scientific contributions belong here. Repository layout, CI, plotting scripts, fairness rules and negative-result retention are evidence conditions, not paper contributions.
-
-| Candidate | Status now | Promotion evidence | Stop/demote condition |
+| Object | Status and antecedent | Method consequence | Falsifier / required evidence |
 |---|---|---|---|
-| C1. Acquisition-conditional accessibility profile and routing-headroom estimand for matched HSE–LLapDiff representations | Analytical candidate | theorem assumptions checked; toy witness; group-level source estimates show nontrivial conditional crossings | one representation conditionally dominates or crossings vanish under group-level uncertainty |
-| C2. Statistically anchored equal-budget conditioner versus equally supervised ordinary code | Implemented component, not validated method | genuine frozen HSE/reference exports; native M vs B1-aux paired experiment; target improvement at declared cost | B1-aux is non-inferior/equivalent at lower cost |
-| C3. Source-only acquisition-conditioned routing | HOLD until C1/C2 headroom | dynamic route beats best source-selected single and static fusion on unseen acquisition without target fitting | headroom below margin, gate uses shortcut identity, or unseen condition reverses the source gain |
-| C4. Industrial/general empirical evidence | NOT YET CLAIMED | PHMFactory recording-level fault diagnosis plus at least five external benchmark families and compatible SOTA | unavailable data, protocol leakage, or inconsistent metrics |
+| $R\to M=T(R)$ under one supervised checkpoint | Concrete candidate intervention, not a new general bottleneck principle | One global moment readout plus ordinary tail, fixed message dimension | M fails to outperform B1-aux under matched supervision and total cost |
+| $\Gamma+\mathcal E_M-\mathcal E_R$ | Conditional projection analysis; observer-limited information has direct V-information antecedents | Interpret gains as finite-model accessibility, not added observation information | Extra metadata, changed target, unmatched supervision or capacity explains the gain |
+| $\rho_j(a)$ and $\mathcal H_{hard}$ | Operational estimands for this experiment, not invented routing theory | Fixed-arm source-only hard selection after independent validation | Static fusion wins, no meaningful headroom, or target ordering reversal |
+| Statistical moments | Gaussian conditional-score population result; not a finite optimizer guarantee | Validate score components; freeze input and readout together | Covariance collapse, unstable source validation, target residual bias |
+| Industrial utility | Not yet established by learned HSE–LLapDiff | PHMFactory exports, frozen groups, same diagnosis head | Gain disappears under recording balance or is absent against strong controls |
 
-## What is explicitly not novel
+## Admitted results versus paper-level claim
 
-- HSE itself and its original heterogeneous-signal interface;
-- Latent Laplace diffusion, stable Laplace modal prediction, or irregular-time querying;
-- Gaussian conditional scoring and moment identification;
-- generic conditional-expectation projection identities;
-- generic approximate sufficiency for conditional diffusion;
-- generic goal-oriented Bayesian posterior approximation;
-- the existence of static fusion or mixture-of-experts routing.
+The proofs and executed toy counterexamples support their explicitly stated implications. MFPT reference acceptance verifies data/configuration/checkpoint/metrics at the recorded upstream revision. Neither establishes a new HSE method advantage. Do not count the reference accuracy or the synthetic headroom as evidence that the proposed conditioner outperforms a baseline.
 
-The paper contribution can survive a negative C3 result: if routing headroom is absent, the final method becomes the simpler best single representation and the theory explains why no router is needed.
+No independent claim is made for a new foundation model, a new general sufficient statistic, a new generic routing theorem, or a necessity of Diffusion. A null M/B1-aux outcome completes the experiment and leads to simplification. Static or dynamic variants must beat the simpler comparator at the declared cost before becoming the paper's recommended method.
