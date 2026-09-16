@@ -1,48 +1,27 @@
-# Results and execution boundary
+# Industrial results and pending method evidence
 
-## 1. What the repository currently demonstrates
+## Executed reference: PHMFactory MFPT
 
-The retained results cover analytical posterior studies, native LLapDiff **component** checks, fixed-predictor routing counterexamples, and one real PHMFactory reference acceptance. They do not yet include trained HSE–LLapDiff on real frozen HSE features, learned static/dynamic routing, or the five external-domain method comparisons.
+The exact dependency is `a0db97364e6d38a927c3ea30c643ebbb821d54d7`. The unchanged `configs/baselines/01_mfpt/mfpt_global_average_linear.yaml` ran five CPU epochs with seeds17/18/19. Initial acceptance run34765060233 and later dev CI34990021558 performed public installation, smoke, preparation, training, selected-checkpoint restoration and independent metrics.
 
-The original native loss/consumption measurements remain attributable to their recorded CI run, not a fresh real-data experiment. Native synthetic components and genuine feature extraction are explicitly different stages.
-
-## 2. Real MFPT reference acceptance
-
-Exact PHMFactory revision: `a0db97364e6d38a927c3ea30c643ebbb821d54d7`. Original accepted config: `configs/baselines/01_mfpt/mfpt_global_average_linear.yaml`, seeds 17/18/19, five CPU epochs. Actions run **34765060233**, job **103744444769**, executed the public install/doctor/smoke/preflight/data preparation/train path, then independently restored all checkpoints and recomputed metrics.
-
-| Seed | Test windows | Accuracy | Pooled-window macro-F1 | Selected epoch |
+| Seed | Test windows | Accuracy | Pooled macro-F1 | Selected epoch |
 |---:|---:|---:|---:|---:|
-| 17 | 96 | 0.500000 | 0.2222222222 | 4 |
-| 18 | 96 | 0.3333333333 | 0.1666666667 | 4 |
-| 19 | 96 | 0.1666666667 | 0.0952380952 | 4 |
+|17|96|0.500000|0.2222222222|4|
+|18|96|0.3333333333|0.1666666667|4|
+|19|96|0.1666666667|0.0952380952|4|
 
-Mean accuracy is 0.3333333 (sample standard deviation 0.1666667); mean F1 is 0.1613757 (sample standard deviation 0.0636572). This six-parameter reference is intentionally weak; its scores are not HSE method performance. Maximum independent accuracy difference from the framework was 9.94e-9 and maximum F1 difference 4.97e-9. Each test recording has 16 windows, so the independently recomputed recording-balanced pooled metric coincides here; that equivalence does not hold with unequal window counts.
+This six-parameter reference is not the proposed HSE method. Mean accuracy is0.3333333 (sample std0.1666667); mean F1 is0.1613757 (sample std0.0636572). Independent agreement errors were below1e-6. Shapes were train160×2048×1 from10 files, validation64×2048×1 from4 files, test96×2048×1 from6 files. Since each test file has16 windows, group-balanced pooled and ordinary pooled metrics coincide in this reference; this is not general.
 
-Exported dataset shapes were train `[160,2048,1]` from 10 files, validation `[64,2048,1]` from 4 files, and test `[96,2048,1]` from 6 files. The split is disjoint by original File, not an assertion of independent machines/bearings. Raw and derived waveform arrays are excluded from CI uploads. Numeric diagnostics/predictions are retained in the run artifact; `paper/assets/mfpt_reference_recomputed.csv` records independent recomputation.
+The initial parent-side ResolvedConfig serialization failure was corrected using `runtime_config()` without changing upstream model/data/protocol. Raw and derived waveform arrays are not uploaded. File separation is not a claim of unseen physical bearings or machines.
 
-The first acceptance run **34764636902** completed all three public trainings but then failed in the parent-side serialization of `ResolvedConfig`. Using the documented `runtime_config()` fixed that integration error. No upstream model, split, epochs or seed was changed to obtain a pass.
+## Native component evidence
 
-## 3. Fixed-predictor routing and fusion controls
+The retained `assets/native_component_reference.csv` records original LLapDiff loss/gradient/consumption checks with explicitly synthetic input. It does not execute genuine HSE or the reference encoder and does not show a method advantage. Older analytical posterior CSVs remain shared regression evidence with their original scope.
 
-Reproduction:
+## Relocated general evidence
 
-```bash
-bash experiments/p19/run.sh toy --events 1024 --seed 0 --output outputs/p19/toy_routing.csv
-```
+The fixed-predictor routing/fusion table and its source CSV now live under `../paper_TPAMI/`. They are not TII empirical results. The new general calibration study likewise belongs there. The move does not create additional independent evidence.
 
-Four scenarios each contain 1,024 independent source events and 1,024 independent test events, with two acquisition views per event. Six methods yield 24 summary rows and 49,152 test-score rows. Repeated methods/views are paired, not additional independent events. Source estimates select arms/weights; only the selected rules are evaluated on test.
+## Pending industrial method table
 
-| Scenario | Best source-selected single | Static prediction fusion | Hard source route | Conditional soft control |
-|---|---:|---:|---:|---:|
-| No hard headroom | 0.25190793 | 0.13178764 | 0.25190793 | 0.13179010 |
-| Conditional crossing | 0.25037478 | 0.12711208 | 0.17848866 | 0.11676041 |
-| Fusion without hard crossing | 0.11125000 | 0.00562500 | 0.11125000 | approximately 0 |
-| Target ordering reversal | 0.25439336 | 0.12748929 | 0.32789204 | 0.16534586 |
-
-Entries are observed test MSEs in a declared simulation, not trained industrial models. The exact algebraic hard headroom is 0.075 in the crossing reference law and zero in the dominance law. The soft-control example proves that zero hard headroom cannot eliminate fusion. In the stochastic crossing cell the hard route improves over a source-selected single arm but loses to static fusion. Under target reversal it becomes worse than the selected single. These negative controls constrain the method claim and remain in the paper.
-
-## 4. Manuscript result slots awaiting GPU/data
-
-**Primary learned contrast:** M versus B1-aux with the same checkpoint, supervision, target and total cost. **Secondary contrasts:** B1 reference, best single, static prediction fusion, then justified hard routing. **Industrial table:** recording-balanced pooled-confusion macro-F1, conventional pooled metrics, Energy Score and costs. **External tables:** one task-compatible table per domain, never an average of incompatible metrics.
-
-No values are entered for unrun models. A null/worse M result, static fusion matching routing, or source-to-target reversal completes the corresponding question and leads to simplification. CI acceptance cannot promote these empty method claims.
+Actual source-trained HSE/reference checkpoints and feature extraction are still needed. M vs B1-aux, B1, industrial static fusion/selection, real acquisition changes and industrial strong baselines remain unrun. No blank slot is filled with reference accuracy, synthetic scores or anticipated improvement. `formal_claim_supported: false` concerns the learned method. A negative comparison is retained and can complete the industrial task.

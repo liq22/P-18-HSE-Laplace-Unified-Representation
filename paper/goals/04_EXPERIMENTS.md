@@ -1,31 +1,15 @@
-# Goal 04 — execute the minimum decisive comparison
+# Goal04 — minimal industrial comparison
 
-## Scope
-
-Run CPU theory/toy and the exact MFPT reference first; the next learned task is the genuine M/B1-aux native pilot. Only then add the original B1 reference, static fusion, fixed-arm selection and task-compatible external models.
-
-## Products
-
-Actual prediction/score CSVs, selected checkpoints, training/score decomposition and cost curves, and updated Results. Each dataset/config/arm has a declared status: executed, failed, or awaiting prerequisite. No synthetic SOTA table.
-
-## Commands
+**Scope:** exact PHM reference first; then genuine M/B1-aux, B1, strongest single, industrial static fusion and optional measured acquisition selection. **Products:** actual checkpoints, predictions, group scores, costs and industrial Results. No general-domain benchmark in the TII experiment plan.
 
 ```bash
-bash experiments/p19/run.sh toy --events 1024 --output outputs/p19/toy_routing.csv
-bash experiments/p19/run.sh ablation parameterization smoke
-bash experiments/p19/run.sh ablation sampled smoke
-# Genuine native exports and an installed official LLapDiff are required:
-bash experiments/p19/run.sh ablation native --train /absolute/train.npz --validation /absolute/validation.npz --test /absolute/test.npz --data-note /absolute/export_note.md --device cuda:0 --seeds 0 1 2 --output-dir outputs/native-pilot
-# Same native entry for an explicitly prepared external domain:
-bash experiments/p19/run.sh external uci_har --train /absolute/har/train.npz --validation /absolute/har/validation.npz --test /absolute/har/test.npz --data-note /absolute/har/export_note.md --device cuda:0 --seeds 0 --output-dir outputs/har-native
-# Official reference CLI only, with its supported upstream dataset key:
-bash experiments/p19/run.sh sota train crypto
+bash experiments/p19/run.sh phm --data /absolute/data/mfpt --output /absolute/runs/mfpt-reference
+CUDA_VISIBLE_DEVICES=0 bash paper/run.sh native-pilot \
+ --train /absolute/exports/train.npz --validation /absolute/exports/validation.npz \
+ --test /absolute/exports/test.npz --data-note /absolute/exports/export_note.md \
+ --device cuda:0 --seeds 0 1 2 --output-dir outputs/tii/native
 ```
 
-## Acceptance
+**Acceptance:** same supervision/checkpoint/target/loss/budget and original groups. Diagnosis F1 and latent Energy Score remain separate. Official industrial SOTA models require compatible implementations and accepted protocols before claiming a comparison. A optional router must beat the stronger static industrial reference at counted cost.
 
-The two-arm pilot fixes shared supervision/checkpoint and all native target/loss/sampler settings. Fixed source selectors are evaluated on independent groups; best-single and static prediction fusion are mandatory references before routing promotion. Class metrics and probabilistic scores are not pooled. External/SOTA launchers executing a supported upstream task do not automatically reproduce this paper's protocol.
-
-## Failure handling
-
-M loses: finish, report and simplify. Static fusion matches a router: remove the latter. An official model lacks compatible data/outputs: leave its row pending rather than replacing it. OOM changes must be declared and matched across arms; no two-GPU workaround.
+**Failure:** M loses or mixture wins: report and simplify. Missing native/export dependencies stop that slice, not substitute a new model. OOM does not authorize a two-GPU run or unmatched batch change.

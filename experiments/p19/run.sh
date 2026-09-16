@@ -16,7 +16,7 @@ NotebookClient(nb, timeout=180, kernel_name="python3", resources={"metadata": {"
 out = Path("outputs/p19/theory/theory_main.executed.ipynb")
 out.parent.mkdir(parents=True, exist_ok=True)
 nbformat.write(nb, out)
-print("Main-theory witness executed:", out)
+print("Applied industrial-theory witness executed:", out)
 NOTEBOOK
     ;;
   toy) python -m experiments.p19.toy_routing "$@" ;;
@@ -29,12 +29,8 @@ NOTEBOOK
     test -d "$PHMFACTORY_ROOT/phmfactory" || { echo 'Initialize external/phmfactory and install it first.' >&2; exit 2; }
     (cd "$PHMFACTORY_ROOT" && python "$ROOT/.github/phmfactory_acceptance.py" "$@") ;;
   phm-metrics) python -m experiments.p19.phm_metrics "$@" ;;
-  external)
-    DATASET=${1:?choose physionet2012, uci_har, ushcn, ett or japanese_vowels}; shift
-    case "$DATASET" in physionet2012|uci_har|ushcn|ett|japanese_vowels) ;; *) echo 'Unknown external family' >&2; exit 2;; esac
-    echo "External family: $DATASET; requires real frozen HSE/reference exports from DATA_DOWNLOAD_SOP.md."
-    bash paper/run.sh native-pilot "$@" ;;
-  sota) bash paper/run_official_baselines.sh "$@" ;;
+  external) bash paper_TPAMI/run.sh external "$@" ;;
+  sota) bash paper_TPAMI/run_official_baselines.sh "$@" ;;
   ablation)
     KIND=${1:?choose parameterization, sampled or native}; shift
     case "$KIND" in
@@ -46,6 +42,7 @@ NOTEBOOK
   plot) python -m experiments.p19.plot "$@" ;;
   help|--help|-h)
     echo 'Usage: bash experiments/p19/run.sh theory|toy|phm-prepare|phm|phm-metrics|external|sota|ablation|statistics|plot [arguments]'
-    echo 'external uses real frozen exports; it is not a raw-data converter. Native ablation retains the existing two-arm pilot.' ;;
+    echo 'Shared implementation: TII industrial goals in paper/; general external/policy goals in paper_TPAMI/.'
+    echo 'external requires actual frozen generation exports; it is not a raw converter or classifier run.' ;;
   *) echo 'Unknown mode; use --help.' >&2; exit 2;;
 esac

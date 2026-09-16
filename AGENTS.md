@@ -1,22 +1,11 @@
 # Research rules
 
-This repository advances one method: HSE-conditioned Latent Laplace Diffusion.
+Read `PAPER_SCOPE.md`. `paper/` is the industrial-only IEEE TII manuscript; `paper_TPAMI/` owns the general theory and multi-domain study. Shared HSE–LLapDiff code is not copied. General claims require more than repeating the TII intervention on extra datasets.
 
-## Required
+Keep actual observations/side inputs, target, units, original groups, source selection and cost explicit. Every scientific claim needs stated assumptions and a falsifying experiment. Record real commands, numerical results and matching manuscript changes. Mathematical witnesses, synthetic features and a reference framework run are not learned industrial or external benchmark evidence.
 
-- Keep acquisition operators, physical units, pairing, splits, and posterior targets explicit.
-- Fail on invalid covariance, shape, time interval, or frequency support.
-- Match each scientific claim to a theorem assumption and a falsifying experiment.
-- Record actual commands, numerical results, and interpretation boundaries.
-- Update the manuscript when an experiment changes a claim.
+PHM data/labels/splits are supplied only by PHMFactory. No core patch or second PHM reader. Update a submodule pointer only after installation/public smoke/real config/checkpoint/metric qualification at that exact accepted main. Shared bibliography entries are not duplicated.
 
-## Prohibited
+No hash/checksum/receipt systems, broad exceptions, silent scientific fallback, redundant factories/managers/registries, copied plans or hypothetical abstractions. Preserve valid old proofs/negative results; remove stale duplicate authority. A conservative retain-reference policy is an explicit statistical decision, not permission for software fallback.
 
-- Do not add hash, checksum, digest, receipt, ledger, or repository-integrity systems.
-- Do not use broad exception handling or silent scientific fallback.
-- Do not add factory, manager, registry, adapter, or wrapper layers for hypothetical use.
-- Do not create duplicate plans, status files, theory documents, or review directories.
-- Do not describe analytic, synthetic, or Notebook evidence as real PHM evidence.
-- Do not add Flow Matching to the active method. It remains future work until the HSE-LLapDiff posterior is validated and reverse sampling is a measured bottleneck.
-
-One PR should change one scientific decision. Prefer a smaller valid method to an unexplained stack.
+Work on dev through tested normal PRs. Never force-push, change master or delete others' branches. First local pilot on one of8×4090, never two-GPU training. Flow Matching stays future work until posterior validity and a measured sampling bottleneck justify it.

@@ -1,7 +1,7 @@
-# Paper workspace
+# IEEE TII — industrial data only
 
-`main.md` contains the current abstract and Introduction. `method.md`, `notation.md`, `theory_main.md` and its same-stem Notebook define the actual scientific comparison. `experiments.md` maps each experiment to a competing explanation; `results_native.md` separates observed reference/toy results from pending learned claims. Existing analytical result files and CSVs retain their original evidence scope.
+This manuscript concerns the concrete statistically anchored HSE–LLapDiff intervention and industrial fault diagnosis. All empirical PHM data enter through PHMFactory. General multi-domain protocols and policy-selection theory now live in `../paper_TPAMI/`; they are not additional TII datasets or independent TII contributions.
 
-Use `GOAL.md` as a stable redirect to the small goals in `goals/`. The exact data instructions are in `experiments/DATA_DOWNLOAD_SOP.md`. The main execution entry is `../experiments/p19/run.sh`; `run.sh` retains the established native and analytical commands. `p19` is the historical experiment-directory name inside this P18 repository, not a second paper.
+Read `main.md`, `method.md`, `theory_main.md` with its Notebook, `experiments.md`, `results_native.md`, and `goals/README.md`. The existing numbered root theory corpus and older analytical CSVs are shared software/derivation evidence, not nonindustrial empirical benchmark tables.
 
-There is no hidden native HSE/reference checkpoint and no all-SOTA training behind a smoke command. The next local task is the genuine feature/target export and paired one-GPU pilot. Flow Matching has no active experiment.
+The historical `paper/run.sh` and `experiments/p19/run.sh` remain shared executable entries to avoid duplicating trainers. Explicitly choose the industrial goals here or the general goals in `paper_TPAMI/`. A synthetic component check is not real feature extraction. Genuine source-trained HSE/reference checkpoints and their exports are still required before learned comparisons.

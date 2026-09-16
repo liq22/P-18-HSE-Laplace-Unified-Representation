@@ -1,17 +1,24 @@
 project_name: HSE-Laplace
-venue: IEEE Transactions on Industrial Informatics
-active_method: statistically_anchored_HSE_conditioning_for_LLapDiff
 working_branch: dev
-formal_claim_supported: false
-scope: same_observation_target_supervision_message_budget
-phm_data_authority: PHMFactory
+manuscripts:
+  TII:
+    path: paper
+    scope: industrial_data_only
+    data_authority: PHMFactory
+    claim: statistically_anchored_industrial_conditioning
+    learned_method_supported: false
+  TPAMI:
+    path: paper_TPAMI
+    scope: general_target_consumer_budget_and_multidomain_study
+    external_domains: [physionet2012, uci_har, ushcn_monthly, ett, japanese_vowels]
+    learned_method_supported: false
+    novelty_requires_more_than_extra_datasets: true
+shared_experiments: experiments/p19
 phmfactory_revision: a0db97364e6d38a927c3ea30c643ebbb821d54d7
 phm_reference_acceptance: MFPT_three_seed_checkpoints_and_independent_metrics_passed
 real_HSE_reference_export: pending_local_checkpoint_and_extraction
-learned_method_comparison: pending_local_GPU
-external_domains: [physionet2012, uci_har, ushcn_monthly, ett, japanese_vowels]
-external_method_evidence: not_executed
-routing_scope: fixed_arm_hard_selection_distinct_from_soft_fusion
+external_conversion_and_training: pending
+formal_claim_supported: false
 flow_matching: future_work_only
 local_hardware: 8_RTX_4090
 first_pilot_gpus: 1

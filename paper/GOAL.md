@@ -1,5 +1,7 @@
-# Paper execution entry
+# IEEE TII execution entry — industrial only
 
-Use [the small TII goals](goals/README.md). The order is dependency acceptance → theory/manuscript → genuine data exports → minimal experiment → statistics/figures → local GPU expansion. The exact MFPT reference path is now accepted; genuine learned HSE/reference features and external-domain conversions are still prerequisites.
+Use [the industrial goals](goals/README.md). PHMFactory exclusively owns industrial data preparation, labels and original splits. The empirical task is the concrete HSE-conditioner comparison; mathematical witnesses remain supporting checks.
 
-Each completed slice leaves executable code or a frozen configuration, actual command/numbers, and the corresponding Results update. Merge verified CPU/documentation changes into `dev` without treating that merge as method-performance approval. Never force-push, modify master, delete others' branches, edit PHMFactory core, or substitute synthetic inputs for unavailable genuine features. Local training follows the 8×4090 Goal with no two-GPU execution.
+General theory, policy selection and five external domains have moved to `../paper_TPAMI/`, with a separate Goal entry. Shared code is not copied. Follow `../PAPER_SCOPE.md` for contribution/results ownership and disclosure.
+
+Each completed slice leaves executable code or frozen configuration, command/numbers and the matching industrial Results text. Preserve failure and negative results. Work on dev through reviewed commits; no master edit, force-push, branch deletion or PHMFactory core change. First learned run is single-GPU on the 8×4090 machine, never two GPUs.
