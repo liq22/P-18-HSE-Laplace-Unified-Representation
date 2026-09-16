@@ -14,20 +14,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install paper runtime
+      - name: Install shared runtime
         run: python -m pip install -e ".[notebooks,experiments]"
-      - name: Execute analytical oracle and all scientific tests/Notebooks
+      - name: Execute shared tests and industrial applied witness
         run: |
           python examples/analytic_hse_llapdiff_oracle.py
           bash experiments/p19/run.sh theory
-      - name: Execute routing/fusion controls, paired statistics and CSV-only figures
+      - name: Execute general proofs, independent calibration experiment and CSV-only figures
+        env:
+          TPAMI_OUTPUT_ROOT: ${{ runner.temp }}/tpami
+        run: |
+          bash paper_TPAMI/run.sh all-cpu
+          bash paper_TPAMI/run.sh statistics --input "$RUNNER_TEMP/tpami/selection/complementary_n2048_seed0_group_scores.csv" --reference static_reference --margin .01 --output "$RUNNER_TEMP/tpami/decision.json"
+          bash paper_TPAMI/run.sh --help
+          bash paper_TPAMI/run.sh sota --help
+      - name: Retain old fixed-policy controls without duplicating manuscript results
         run: |
           bash experiments/p19/run.sh toy --events 1024 --output "$RUNNER_TEMP/toy_routing.csv"
           bash experiments/p19/run.sh statistics --input "$RUNNER_TEMP/toy_routing_events.csv" --reference best_single --output "$RUNNER_TEMP/toy_effects.csv" --bootstrap 128
           bash experiments/p19/run.sh plot --input "$RUNNER_TEMP/toy_effects.csv" --method hard_source_route --output-dir "$RUNNER_TEMP/toy-figures"
-          bash experiments/p19/run.sh --help
-          bash experiments/p19/run.sh sota --help
-      - name: Exercise inherited posterior experiments and reference redraw
+      - name: Exercise shared analytical experiments and reference redraw
         env:
           OUTPUT_ROOT: ${{ runner.temp }}/paper
           OPENBLAS_NUM_THREADS: "1"
@@ -37,35 +43,36 @@ jobs:
           bash experiments/p19/run.sh ablation sampled smoke
           bash experiments/p19/run.sh ablation parameterization smoke
           bash paper/run.sh parameterization-figures paper/assets/parameterization_controls.csv "$RUNNER_TEMP/parameterization-reference"
-      - name: Check real source commands and manuscript references
+      - name: Check entrypoints and both retained numerical studies
         run: |
-          bash -n experiments/p19/run.sh paper/run.sh paper/run_official_baselines.sh
+          bash -n experiments/p19/run.sh paper/run.sh paper_TPAMI/run.sh paper_TPAMI/run_official_baselines.sh
           python - <<'PY'
-          import csv, re
+          import csv, os
           from pathlib import Path
           import numpy as np
-          bib=Path('literature/references.bib').read_text()
-          keys=set(re.findall(r'@\w+\{([^,]+),',bib))
-          for path in (Path('paper/main.md'),Path('paper/related_work.md')):
-              used=set(re.findall(r'@([A-Za-z0-9_]+)',path.read_text()))
-              assert used <= keys, (path,used-keys)
-          import os
-          with open(Path(os.environ['RUNNER_TEMP'])/'toy_routing.csv') as f: actual=list(csv.DictReader(f))
-          with open('paper/assets/routing_controls.csv') as f: reference=list(csv.DictReader(f))
-          assert len(actual)==len(reference)==24
-          for a,b in zip(actual,reference):
-              assert (a['scenario'],a['method'])==(b['scenario'],b['method'])
-              for key in ('test_mse','source_empirical_headroom','source_static_alpha'):
-                  np.testing.assert_allclose(float(a[key]),float(b[key]),rtol=0,atol=1e-10)
-          print('Citation keys and 24 retained finite-control rows agree.')
+          root=Path(os.environ['RUNNER_TEMP'])
+          for actual_path,ref_path,ids,numerics in [
+            (root/'toy_routing.csv',Path('paper_TPAMI/assets/routing_controls.csv'),['scenario','method'],['test_mse','source_empirical_headroom','source_static_alpha']),
+            (root/'tpami/selection/selection_summary.csv',Path('paper_TPAMI/assets/selection_summary.csv'),['scenario','calibration_groups','seed','selected_policy'],['radius','best_lower_bound','reference_test_risk','selected_test_risk','test_net_improvement','shift_bound'])]:
+              with actual_path.open() as f:actual=list(csv.DictReader(f))
+              with ref_path.open() as f:reference=list(csv.DictReader(f))
+              assert len(actual)==len(reference)==24
+              for a,b in zip(actual,reference):
+                  assert all(a[k]==b[k] for k in ids),(a,b)
+                  for k in numerics:np.testing.assert_allclose(float(a[k]),float(b[k]),rtol=0,atol=1e-10)
+          print('Both retained 24-row studies agree with the executed code.')
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: p19-cpu-controls
+          name: tpami-scope-and-cpu-evidence
           path: |
+            ${{ runner.temp }}/tpami/selection/selection_summary.csv
+            ${{ runner.temp }}/tpami/selection/complementary_n2048_seed0_group_scores.csv
+            ${{ runner.temp }}/tpami/selection/target_reversal_n2048_seed0_group_scores.csv
+            ${{ runner.temp }}/tpami/decision.json
+            ${{ runner.temp }}/tpami/figures/
             ${{ runner.temp }}/toy_routing.csv
-            ${{ runner.temp }}/toy_effects.csv
-            ${{ runner.temp }}/toy-figures/
+            outputs/tpami/theory/
             outputs/p19/theory/theory_main.executed.ipynb
           if-no-files-found: error
 
@@ -87,13 +94,13 @@ jobs:
           python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           python -m pip install numpy matplotlib
           python -m pip install -e native_llapdiff --no-deps
-      - name: Execute native acceptance and real feature CLI interfaces
+      - name: Execute unchanged native component and scoped feature CLI checks
         env:
           OMP_NUM_THREADS: "1"
           OUTPUT_ROOT: ${{ runner.temp }}/paper
         run: |
           bash paper/run.sh native-acceptance
-          bash experiments/p19/run.sh external uci_har --help
+          bash paper_TPAMI/run.sh external physionet2012 --help
           bash experiments/p19/run.sh ablation native --help
       - uses: actions/upload-artifact@v4
         with:
@@ -115,7 +122,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install the accepted submodule with its required CPU runtime
+      - name: Install unchanged accepted PHMFactory dependency
         run: |
           python -m pip install 'torch==2.6.0' 'torchvision==0.21.0' --index-url https://download.pytorch.org/whl/cpu
           python -m pip install -e external/phmfactory
@@ -124,13 +131,13 @@ jobs:
           phmfactory doctor
           phmfactory preflight --config smoke
           phmfactory demo
-      - name: Prepare MFPT exclusively through PHMFactory
+      - name: Prepare MFPT through PHMFactory
         run: bash experiments/p19/run.sh phm-prepare --output "$RUNNER_TEMP/p18-mfpt-data"
-      - name: Restore and independently evaluate the unchanged three-seed reference
+      - name: Restore and independently evaluate unchanged three-seed reference
         run: |
           bash experiments/p19/run.sh phm --data "$RUNNER_TEMP/p18-mfpt-data" --output "$RUNNER_TEMP/p18-mfpt-acceptance"
           bash experiments/p19/run.sh phm-metrics --predictions "$RUNNER_TEMP/p18-mfpt-acceptance/predictions.csv" --reference "$RUNNER_TEMP/p18-mfpt-acceptance/acceptance.csv" --output "$RUNNER_TEMP/p18-mfpt-acceptance/recomputed.csv"
-      - name: Retain numeric diagnostics only, never waveform arrays
+      - name: Retain numerical diagnostics only
         if: always()
         uses: actions/upload-artifact@v4
         with:

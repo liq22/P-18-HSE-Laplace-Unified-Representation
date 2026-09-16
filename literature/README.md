@@ -1,7 +1,7 @@
-# Literature for the active question
+# Shared literature, separate claims
 
-Start with HSE and the full LLapDiff v2 method/target definition, then the statistical-compression and target-posterior sources already in `references.bib`. For the current finite-model and routing interpretation, Xu et al. (ICLR 2020) and Mao–Mohri–Zhong (ICML 2024/2025) are direct theoretical predecessors, not peripheral citations.
+`references.bib` is the single shared bibliography. TII uses industrial HSE/LLapDiff and statistical antecedents for its concrete industrial intervention. TPAMI adds general representation, expert specialization and independent risk-control comparisons, with inspected sections documented in `paper_TPAMI/related_work.md`.
 
-Read `paper/related_work.md` for the exact inspected sections and source-access limits. The active candidate is a statistically supervised reparameterization of the same HSE code, not a claim of one calibrated physical posterior for every industrial signal. PHMFactory reference acceptance and a conditional routing toy cannot establish learned posterior calibration.
+Moirai-MoE and the AME-TS preprint are direct specialization/routing neighbors. V-information and multi-expert deferral predate the general accessibility/profile language. Learn then Test is a direct predecessor of the new finite-policy calibration corollary. Do not suppress these papers to manufacture a gap.
 
-Flow Matching remains future work. Existing valid literature and negative controls are retained; duplicated future-work prose was consolidated into the main project/paper entries.
+Reference venue and publication status must match inspected primary records; no absence claim follows from a missing abstract or inaccessible final text. Existing valid analytical results and negative controls remain attributable to their original scope. More datasets do not by themselves create a second paper contribution.

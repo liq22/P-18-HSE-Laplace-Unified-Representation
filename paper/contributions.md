@@ -1,15 +1,11 @@
-# Contribution-to-evidence map
+# TII contribution and evidence map
 
-| Object | Status and antecedent | Method consequence | Falsifier / required evidence |
+| Candidate | Minimal intervention or estimand | Required industrial evidence | Not accepted as evidence |
 |---|---|---|---|
-| $R\to M=T(R)$ under one supervised checkpoint | Concrete candidate intervention, not a new general bottleneck principle | One global moment readout plus ordinary tail, fixed message dimension | M fails to outperform B1-aux under matched supervision and total cost |
-| $\Gamma+\mathcal E_M-\mathcal E_R$ | Conditional projection analysis; observer-limited information has direct V-information antecedents | Interpret gains as finite-model accessibility, not added observation information | Extra metadata, changed target, unmatched supervision or capacity explains the gain |
-| $\rho_j(a)$ and $\mathcal H_{hard}$ | Operational estimands for this experiment, not invented routing theory | Fixed-arm source-only hard selection after independent validation | Static fusion wins, no meaningful headroom, or target ordering reversal |
-| Statistical moments | Gaussian conditional-score population result; not a finite optimizer guarantee | Validate score components; freeze input and readout together | Covariance collapse, unstable source validation, target residual bias |
-| Industrial utility | Not yet established by learned HSE–LLapDiff | PHMFactory exports, frozen groups, same diagnosis head | Gain disappears under recording balance or is absent against strong controls |
+| Statistically anchored HSE condition | M=T(R), same trained trunk, supervision, checkpoint, q and actual side inputs | M vs B1-aux with the same diagnosis/generation consumer | extra auxiliary training only on M; synthetic feature training |
+| Industrial information–fitting interpretation | nested-message square-risk identity under its assumptions | source/unseen acquisition residuals and capacity controls | a generic information theorem renamed as novel |
+| Practical diagnostic utility | recording-balanced pooled-confusion macro-F1 and measured cost | PHMFactory original-group splits and matched industrial baselines | MFPT reference acceptance relabelled as a method gain |
 
-## Admitted results versus paper-level claim
+Retain best single, static predictive fusion and acquisition selection as industrial ablations, without claiming new routing theory. The general fixed-policy/certification study and five external domains are owned by `paper_TPAMI/`.
 
-The proofs and executed toy counterexamples support their explicitly stated implications. MFPT reference acceptance verifies data/configuration/checkpoint/metrics at the recorded upstream revision. Neither establishes a new HSE method advantage. Do not count the reference accuracy or the synthetic headroom as evidence that the proposed conditioner outperforms a baseline.
-
-No independent claim is made for a new foundation model, a new general sufficient statistic, a new generic routing theorem, or a necessity of Diffusion. A null M/B1-aux outcome completes the experiment and leads to simplification. Static or dynamic variants must beat the simpler comparator at the declared cost before becoming the paper's recommended method.
+The learned industrial contribution remains unvalidated. A null or adverse M/B1-aux comparison completes the question and favors the simpler conditioner. Shared code and analytical antecedents must be disclosed, not presented as independently new in two manuscripts.

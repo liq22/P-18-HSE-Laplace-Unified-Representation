@@ -1,25 +1,22 @@
-# HSE–Laplace: statistically anchored industrial conditioning
+# HSE–Laplace research
 
-This repository studies whether a fixed-budget statistical reparameterization of HSE features helps the same finite LLapDiff model. The strongest comparator sends the complete ordinary code trained by the same auxiliary supervision. A hard acquisition selector is evaluated separately from static/soft fusion; routing is not mandatory.
+Two manuscript workspaces share one implementation:
 
-## Start
+| Workspace | Scope | Entry |
+|---|---|---|
+| `paper/` | IEEE TII: industrial fault-diagnosis data only, via PHMFactory | [Industrial manuscript](paper/main.md), [goals](paper/goals/README.md) |
+| `paper_TPAMI/` | IEEE TPAMI candidate: target/consumer/budget analysis and five external domains | [General manuscript](paper_TPAMI/main.md), [goals](paper_TPAMI/goals/README.md) |
+
+Read [PAPER_SCOPE.md](PAPER_SCOPE.md) before moving results or changing claims. Adding datasets alone does not make an independent TPAMI contribution. Shared theory/code/reference experiments are attributed rather than counted twice.
 
 ```bash
 python -m pip install -e '.[notebooks,experiments]'
 bash experiments/p19/run.sh theory
-bash experiments/p19/run.sh toy --events 1024 --output outputs/p19/toy_routing.csv
+bash paper_TPAMI/run.sh all-cpu
 ```
 
-[Paper](paper/main.md) · [Method](paper/method.md) · [Proof + Notebook](paper/theory_main.md) · [Observed results](paper/results_native.md) · [Execution goals](paper/goals/README.md) · [Data SOP](paper/experiments/DATA_DOWNLOAD_SOP.md)
+`src/hse_laplace/`, `theory/`, and `experiments/` remain shared. The historical `experiments/p19/` path is an experiment library, not a third paper. Plot commands consume real CSV and export SVG/PDF/PNG. No duplicate trainer or registry is introduced.
 
-## PHM data
+All PHM data enter through the accepted `external/phmfactory` submodule. Its MFPT public baseline, three checkpoint restores and independent metrics passed; no dependency advance exists in the current upstream check. This reference is not a learned HSE advantage. Genuine feature/reference checkpoints, learned method comparisons and five-domain conversions/training remain pending.
 
-All PHM readers, labels and splits come through PHMFactory. `external/phmfactory` records the exact main revision whose MFPT public configuration, three selected checkpoints and independent metric recomputation passed. Initialize with `git submodule update --init external/phmfactory` and follow Goal 01 in an isolated environment. The parent does not patch upstream core or maintain another MAT reader.
-
-## Evidence boundary
-
-Analytical studies, native-component checks, finite routing/fusion controls and the real MFPT **reference** acceptance are available. Genuine source-trained HSE/reference features, learned M/B1-aux comparisons, learned routing and the five external-domain method experiments remain pending local data/checkpoints/GPU. A command accepting feature files is not proof those files have been produced.
-
-First local run uses one of the 8×4090 GPUs; two-GPU training is prohibited. See Goal 06. Flow Matching remains future work until posterior validity and a real sampling bottleneck are established. `formal_claim_supported: false` refers to the proposed learned method, not to an assertion that no reference execution occurred.
-
-CSV plotting, statistics and PHM metric recomputation are available through `bash experiments/p19/run.sh --help`. Outputs belong under ignored `outputs/`; source figures are SVG/PDF/PNG generated from actual CSVs only.
+Local hardware is8×4090; first run uses one GPU and two-GPU training is forbidden. Flow Matching remains future work. Work is merged normally into dev after validation; master and others' branches are preserved.
