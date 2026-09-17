@@ -1,0 +1,38 @@
+name: tpami-official-vowels-affine-reference
+on:
+  pull_request:
+  push:
+    branches: [dev]
+permissions:
+  contents: read
+jobs:
+  official-vowels-reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the existing CPU paper runtime
+        run: python -m pip install -e '.[experiments]'
+      - name: Download the official UCI128 archive
+        run: curl -fL 'https://archive.ics.uci.edu/static/public/128/japanese%2Bvowels.zip' -o "$RUNNER_TEMP/japanese_vowels.zip"
+      - name: Convert real native-length data and restore the affine reference
+        run: python -m experiments.p19.japanese_vowels --archive "$RUNNER_TEMP/japanese_vowels.zip" --output-dir "$RUNNER_TEMP/vowels-reference"
+      - name: Draw only the actual reference CSV
+        run: python -m experiments.p19.plot_affine_reference --csv "$RUNNER_TEMP/vowels-reference/affine_summary.csv" --output-dir "$RUNNER_TEMP/vowels-reference/figures"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: japanese-vowels-reference
+          path: |
+            ${{ runner.temp }}/vowels-reference/*.csv
+            ${{ runner.temp }}/vowels-reference/acceptance.json
+            ${{ runner.temp }}/vowels-reference/affine_reference.npz
+            ${{ runner.temp }}/vowels-reference/figures/
+          if-no-files-found: warn
