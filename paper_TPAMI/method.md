@@ -1,39 +1,45 @@
 # Method: conditional-moment specificity before routing
 
-## 1. Scientific object and task
+## 1. Scientific object and primary task
 
-For each dataset fix observation O, deployment side information a, target U, original groups and the primary task. A frozen encoder supplies F. Let R be the complete ordinary code, source-trained with the same auxiliary supervision as its statistical message M=T(R). A comparison specifies target, consumer family, message size q, dtype and total training/inference cost. It is not a universal ranking of representations across incompatible metrics.
+Freeze observation O, deployment side information a, target U, original groups and the primary task. R is a complete ordinary code obtained through a source-trained frozen encoder and shared statistical supervision. M=T(R) is a deterministic reparameterization. A comparison specifies consumer family, q, dtype, train/validation protocol and full cost. In the full-rank exact-map case M is information-equivalent to R, not intrinsically lossy. Finite-precision behavior and actual checkpoint rank are checked separately.
 
-Classification uses direct label-prediction heads first. Future prediction/imputation uses actual measurements or one source-frozen reference target, with simple Gaussian/mixture consumers before a claim of diffusion necessity. LLapDiff remains one consumer; its native squared loss does not guarantee diagnostic macro-F1. The existing native runner is a two-arm generation pilot, not a universal classification runner.
+Classification starts with direct label heads. Forecasting/imputation uses real targets or a fixed source reference latent, with Gaussian/mixture heads as controls. LLapDiff is one consumer, not a necessary component of all tasks. Native squared loss does not imply improved macro-F1.
 
 ## 2. Global conditional-moment message
 
-Use the shared `MatchedConditioner`: source encoder and input mask/side fields → trainable trunk → R → global mean/covariance head. Gaussian scoring updates the actual R path later transmitted by B1-aux. The mean head is affine in R; the covariance path applies softplus, a declared covariance floor and Cholesky. These outputs are conditional-moment estimates, not an automatically calibrated full posterior.
+Use the shared MatchedConditioner: frozen features plus explicit input mask/side → trainable trunk R → Linear global head h. The Gaussian score updates this exact R path, not a detached head. The mean is affine in R; raw covariance coordinates pass through softplus and declared covariance-floor/Cholesky operations. The resulting fields estimate conditional moments, not a full posterior by definition.
 
-Select one source-validation checkpoint, freeze input preprocessing, HSE, buffers, trunk and head, and replace a declared prefix with mean/Cholesky coordinates while retaining the ordinary tail. Both messages are global dense summaries with an explicitly all-valid output mask; original observation masks are consumed upstream. No unpriced side copy of the moments bypasses the message. Statistical units are checked at the raw readout, not required to persist through every learned downstream projection.
+Choose the checkpoint on source validation and freeze preprocessing, feature extractor, buffers, trunk and head. M replaces s=d+d(d+1)/2 coordinates with mean and triangular covariance factor and retains the tail. Both outputs are dense global summaries with an explicitly all-valid output mask. Original history masks are consumed upstream. Statistics are checked at the raw readout; downstream transformations need not retain units. No unpriced parallel moment message is supplied.
 
-Gaussian score, its log-determinant/Mahalanobis parts, covariance eigenvalues and sample-out residual checks are recorded. Mean-MSE and beta-NLL are optional loss controls after the main path works. Seitzer's beta-NLL uses a detached variance weight; it cannot be silently substituted while claiming the same proper-score objective. Without oracle conditional moments, report held-out scores/residuals rather than a fictitious true-posterior RMSE. Freezing a source head does not establish target conditional calibration.
+## 3. Same-head affine control: the first nonlinear-specific comparison
 
-## 3. Required simple controls
+The implemented `head_affine` arm transmits H_A=[h(R),R_tail] using the same selected parameters, targets, supervision, q and dtype. No separate fitting occurs. Only the covariance-coordinate nonlinear map differs from M. Raw covariance coordinates of H_A are not assigned moment semantics.
 
-Keep the actual message dimension fixed and compare R, full-q PCA, source-fitted whitening and a seeded orthogonal map. Full-dimensional transformations are invertible when their stated rank conditions hold, unlike truncated bottlenecks. Match dtype/bytes; no silent rank truncation or variance floor. For a solved ridge consumer report both ordinary isotropic regularization and the coordinate-transported penalty. The latter is an identity check, not a new learned competitor.
+The proof in `theory_main.md` gives M=Φ(H_A) and an inverse of Φ on its exact attainable image; W_p need not be full rank for this equivalence. An affine consumer after H_A collapses into an affine function of R. Thus three contrasts have distinct roles:
 
-Add the exact R → frozen T → same consumer path: equality with M establishes packing/consumer consistency only. Then compare source-trained linear and small-MLP reparameterizations with the same supervision/search/checkpoint/update budget; these are not yet implemented by the affine CPU reference. Compare mean-only and shuffled mean/covariance/target controls to identify which statistical fields matter. A field shuffle is defined within a split and acquisition stratum with a recorded randomization; it never mixes train/test records.
+| Contrast | What it tests |
+|---|---|
+| M versus B1-aux/R | complete coordinate intervention under shared supervision |
+| H_A versus R | access to the same trained affine head coordinates |
+| M versus H_A | nonlinear statistical covariance coordinates for the chosen finite consumer |
 
-## 4. Frozen tuning and costs
+A win only over R does not establish statistical specificity. Equality with H_A supports the simpler transformation. Even a gain over H_A still needs generic nonlinear and cost controls; it is not automatically a full-posterior effect.
 
-Before any target result, declare source checkpoint metric, loss-weight grid, HPO trial count, patience, optimizer/update budget, consumer architecture, q, dtype, normalization and paired seeds. PCA and whitening fit on source train only. Model/transform choice uses source validation; untouched calibration/test data do not choose targets, shrinkage, covariance floors or the model family.
+## 4. Other required simple alternatives and budgets
 
-Record dimensions and message bytes, coordinate buffers, rank/scales/condition, HSE/trunk/moment/consumer parameters, forward work, training updates, actual latency and peak memory where measured. Same q is an interface constraint, not equal information or full compute. A single CPU solve time is descriptive, not a stable inference-latency benchmark or a Pareto claim. Plot performance/latency/memory only once genuine comparable measurements exist.
+Retain source-fitted full-q PCA, orthogonal coordinates, and whitening with both isotropic and coordinate-transported ridge penalties. Truncation/flooring changes the declared experiment. R→same frozen T→same consumer is an identity check. Same-supervision learned linear/small-MLP alternatives, mean-only and shuffled mean/covariance/target messages are subsequent controlled arms; the CPU affine reference does not claim to train them.
 
-## 5. Policy comparisons are secondary
+Freeze loss-weight grid, HPO count, normalization, checkpoint metric/patience, consumer capacity, updates, source split and seeds before test results. Record q, dtype/bytes, coordinate rank/condition/scales and all parameters. `costs.csv` now distinguishes whether the affine head and statistical factorization were evaluated, and records head/trunk/denoiser parameter counts plus actual training/sampling time. It does not claim FLOPs or stable inference-latency/memory measurements not obtained. Equal q is not total cost equality.
 
-The first decision is whether M beats ordinary and generic transformations on the fixed task. Keep best source-selected single and strong source-selected static prediction/distribution fusion. Add a hard acquisition selector only afterward. Generic hard headroom does not establish superiority over static fusion; soft token fusion trained jointly is another complete policy. Account for every evaluated expert and posterior draw.
+## 5. Statistical semantics and diagnosis
 
-Current target-drift bounds are sensitivity statements because b(a) is not observable from unlabeled target data. The independent bounded-loss certificate remains an optional tool only when its frozen-family, group independence, boundedness and shift assumptions hold. Raw Energy Score, onehot ridge score MSE, cross-entropy and nonlinear macro-F1 are not silently clipped into that theorem.
+Keep score/logdet/Mahalanobis/eigenvalue diagnostics. Mean-MSE and beta-NLL are later loss controls; the original beta-NLL uses a detached variance weight and changes the optimization rule. Without oracle moments report held-out scores and residuals, not a fabricated posterior-mean RMSE. Source supervision does not establish unseen-acquisition calibration. The primary task determines the claimed endpoint; native generation and direct classification are not substituted for one another.
 
-## 6. Actual external reference and remaining learned step
+## 6. Secondary policies and execution
 
-`japanese_vowels.py` now reads official UCI128 native-length sequences, preserves the original test set, and uses source time-mean LPC features with solved ridge. It writes masks, the correct LPC frame timing, labels and split groups, serializes/restores all fitted coefficients, and exports actual predictions. It does **not** produce HSE/reference-VAE features, posterior samples or statistically supervised messages. Their source-trained checkpoints and corresponding genuine extraction remain the next local dependency.
+Only after representation specificity is tested compare source-selected best single, strong static predictive fusion and optional fixed-arm acquisition routing. Hard headroom does not guarantee superiority over fusion. Unknown target drift remains a sensitivity parameter. A bounded-loss iid certificate is not applied to raw Energy Score or correlated utterances/time windows.
 
-The other four external sources remain individually pending conversion; naming them at the native CLI does not integrate them. TII stays industrial-only through PHMFactory. This general workspace reuses `experiments/p19/`, the native conditioner and the single bibliography rather than copying trainers or upstream readers.
+`run_native_pilot.py` preserves the original two-arm default; `--arms B1_aux M head_affine` explicitly runs the new comparison on supplied genuine frozen exports. Its native CI test uses four synthetic fixture events per split and one optimizer update: an integration test, not learned task evidence. CSV plots require an explicit reference/candidate when multiple arms exist; no unmentioned rows vanish.
+
+The Japanese Vowels real reader/reference remains mean-LPC/closed-form ridge, with restored coefficients and the original test set. It is not HSE, a moment model or calibrated probability prediction. Four other external raw converters and genuine multi-domain HSE/reference checkpoints remain missing prerequisites. TII remains industrial-only through PHMFactory, with all code shared rather than copied.

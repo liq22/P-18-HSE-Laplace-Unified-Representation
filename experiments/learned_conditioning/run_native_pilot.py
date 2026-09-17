@@ -1,7 +1,8 @@
-"""Small M/B1-aux comparison on actual exported frozen HSE/reference features.
+"""Matched native LLapDiff on genuine frozen HSE/reference exports.
 
-There is deliberately no synthetic fallback. This script trains the installed
-LLapDiff, not the HSE or reference encoder. The export note defines that boundary.
+Defaults retain the original two-arm experiment. The explicit head_affine arm
+uses the same checkpoint before statistical nonlinearities. No raw data reader,
+synthetic fallback, extra representation training or replacement denoiser.
 """
 import argparse
 import copy
@@ -16,7 +17,7 @@ from .fit_moment_probe import fit_shared, diagnostics
 
 
 def energy_score(draws, truth, mask):
-    """Unbiased sample Energy Score, Euclidean norm divided by sqrt(valid size)."""
+    """Unbiased sample Energy Score; Euclidean norm / sqrt(valid size)."""
     if draws.shape[0] < 2:
         raise ValueError('Energy Score needs at least two independent draws')
     result=[]
@@ -39,8 +40,11 @@ def native_model(data, device):
         block_summary_adaln=True,analysis_summary_qk=True).to(device)
 
 
-def pilot(train, val, test, seeds, anchor_steps, diffusion_steps, draws, sample_steps, device, output):
+def pilot(train, val, test, seeds, anchor_steps, diffusion_steps, draws, sample_steps, device, output,
+          arms=('B1_aux','M')):
     from llapdiffusion.models.llapdiff_utils import diffusion_loss
+    if len(arms)<2 or len(set(arms))!=len(arms) or not {'B1_aux','M'}<=set(arms) or not set(arms)<={'B1_aux','M','head_affine'}:
+        raise ValueError('distinct B1_aux and M required; head_affine is the only optional control')
     records=[]; history=[]; costs=[]; anchor_scores=[]
     for seed in seeds:
         start=time.perf_counter()
@@ -53,12 +57,11 @@ def pilot(train, val, test, seeds, anchor_steps, diffusion_steps, draws, sample_
                     **diagnostics(anchor,split,idx)})
         with (output/f'anchor_seed{seed}.csv').open('w',newline='') as f:
             w=csv.DictWriter(f,fieldnames=list(anchor_rows[0]));w.writeheader();w.writerows(anchor_rows)
-        # This same fitted checkpoint supervises and freezes both arms.
         anchor.to(device)
         frozen=copy.deepcopy(anchor.state_dict())
         torch.manual_seed(seed+1000)
         initial=native_model(train,device).state_dict()
-        for arm in ['B1_aux','M']:
+        for arm in arms:
             torch.manual_seed(seed+2000)
             if str(device).startswith('cuda'):
                 torch.cuda.manual_seed_all(seed+2000)
@@ -66,10 +69,8 @@ def pilot(train, val, test, seeds, anchor_steps, diffusion_steps, draws, sample_
             start=time.perf_counter()
             model=native_model(train,device);model.load_state_dict(initial)
             optimizer=torch.optim.Adam(model.parameters(),lr=1e-3)
-            # Equal predeclared validation subset; no target-domain selection.
             nv=min(64,len(val['tokens']))
-            with torch.no_grad():
-                cv=anchor(*inputs(val,slice(0,nv),device),arm)
+            with torch.no_grad(): cv=anchor(*inputs(val,slice(0,nv),device),arm)
             zv=val['z0'][:nv].to(device);mv=val['target_mask'][:nv].to(device)
             tv=torch.arange(nv,device=device)%63+1
             ev=torch.randn(zv.shape,generator=torch.Generator(device=device).manual_seed(seed+3000),device=device)
@@ -95,6 +96,7 @@ def pilot(train, val, test, seeds, anchor_steps, diffusion_steps, draws, sample_
                         vl=diffusion_loss(model,model.scheduler,zv,tv,cond_summary=cv,
                             dt=val['query_time_s'][:nv].to(device),predict_type='v',weight_scheme='none',
                             minsnr_normalize='none',target_mask=mv,reuse_xt_eps=(xv,ev))
+                    if not torch.isfinite(vl): raise FloatingPointError('nonfinite native validation loss')
                     history.append({'seed':seed,'arm':arm,'step':step,'train_loss':float(loss.detach()),'validation_loss':float(vl)})
                     if float(vl)<best: best=float(vl);selected=step;state=copy.deepcopy(model.state_dict())
             model.load_state_dict(state);model.eval()
@@ -125,9 +127,14 @@ def pilot(train, val, test, seeds, anchor_steps, diffusion_steps, draws, sample_
             costs.append({'seed':seed,'arm':arm,'anchor_cpu_seconds':anchor_seconds,
                           'denoiser_training_seconds':train_seconds,'sampling_seconds':time.perf_counter()-start,
                           'conditioner_parameters':sum(p.numel() for p in anchor.parameters()),
+                          'trunk_parameters':sum(p.numel() for p in anchor.trunk.parameters()),
+                          'moment_head_parameters':sum(p.numel() for p in anchor.moment_head.parameters()),
                           'denoiser_parameters':sum(p.numel() for p in model.parameters()),
-                          'message_scalars':anchor.budget,'anchor_selected_step':anchor_step,
-                          'denoiser_selected_step':selected})
+                          'message_scalars':anchor.budget,'message_dtype':str(cv.dtype),
+                          'message_bytes_per_event':anchor.budget*cv.element_size(),
+                          'head_evaluated_at_inference':arm!='B1_aux',
+                          'statistical_factorization_at_inference':arm=='M',
+                          'anchor_selected_step':anchor_step,'denoiser_selected_step':selected})
     for name,rows in [('event_scores',records),('training_curve',history),('costs',costs),('anchor_scores',anchor_scores)]:
         with (output/f'{name}.csv').open('w',newline='') as f:
             writer=csv.DictWriter(f,fieldnames=list(rows[0]));writer.writeheader();writer.writerows(rows)
@@ -139,12 +146,15 @@ def main():
         p.add_argument('--'+name,type=Path,required=True)
     p.add_argument('--device',required=True)
     p.add_argument('--seeds',type=int,nargs='+',default=[0,1,2])
+    p.add_argument('--arms',nargs='+',choices=['B1_aux','M','head_affine'],default=['B1_aux','M'])
     p.add_argument('--anchor-steps',type=int,default=150)
     p.add_argument('--diffusion-steps',type=int,default=200)
     p.add_argument('--draws',type=int,default=8);p.add_argument('--sampler-steps',type=int,default=16)
     args=p.parse_args()
     if not args.data_note.is_file(): p.error('actual HSE/reference export note is required')
     if len(set(args.seeds))!=len(args.seeds): p.error('training seeds must be distinct')
+    if len(set(args.arms))!=len(args.arms) or not {'B1_aux','M'}<=set(args.arms):
+        p.error('B1_aux and M must occur once; head_affine is optional')
     if min(args.anchor_steps,args.diffusion_steps,args.sampler_steps)<1 or args.draws<2:
         p.error('positive update counts and at least two draws are required')
     if args.sampler_steps>64: p.error('sampler steps cannot exceed the declared 64-step schedule')
@@ -157,10 +167,10 @@ def main():
         p.error('validation contains unseen acquisition conditions; reserve these for test')
     args.output_dir.mkdir(parents=True,exist_ok=False)
     torch.set_num_threads(1)
-    pilot(*data,args.seeds,args.anchor_steps,args.diffusion_steps,args.draws,args.sampler_steps,device,args.output_dir)
+    pilot(*data,args.seeds,args.anchor_steps,args.diffusion_steps,args.draws,args.sampler_steps,device,args.output_dir,tuple(args.arms))
     settings={key:str(value) if isinstance(value,Path) else value for key,value in vars(args).items()}
     settings['scope']='native LLapDiff on supplied frozen exports, not on-the-fly HSE/VAE execution'
-    settings['decision']='report M minus B1_aux; no automatic promotion or full experiment launch'
+    settings['decision']='report every predeclared contrast; no automatic promotion or full experiment launch'
     (args.output_dir/'settings.json').write_text(json.dumps(settings,indent=2),encoding='utf-8')
     print('Completed the declared comparison; both favorable and unfavorable rows are retained.')
 

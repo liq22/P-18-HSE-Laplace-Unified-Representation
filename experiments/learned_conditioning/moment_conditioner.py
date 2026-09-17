@@ -1,7 +1,7 @@
-"""One supervised path for both M and B1-aux; no HSE replacement.
+"""One supervised path for M, B1-aux and the same-head affine control.
 
-Input masks describe frozen history tokens. Output tokens are a dense global
-summary, not patch-indexed observations; all output positions are consumed.
+Input masks describe frozen history. Output tokens are dense global summaries,
+not patch-indexed observations. The raw affine head is not a moment estimate.
 """
 from __future__ import annotations
 import torch
@@ -49,7 +49,6 @@ class MatchedConditioner(nn.Module):
             raise ValueError('valid observations and side fields must be finite')
         if self.frozen and (tokens.requires_grad or side.requires_grad):
             raise ValueError('stage two requires frozen input features and side preprocessing')
-        # Masked entries are explicitly excluded, not imputed as observations.
         visible = torch.where(mask[..., None], tokens, torch.zeros_like(tokens))
         return torch.cat((visible.flatten(1), mask.to(tokens.dtype), side), dim=1)
 
@@ -65,7 +64,7 @@ class MatchedConditioner(nn.Module):
         factor[:, diagonal, diagonal] = F.softplus(factor[:, diagonal, diagonal])
         covariance = factor @ factor.transpose(-1, -2)
         if self.covariance_floor:
-            # Public covariance constraint, not a hidden numerical jitter.
+            # Public covariance constraint, not hidden numerical jitter.
             covariance = covariance + self.covariance_floor * torch.eye(
                 self.target_dim, device=raw.device, dtype=raw.dtype)
         factor = torch.linalg.cholesky(covariance)
@@ -93,25 +92,30 @@ class MatchedConditioner(nn.Module):
         return self
 
     def train(self, mode=True):
-        # A parent's train() cannot reactivate the frozen conditioning path.
         return super().train(False if self.frozen else mode)
 
     def forward(self, tokens, mask, side, arm='M'):
-        if arm not in ('M', 'B1_aux', 'M0'):
-            raise ValueError('arm must be M, B1_aux or M0')
+        if arm not in ('M', 'B1_aux', 'M0', 'head_affine'):
+            raise ValueError('arm must be M, B1_aux, M0 or head_affine')
         if not self.frozen:
             raise RuntimeError('select the source checkpoint and freeze before denoising')
         ordinary = self.ordinary(tokens, mask, side)
         if arm == 'B1_aux':
             return ordinary.reshape(-1, self.tokens, self.width)
+        tail = ordinary[:, self.semantic_size:]
+        if arm == 'head_affine':
+            # Same trained head and tail, before nonlinear covariance coordinates.
+            # No new weights, target, fitting or hidden moment channel.
+            raw = self.moment_head(ordinary)
+            return torch.cat((raw, tail), -1).reshape(-1, self.tokens, self.width)
         mean, factor = self.moments_from_code(ordinary)
         semantic = torch.cat((mean, factor[:, self.tril[0], self.tril[1]]), dim=-1)
-        tail = ordinary[:, self.semantic_size:]
         if arm == 'M0':
             tail = torch.zeros_like(tail)
         return torch.cat((semantic, tail), -1).reshape(-1, self.tokens, self.width)
 
     def read_moments(self, message):
+        # This decoder applies to M/M0, not head_affine or B1_aux.
         raw = message.reshape(len(message), self.budget)
         factor = raw.new_zeros((len(raw), self.target_dim, self.target_dim))
         factor[:, self.tril[0], self.tril[1]] = raw[:, self.target_dim:self.semantic_size]
