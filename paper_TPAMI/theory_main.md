@@ -1,124 +1,111 @@
-# Conditional accessibility: fixed representations, selection and fusion
+# Representation specificity before policy selection
 
-## Objects and scope
+## Scope and notation
 
-Fix the source-trained HSE, reference encoder, supervised conditioner checkpoint and each downstream predictor before the following population comparison. Write $R=g_\theta(C_F)$ for the complete ordinary message and $M=T_\psi(R)$ for its statistically anchored reparameterization. Both use the same actual side inputs. Let $A$ be the deployment-available acquisition descriptor. Let $X$ include the noisy latent, diffusion time, **A**, and common side information. A target mask or random native weight must either be part of this declared information or be handled under the native weighted population measure; an unweighted identity is not silently applied to a different batch-normalized objective.
+Fix the source-trained encoder, target, preprocessing and conditional-moment checkpoint. R is the complete ordinary code; M=T(R) is its deterministic message. Both consumers receive identical side information. X includes the noisy target, diffusion time, acquisition descriptor A and common masks/side fields. Population expectations condition on the training result and integrate over new evaluation groups and declared noise. A finite empirical risk carries a hat. A native batch-normalized objective is not silently replaced by an unweighted population identity.
 
-Population expectations below integrate over an independent evaluation event and any stated diffusion noise, conditional on the fixed training result. Finite source-validation averages carry hats. The prediction family and training budget are fixed; a newly trained fusion model is a different arm.
+The arguments below use classical function-class inclusion, coordinate changes, conditional projection and fixed-expert selection. V-information [@xu2020usable] and multi-expert deferral [@mao2024regression; @mao2025routing] are direct antecedents. These are falsification tools for the specific message, not a new general information theory. Independent-policy certification remains secondary in `theory/policy_certificate.md`; no additional theorem file is needed.
 
-The results use standard conditional projection and fixed-expert selection arguments. They specialize these tools to the actual matched HSE messages; they are not new general information or routing theory. Predictive V-information already formalizes observer-dependent usable information (Xu et al., ICLR 2020); multi-expert regression/deferral and cost-aware two-stage routing are direct precedents (Mao, Mohri and Zhong, ICML 2024/2025).
+## Representation-specific checks for the implemented head
+
+### Consumer inclusion
+
+Let F_R contain every composition f(X,T(R)) for f in F_M. Under the same evaluation law, loss and admissible budget,
+
+$$
+\inf_{g\in\mathcal F_R}\mathbb E\ell(Y,g(X,R))
+\le \inf_{f\in\mathcal F_M}\mathbb E\ell(Y,f(X,M)).
+$$
+
+**Proof.** Each candidate on the right is, by the stated inclusion, a candidate on the left with exactly the same predictions. Taking infima proves the inequality. No existence of an optimizer is required. The inclusion must also hold under the actual parameter/computation restriction; installing T inside the R path is not cost-free. This is a population function-class comparison, not an assertion that gradient descent on R discovers T.
+
+The executable identity control is R → the **same frozen** T → the same consumer. Its output must equal the M path. An independently trained MLP is a competing finite method, not this identity control.
+
+### The current mean readout is affine
+
+In `MatchedConditioner`, `moment_head` is a single Linear layer. Its mean output therefore has the form m(R)=W_m R+b_m. Appending that mean to a linear tail produces an affine map of R. Any subsequent affine classifier/regressor is consequently an affine function of R. A mean-only message cannot enlarge the unrestricted affine-consumer family of R; if the replacement is rank-deficient it can make the family smaller.
+
+The actual M also includes softplus/Cholesky-derived covariance fields, so the whole map is not generally affine. Any method-specific claim must isolate those nonlinear fields from a mean-only control and a similarly sized generic nonlinear reparameterization. The nonlinear square-target witness R∈{-1,0,1}, T(R)=R² illustrates a possible finite-family benefit, but it does **not** explain this affine mean head by itself.
+
+### Full-dimensional coordinates and the ridge objective
+
+Take source X∈R^(n×q), targets Y∈R^(n×k), fixed center c and nonsingular A∈R^(q×q). Set Z=(X-1cᵀ)A. Consider
+
+$$
+J_R(W,b)=n^{-1}\|Y-(X-1c^\top)W-1b^\top\|_F^2+\lambda\|W\|_F^2,
+$$
+
+and the transformed problem
+
+$$
+J_A(V,b)=n^{-1}\|Y-ZV-1b^\top\|_F^2+\lambda\|AV\|_F^2.
+$$
+
+For λ>0 and an unpenalized intercept, the solutions make identical predictions on every source or new input.
+
+**Proof.** W=AV is a bijection because A is nonsingular. Substitution gives J_A(V,b)=J_R(AV,b), including the penalty. The positive ridge term makes the coefficient solution unique; the intercept is fixed by centering the residual. Thus W*=AV*, and for every x, (x-c)ᵀW*+b*=(x-c)ᵀAV*+b*. This is an exact objective equivalence, not a statement about finite-precision solver error. ∎
+
+With isotropic transformed penalty λ||V||² instead, the equivalent penalty in raw coordinates is λ||A^-1 W||². It agrees with ordinary ridge for an orthogonal A, but not for a general whitening transform. Therefore full-q PCA and random orthogonal coordinates are exact isotropic-ridge controls; whitening must be reported with both unchanged and transported penalties. Source covariance must be full rank for the present whitening experiment. Truncated PCA, covariance flooring, different λ or unequal training updates change the problem and are separately declared variants, not hidden repairs.
+
+The same-stem Notebook and `affine_controls.py` execute this identity. The real Japanese Vowels reference uses source-fitted full-q coordinates and untouched official test utterances. It does not use HSE features or prove a conditional-moment advantage.
 
 ## Proposition 1 — nested-message finite-risk decomposition
 
-Assume $\mathbb E\|V\|^2<\infty$ for a common regression target $V$. Put
+Assume E||V||²<∞ for one common target. Put f_R=E[V|X,R], f_M=E[V|X,M]. For square-integrable fitted consumers d_j define
 
 $$
-f_R=\mathbb E[V\mid X,R],\qquad f_M=\mathbb E[V\mid X,M].
-$$
-
-The fitted predictors $d_R,d_M$ are measurable in their respective inputs and square-integrable. Define
-
-$$
-\Gamma(a)=\mathbb E[\|f_R-f_M\|^2\mid A=a],\quad
+\Gamma(a)=\mathbb E[\|f_R-f_M\|^2\mid A=a],\qquad
 \mathcal E_j(a)=\mathbb E[\|d_j-f_j\|^2\mid A=a].
 $$
 
-For almost every $a$,
+For almost every a,
 
 $$
-\boxed{\rho_M(a)-\rho_R(a)=\Gamma(a)+\mathcal E_M(a)-\mathcal E_R(a),\qquad \Gamma(a)\ge0.}
+\rho_M(a)-\rho_R(a)=\Gamma(a)+\mathcal E_M(a)-\mathcal E_R(a),\qquad\Gamma(a)\ge0.
 $$
 
-### Proof
+**Proof.** Since M=T(R), σ(X,M)⊂σ(X,R). Expand V-f_M=(V-f_R)+(f_R-f_M). Conditional expectation of the cross term vanishes by the tower property. Do the same with V-d_j=(V-f_j)+(f_j-d_j), then subtract. A is included in X so the identities can be conditioned on the acquisition stratum. ∎
 
-Since $M=T(R)$, $\sigma(X,M)\subseteq\sigma(X,R)$. Conditional on $(X,R)$, $V-f_R$ has zero mean. Expanding
+M gains only if its finite-consumer error reduction exceeds Γ. This identity applies to every deterministic T, not only a statistical message. It is not a macro-F1, Energy Score, arbitrary-domain-calibration or finite-reverse-sampler guarantee.
 
-$$
-\|V-f_M\|^2=\|V-f_R\|^2+\|f_R-f_M\|^2
-+2\langle V-f_R,f_R-f_M\rangle
-$$
+## Fixed-policy interpretation (secondary)
 
-and conditioning on $A$ eliminates the cross term by the tower property; this is valid because $A$ was included in $X$. For each $j$, expand $V-d_j=(V-f_j)+(f_j-d_j)$ and eliminate its cross term in the same way. Subtract the two resulting identities. These conditional expectations are defined almost surely, not pointwise at every unsupported acquisition value. ∎
+For fixed trained arms j let ρ_j(a)=E[ℓ_j|A=a], R_j=E_πρ_j(A). The common integrable loss and acquisition weighting π are declared; balanced conditions and deployment prevalence define different estimands. Macro-F1 is not an additive event loss for fitting the rule.
 
-### Consequence and boundary
-
-An M-over-R gain requires $\mathcal E_R(a)-\mathcal E_M(a)>\Gamma(a)$. The statistical message does not create new observation information. This identity concerns the stated square-loss target; it is not an Energy Score, macro-F1 or finite reverse-sampler guarantee. Gaussian-score moment identification and the same-moment/non-Gaussian counterexample remain in the existing detailed theory files.
-
-## Definition — a fixed-system conditional risk profile
-
-For a finite set of fixed trained arms $\mathcal J$, define
+### Proposition 2 — hard-selection opportunity
 
 $$
-\rho_j(a)=\mathbb E[\ell_j\mid A=a],\qquad
-\mathcal R_j=\mathbb E_{A\sim\pi}\rho_j(A).
+\mathcal H_{hard}=\min_j\mathbb E_\pi\rho_j(A)-\mathbb E_\pi\min_j\rho_j(A)\ge0.
 $$
 
-The acquisition weighting $\pi$ is declared. A balanced-condition benchmark and a prevalence-weighted deployment are different estimands. Loss must be integrable and common across arms. For diagnostic routing, use a declared per-event proper/classification loss to fit the selector; recompute macro-F1 from final predictions instead of treating it as an additive event loss.
+For finitely many arms it is zero iff a globally optimal arm is conditionwise optimal almost surely, ties allowed.
 
-## Proposition 2 — hard-selection headroom, not a fusion theorem
+**Proof.** The pointwise minimum is no larger than each fixed arm. Integrate and minimize. Equality means the nonnegative gap of a global minimizer has zero expectation and is therefore zero almost surely; the converse follows immediately. ∎
 
-Define
+This is not a theorem about soft or newly trained fusion. With equally likely targets .25 and .40 and fixed predictions 0 and 1, the zero predictor is better in each condition and hard headroom is zero. Yet static fusion weight .325 reduces MSE from .11125 to .005625; a condition-dependent weight attains zero in this constructed example. Probability fusion must mix distributions; averaging arbitrary generated trajectories is not automatically a predictive mixture.
 
-$$
-\mathcal H_{\rm hard}=\min_j\mathbb E_\pi\rho_j(A)
--\mathbb E_\pi\min_j\rho_j(A).
-$$
+### Proposition 3 — transport sensitivity, not an observable deployment certificate
 
-Then $\mathcal H_{\rm hard}\ge0$. For finite $\mathcal J$ it is zero exactly when at least one globally best arm is also conditionwise optimal almost surely (ties allowed).
-
-### Proof
-
-For every fixed $j$, $\min_k\rho_k(a)\le\rho_j(a)$. Integrate and minimize the right-hand side. If equality holds, choose a global minimizer $j_0$, which exists because the set is finite. The nonnegative integrable gap $\rho_{j_0}(A)-\min_k\rho_k(A)$ has expectation zero and thus vanishes almost surely. The converse is immediate. ∎
-
-### Counterexample — zero hard headroom can coexist with a fusion gain
-
-Let $A$ have two equally likely values, target $Y=0.25$ or $0.40$, and fixed predictions $f_R=0,f_M=1$. R is better under both conditions, so $\mathcal H_{\rm hard}=0$. Its MSE is $0.11125$. Static prediction fusion $f_\alpha=(1-\alpha)f_R+\alpha f_M$ with $\alpha=0.325$ has MSE $0.005625$. Conditional weights $\alpha(A)=Y(A)$ have zero MSE in this constructed example. Therefore a zero hard headroom does **not** rule out static or soft fusion; a positive one does **not** prove a router beats static fusion.
-
-These are fixed scalar-predictor witnesses. For probability forecasts, define a mixture distribution and evaluate its proper score. Interpolating two diffusion latent samples or two condition tokens is not automatically that mixture.
-
-## Proposition 3 — plug-in regret with an explicit transportability error
-
-Let $\widehat\rho^s_j(a)$ be source-only estimates and suppose, on the target support,
+Suppose on target support, uniformly over arms,
 
 $$
-|\widehat\rho^s_j(a)-\rho^s_j(a)|\le\epsilon(a),\quad
-|\rho^s_j(a)-\rho^t_j(a)|\le b(a)
+|\widehat\rho_j^s(a)-\rho_j^s(a)|\le\epsilon(a),\qquad
+|\rho_j^s(a)-\rho_j^t(a)|\le b(a).
 $$
 
-for every arm. Both bounds are assumptions unless separately established. Use the same declared target weighting $\pi$ when evaluating the quantities below. Set $e=\epsilon+b$ and $\widehat j(a)=\arg\min_j\widehat\rho^s_j(a)$ with a fixed tie rule. Then
+For source plug-in selector jhat(a)=argmin_j ρhat_j^s(a), with a fixed tie rule and e=ε+b,
 
 $$
-\boxed{\mathcal R_t(\widehat j)-\mathcal R_t(j_t^*)\le2\mathbb E_\pi e(A).}
-$$
-
-Moreover,
-
-$$
+\mathcal R_t(\widehat j)-\mathcal R_t(j_t^*)\le2\mathbb E_\pi e(A),\qquad
 |\widehat{\mathcal H}_{s,\pi}-\mathcal H_{t,\pi}|\le2\mathbb E_\pi e(A).
 $$
 
-### Proof
+**Proof.** Each estimated source risk differs from target risk by at most e. Add/subtract estimated risks for selected and target-optimal arms; their estimated difference is nonpositive, leaving 2e. Integrate. The finite minimum is 1-Lipschitz in the sup norm; apply it to global and conditional minima for the second bound. ∎
 
-By the triangle inequality, each estimated risk differs from the target risk by at most $e(a)$. Add and subtract the estimated risks of the selected and target-optimal arms. Their estimated difference is nonpositive, leaving at most $2e(a)$. Integrate. For headroom, the minimum of finitely many real numbers is 1-Lipschitz in the sup norm. Apply that fact once to the minimum of global risks and once to the conditionwise minimum, then add the two bounds. ∎
+With additional declared selector penalty λc_g, its gain versus the target-best fixed arm is at least Hhat_s,π-4E_πe-λE_πc_g. Arm-dependent costs belong inside the arm objective. If b is unknown, this is a sensitivity expression, not a computable target-deployment guarantee. Target-labelled evaluation may measure failure after the fact but cannot be used to fit a zero-shot gate.
 
-If the selector incurs additional cost $c_g(A)$ priced by a declared $\lambda$, its gain over the target-best fixed arm is at least
+## Validation and claims
 
-$$
-\widehat{\mathcal H}_{s,\pi}-4\mathbb E_\pi e(A)-\lambda\mathbb E_\pi c_g(A).
-$$
+Fit transformations, targets, checkpoints, loss weights and tuning budgets on source data only. Use disjoint original groups for policy calibration; a noisy empirical minimum on the selection sample is not evidence of population headroom. The current computational fixes enforce exact Gaussian input dimensions and a condition-wide common seed set; predeclared seeds detect globally missing runs.
 
-This is a conditional lower bound, not a claim that target errors or a universal cost conversion are known. Arm-dependent cost must be included in each risk before selection. No unseen-condition guarantee is invoked when source conditional order reverses.
-
-## Empirical selection and falsification
-
-Use disjoint source groups for fitting predictors, selecting checkpoints/gates, and evaluating the final comparison. A positive in-sample $\min\widehat\rho$ gap is upward-biased evidence for selection because the same noise chooses the winner. An independent held-out source evaluation or group cross-fitting is required before promotion. Target test groups never choose a gate, threshold, fusion coefficient or covariance floor.
-
-The same-stem Notebook executes the finite hard/soft distinction and the regret algebra. `experiments/p19/toy_routing.py` additionally generates independent source/test events, fits selectors on source predictions, and evaluates no-crossing, crossing, fusion-only and target-reversal controls. It is not a simulation of the complete HSE or LLapDiff architecture. The existing two-arm native pilot remains the first learned experiment.
-
-## References and originality boundary
-
-- Xu et al. (2020), *A Theory of Usable Information under Computational Constraints*, ICLR; arXiv:2002.10689, Definitions 1–3.
-- Mao, Mohri and Zhong (2024), *Regression with Multi-Expert Deferral*, ICML/PMLR 235:34738–34759.
-- Mao, Mohri and Zhong (2025), *Mastering Multiple-Expert Routing: Realizable H-Consistency and Strong Guarantees for Learning to Defer*, ICML/PMLR 267:43035–43066, Section 2.
-
-The candidate contribution is a statistically anchored **industrial conditioning intervention**, tested against its fully supervised ordinary code. Conditional profiles and the bounds above define falsifiable interpretation and selection criteria; merely renaming standard routing headroom is not an independent theoretical invention.
+The actual first external experiment is ordinary LPC coordinates plus a solved ridge consumer. A statistical-message result still needs real shared R/M features, exact-composition checks, PCA/whitening/orthogonal and generic learned controls, with direct task heads before attributing value to diffusion. Neither the coordinate identity nor a finite-policy certificate constitutes independent TPAMI novelty. TII industrial evidence remains in `paper/` and is not counted twice.

@@ -1,16 +1,12 @@
-# Goal05 — paired results and independent vector plots
+# Goal05 — actual prediction metrics and figures
 
-**Scope:** bounded group-policy certification is different from empirical native Energy Score or nonlinear macro-F1. **Products:** exact decision JSON, observed CSV summaries, source/test separation, SVG/PDF/PNG with editable text and actual negative outcomes.
+**Scope:** reference classification metrics are recomputed from predictions; additive group effects use common predeclared seeds; bounded policy certification has separate assumptions. **Products:** actual CSV, checkpoint verification, SVG/PDF/PNG and accurate Results. No repeated-window or seed pseudo-replication.
 
 ```bash
-bash paper_TPAMI/run.sh statistics \
- --input outputs/tpami/selection/complementary_n2048_seed0_group_scores.csv \
- --reference static_reference --margin .01 --output outputs/tpami/selection/decision.json
-bash paper_TPAMI/run.sh plot --csv paper_TPAMI/assets/selection_summary.csv --output-dir outputs/tpami/figures
-# Existing additive event CSVs use the shared empirical, not certificate, route:
-bash paper_TPAMI/run.sh group-statistics --input /absolute/event_scores.csv --reference B1-aux --output outputs/tpami/effects.csv
+bash paper_TPAMI/run.sh reference-plot --csv outputs/tpami/vowels-reference-01/affine_summary.csv --output-dir outputs/tpami/vowels-reference-01/figures
+bash paper_TPAMI/run.sh group-statistics --input /absolute/event_scores.csv --reference B1_aux --expected-seeds 0 1 2 --output outputs/tpami/effects.csv
 ```
 
-**Acceptance:** no target data select a policy; duplicates/incomplete pairs fail; costs are declared versus measured; all24 finite-study rows are plotted with seeds shown descriptively. Raw Energy Score is never called bounded by normalization after the fact. Figures never trigger training/simulation.
+**Acceptance:** reference figures show validation/test, with calibration values retained inCSV but not used for selection. Scores from ridge are not probabilities or automatically bounded proper losses. All groups within a condition have the same seed set; expected seeds catch a run missing everywhere. Classification F1 is recomputed, not averaged by window. Only measured comparable latency/memory supports a Pareto figure; a single fitting timer is insufficient.
 
-**Failure:** incomplete data or unsupported loss blocks certification. Keep empirical results with their real limitations rather than invent intervals or clip inputs. With one group no population interval is asserted. For nonlinear classification recompute the metric from predictions, not average per-window F1.
+**Failure:** reject malformed or incomplete comparisons; do not silently drop matching missing seeds. No expected curves, clipped error bars or invented CI from dependent utterances. Raw predictions and negative outcomes remain available.

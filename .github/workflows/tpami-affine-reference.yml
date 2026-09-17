@@ -22,10 +22,39 @@ jobs:
         run: python -m pip install -e '.[experiments]'
       - name: Download the official UCI128 archive
         run: curl -fL 'https://archive.ics.uci.edu/static/public/128/japanese%2Bvowels.zip' -o "$RUNNER_TEMP/japanese_vowels.zip"
-      - name: Convert real native-length data and restore the affine reference
-        run: python -m experiments.p19.japanese_vowels --archive "$RUNNER_TEMP/japanese_vowels.zip" --output-dir "$RUNNER_TEMP/vowels-reference"
-      - name: Draw only the actual reference CSV
-        run: python -m experiments.p19.plot_affine_reference --csv "$RUNNER_TEMP/vowels-reference/affine_summary.csv" --output-dir "$RUNNER_TEMP/vowels-reference/figures"
+      - name: Execute the public real-data reference entry and restore predictions
+        run: bash paper_TPAMI/run.sh vowels-reference --archive "$RUNNER_TEMP/japanese_vowels.zip" --output-dir "$RUNNER_TEMP/vowels-reference"
+      - name: Reproduce the retained numbers and independently recompute class metrics
+        run: |
+          python - <<'PY'
+          import csv, os
+          from pathlib import Path
+          import numpy as np
+          out=Path(os.environ['RUNNER_TEMP'])/'vowels-reference'
+          with (out/'affine_summary.csv').open() as f:actual=list(csv.DictReader(f))
+          with Path('paper_TPAMI/assets/vowels_affine_reference.csv').open() as f:reference=list(csv.DictReader(f))
+          assert len(actual)==len(reference)==21
+          for a,b in zip(actual,reference):
+              for key in ('model','split','utterances','q','dtype','message_bytes'):
+                  assert a[key]==b[key],(key,a,b)
+              for key in ('regularization','accuracy','macro_f1','onehot_mse','max_abs_score_delta_from_R','source_feature_condition'):
+                  np.testing.assert_allclose(float(a[key]),float(b[key]),rtol=1e-8,atol=1e-10)
+          with (out/'predictions.csv').open() as f:predictions=list(csv.DictReader(f))
+          for r in actual:
+              rows=[x for x in predictions if x['model']==r['model'] and x['split']==r['split']]
+              y=np.array([int(x['y_true']) for x in rows]);p=np.array([int(x['y_pred']) for x in rows])
+              assert len(y)==int(r['utterances'])
+              f1=[]
+              for label in range(9):
+                  tp=np.sum((y==label)&(p==label));fp=np.sum((y!=label)&(p==label));fn=np.sum((y==label)&(p!=label))
+                  f1.append(0. if 2*tp+fp+fn==0 else 2*tp/(2*tp+fp+fn))
+              np.testing.assert_allclose([np.mean(y==p),np.mean(f1)],[float(r['accuracy']),float(r['macro_f1'])],rtol=0,atol=1e-12)
+          print('21 reference rows and all exported per-class metrics reproduced; no HSE method claim.')
+          PY
+      - name: Draw only the actual CSV and test independent replay
+        run: |
+          bash paper_TPAMI/run.sh reference-plot --csv "$RUNNER_TEMP/vowels-reference/affine_summary.csv" --output-dir "$RUNNER_TEMP/vowels-reference/figures"
+          bash paper_TPAMI/run.sh vowels-reference --help
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -1,25 +1,54 @@
-# Results — general study
+# Results — executed evidence and untested method claims
 
-## 1. Shared earlier evidence
+## 1. Scientific-input corrections
 
-`assets/routing_controls.csv` retains the earlier fixed-predictor study: the hard source route loses to static fusion in the crossing cell (MSE 0.178489 vs 0.127112) and fails after target-order reversal (0.327892 vs 0.254393 for the selected single). Moving it out of the industrial manuscript did not create new evidence.
+PR10 corrected the two verified review defects before this reference experiment. Invalid Gaussian mean shapes no longer broadcast into a different-dimensional distribution, and nonfinite means fail. Correct [0,0] versus [1,2] under identity covariance still yields 2.5 nats. Generic group statistics now enforce a common condition-wide seed set; `--expected-seeds` additionally detects a seed absent everywhere. The regression fixture's planned mean effect is3.0, whereas the previous incomplete seed mixture could yield1.5. These values demonstrate software semantics, not model gains.
 
-`assets/selection_summary.csv` retains the independent finite-policy calibration study: four scenarios, calibration groups 64/2048, three simulator seeds, 512 source-fit events and 4096 test events per run. At n=64 no candidate passes the simultaneous bound. At n=2048 complementary hard-policy net gains are 0.10231250/0.10158008/0.09908984; under target reversal and a false zero-shift assumption they are -0.25305859/-0.25628125/-0.26331250. The identical reversed observations with a declared 0.4 shift allowance retain the reference. Binary Brier loss and toy cost utilities are not GPU latency or native HSE results. The guarantee remains a classical finite-family specialization, not an independent TPAMI novelty claim.
+## 2. First real external data/reference slice
 
-## 2. Scientific-input corrections (2026-09-17)
-
-The supplied review identified two errors that remained in dev after the manuscript split. The exact pre-fix Gaussian calculation accepted mean `[0]` against a 2-dimensional covariance and other mean `[1,2]`, yielding a misleading finite KL of 2.5 through broadcasting. A nonfinite mean returned NaN. The shared `gaussian_kl` now requires two finite mean vectors matching the same nonempty covariance dimension; invalid inputs fail before evaluation. Valid inputs `[0,0]` and `[1,2]` with identity covariances still give exactly 2.5 nats.
-
-The generic group-statistics entry formerly allowed the same missing seed in both arms of one recording. A regression fixture with common-seed effect 3.0 could report 1.5 after that omission. Each condition now requires the same seed set for every method/group. `--expected-seeds 0 1 2` additionally detects a seed absent from every group; inference from observed rows alone cannot detect that global omission. Existing native plotting checks are retained, not duplicated or replaced.
-
-Actual local command on the inspected two-module slice:
+Run35227181539, PR11 initial code d7610230, executed the official UCI archive download, native-length conversion, source fit/validation selection, coefficient restoration, predictions and actual CSV figures on CPU. The command was:
 
 ```bash
-python -m unittest discover -s tests -p 'test_scientific_input_contract.py' -v
+python -m experiments.p19.japanese_vowels --archive "$RUNNER_TEMP/japanese_vowels.zip" --output-dir "$RUNNER_TEMP/vowels-reference"
 ```
 
-Ten new tests passed, including wrong-length/scalar/column/nonfinite means and jointly missing/global missing seeds. These are software regression values, not changes to retained experimental scores. Full combined-checkout CI is recorded in the corresponding PR. No preexisting method result is declared invalid solely from the existence of these bugs; retained scripts are rerun rather than assumed affected.
+The later public paper entry invokes the same implementation. Source split was fixed before the real run:18/6/6 utterances per speaker. All nine labels are present in each split; original official test membership is unchanged.
 
-## 3. Unfinished empirical claims
+| Split | Utterances | Valid frames | Observed length range |
+|---|---:|---:|---:|
+|Fit|162|2613|7–26|
+|Validation|54|828|10–25|
+|Reserved calibration|54|833|9–25|
+|Official test|370|5687|7–29|
 
-No genuine multi-domain HSE/reference checkpoint, learned M/B1-aux comparison, external SOTA run or TPAMI method advantage is established. MFPT remains the TII-owned reference acceptance. Each general task still needs genuine input preparation and matched controls against PCA/whitening, orthogonal and learned reparameterizations before statistical-message specificity can be asserted. Source-test shift allowances are sensitivity assumptions, not observable deployment certificates.
+The representation is **time-mean LPC coefficients**, q=12, float64, 96 message bytes. It is not HSE. The consumer has117 fitted coefficient/intercept scalars and solves onehot ridge; outputs are unnormalized class scores, not posterior probabilities. Source validation selected λ=0.0001 from the predeclared three-value grid for every isotropic arm. Matched controls use the same R-selected λ.
+
+### Test results
+
+| Coordinate / penalty | Accuracy | Macro-F1 | Onehot score MSE | Maximum score difference from R |
+|---|---:|---:|---:|---:|
+|Ordinary / isotropic|0.8594594595|0.8523978638|0.0451129981|0|
+|Full-q PCA / isotropic|0.8594594595|0.8523978638|0.0451129981|1.80e-15|
+|Random orthogonal / isotropic|0.8594594595|0.8523978638|0.0451129981|4.11e-15|
+|Whitened / transported penalty|0.8594594595|0.8523978638|0.0451129981|1.78e-15|
+|Whitened / isotropic|0.8594594595|0.8523978638|0.0451666902|0.02625145|
+
+The full seven-model, three-evaluation-split output contains21 rows. All seven models predict the same test labels:318 correct out of370. PCA and orthogonal matched-penalty rows, omitted from the display for brevity, are retained in the source CSV. Every serialized model was reloaded and its evaluation metrics reproduced. The downloaded prediction CSV was also used to recompute classification outcomes.
+
+Source centered feature condition number decreases from16.0680669 to approximately1 after whitening. That improvement did **not** yield a classification gain here. Transporting the regularizer recovers ordinary scores to floating-point precision. Leaving it isotropic changes real-valued scores but not test decisions in this run. Thus coordinate conditioning, changed regularization and improved task risk must not be conflated.
+
+`assets/vowels_affine_reference.csv` retains the numerical summary without variable one-shot CPU fitting times; the complete run artifact includes those descriptive times, source-trial results, predictions and fitted coefficients. They are not a GPU latency or memory Pareto experiment. Figures display validation and test; reserved calibration is retained in CSV and was not used for selection. No confidence interval or iid certificate is asserted from these utterance IDs, whose session dependence is not resolved.
+
+## 3. Method-specific finite witnesses
+
+The existing main-theory Notebook now checks full-q coordinate/penalty equivalence and its failure under an unchanged isotropic whitening penalty. A separate selected-source solver fixture gave matched errors at most1.20e-15 and a whitening/isotropic score change0.47649716. These are algebraic regression values, not a speech or HSE performance result.
+
+The actual shared moment-conditioner tests additionally verify exact R→frozen T composition and collapse of the mean-only affine-consumer path to an affine R consumer. The full covariance message can still be nonlinear; neither check validates a learned superiority claim.
+
+## 4. Earlier general evidence retained
+
+The earlier routing_controls.csv still shows hard routing losing to static fusion in its crossing cell, and failing after target ordering reverses. The selection_summary.csv retains the finite independent-calibration study with explicit target-shift failures. These are known finite controls, not expanded into new routing contributions. Unknown drift bounds remain sensitivity assumptions.
+
+## 5. What has not been measured
+
+This is one real external **reference** and converter, not a conditional-moment, HSE, LLapDiff or SOTA result. Genuine source-trained R/M features, learned linear/MLP bottlenecks, direct task-head comparison, meaningful same-task cost measurements and all five neural benchmark integrations are pending. Four other raw converters remain pending separately. MFPT remains TII-owned reference acceptance, not duplicated as new TPAMI evidence. A negative M/PCA/MLP or direct-head comparison is retained and can complete the scientific question.

@@ -1,8 +1,10 @@
-# Goal06 — local GPU experiments
+# Goal06 — genuine local learned comparison
 
-**Scope:** only after genuine source-trained encoder/reference checkpoints, official raw conversion, masks, targets and original-group splits exist. The machine has8×RTX4090; first pilot uses one GPU. **Two-GPU training/world-size2 is prohibited.** Later supported implementations may use1/4/8 GPUs or independent single-GPU seeds after validation, not an automatic two-card workaround.
+**Scope:** one real source-trained R/M comparison, not more synthetic features or a compulsory router. Machine:8×RTX4090. First run uses GPU0 only, seeds0/1/2 sequentially. **No two-GPU/world-size2 training.** Four/eight GPUs are later options only for an actually validated distributed implementation.
 
-**Products:** real checkpoints, shared-supervision comparison, target/consumer/budget records, per-group scores, cost logs and Results. No dummy export substitutes missing local dependencies.
+**Current boundary:** UCI128 raw conversion and ordinary affine CPU reference exist. They do not provide trained HSE or reference-VAE checkpoints. Four other raw converters are still pending CPU tasks. Identify/train the actual source encoder/reference and record its target and extraction function before invoking native generation. Classification starts with direct R/M linear/small-MLP heads; the existing native pilot does not implement those classification arms automatically.
+
+**Products:** frozen input/target/split, selected shared auxiliary checkpoint, simple competing transformations, exact T-composition check, direct task scores, prediction CSVs and cost measurements. Freeze primary metric, HPO trials, checkpoint rule, loss weights, normalizer, q/dtype, consumer size, update budget, practical margin and expected seeds before test inspection. PCA/whitening/MLP fitting is source-only. Do not impose a speculative 2% effect margin universally; define the task-specific practical threshold before the paired run.
 
 ```bash
 bash paper_TPAMI/run.sh setup
@@ -10,6 +12,7 @@ bash paper/run.sh setup-neural
 export LLAPDIFF_ROOT=/absolute/LLapDiffusion
 bash paper/run.sh setup-native
 bash paper/run.sh native-acceptance
+# Generation only, after actual source-trained HSE/reference exports exist:
 CUDA_VISIBLE_DEVICES=0 bash paper_TPAMI/run.sh native-pilot \
  --train /absolute/exports/train.npz --validation /absolute/exports/validation.npz \
  --test /absolute/exports/test.npz --data-note /absolute/exports/export_note.md \
@@ -18,6 +21,6 @@ CUDA_VISIBLE_DEVICES=0 bash paper_TPAMI/run.sh native-pilot \
 bash paper/run.sh native-figures comparison outputs/tpami/native_pilot_01/event_scores.csv outputs/tpami/native_pilot_01/figures
 ```
 
-**Acceptance:** component smoke is labelled synthetic; real export is separately checked; frozen paths, same target/loss/time/noise policy and original groups are verified. Source validation chooses checkpoints; fresh calibration groups choose among frozen complete policies, then untouched test groups evaluate. No single learned M/B1-aux result is presented as all5 domains or a new TPAMI theory.
+**Acceptance:** real feature provenance, original-group separation, identical consumed side/mask/target and same shared checkpoint. Exact R→T consumer identity must hold. Learned M must be compared against the simple transformations and a matched generic bottleneck before statistical specificity is claimed. Diffusion loss is a mechanism diagnostic for a classification task, not its primary outcome. Byte equality is not total-cost equality; measure latency/memory before Pareto plots.
 
-**Failure:** missing data/checkpoint/converter/export is named and stops that slice. OOM means a declared matched configuration change or no run; no two GPUs. A negative method result is deliverable. No automatic publication, master change, force-push or branch deletion.
+**Failure:** missing permission/converter/checkpoint is named and stops that slice; no random replacement. OOM requires a declared matched change, never two GPUs. M tying PCA/MLP, or direct heads matching diffusion, is a completed negative result. Keep static fusion as a strong control and route only after these contrasts. Do not change target data, retitle the project or add modules to force a win. No automatic submission, master edit, force-push, branch deletion or PHMFactory core modification.

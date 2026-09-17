@@ -1,16 +1,17 @@
-# General time-series representation study — IEEE TPAMI candidate
+# General representation study — TPAMI candidate
 
-This workspace receives the general analysis and multi-domain experiments from the industrial TII paper. Read [scope](../PAPER_SCOPE.md), [manuscript](main.md), [experiment design](experiments.md), [observed results](results.md) and [goals](goals/README.md).
+Read [scope](../PAPER_SCOPE.md), [manuscript](main.md), [Method](method.md), [actual results](results.md) and [the sole task index](goals/README.md). TII `paper/` remains industrial-only.
 
-The question is **target- and consumer-dependent representation utility under an explicit budget**, followed by source-only comparison of single, static-fusion and dynamic policies. HSE–LLapDiff is one inherited instantiation, not a universal architecture or a newly trained foundation model.
-
-General fixed-policy proofs are in `theory_main.md` and its matching Notebook. The finite-sample specialization is in `theory/policy_certificate.md` and `.ipynb`. They build on V-information, multi-expert deferral and Learn then Test; no generic novelty is inferred from running the witnesses.
+The immediate question is whether a conditional-moment message has an advantage beyond equally supervised ordinary code and simple coordinate/learned transformations. General projection and routing theory are supporting background; a mean-only affine head does not enlarge an affine consumer family. More datasets alone do not establish a second independent paper.
 
 ```bash
 bash paper_TPAMI/run.sh setup
 bash paper_TPAMI/run.sh theory
-bash paper_TPAMI/run.sh toy
-bash paper_TPAMI/run.sh plot --csv paper_TPAMI/assets/selection_summary.csv --output-dir outputs/tpami/figures
+# First actual external reference; official download command is in the SOP.
+bash paper_TPAMI/run.sh vowels-reference --archive /absolute/vowels.zip --output-dir outputs/tpami/vowels-reference-01
+bash paper_TPAMI/run.sh reference-plot --csv outputs/tpami/vowels-reference-01/affine_summary.csv --output-dir outputs/tpami/vowels-reference-01/figures
 ```
 
-Five external-domain protocols are specified, but raw conversion, source-trained feature/target checkpoints and multi-domain learned experiments remain pending. The genuine local GPU boundary is Goal 06. PHMFactory is unchanged and optional for the general paper; TII owns industrial method tables. No two-GPU training.
+Japanese Vowels now has real native-length conversion, source-fitted same-dimensional affine controls, saved/restored coefficients and prediction metrics. The features are mean LPC, not HSE. Four other raw converters and genuine learned feature/reference checkpoints remain pending. The existing `all-cpu` command only executes mathematical studies and their figures; it does not claim all external benchmarks are integrated.
+
+Reuse the shared code and bibliography, not copied trainers. First genuine local neural pilot uses one of8×4090; two-GPU training is forbidden. The existing local GPU goal names actual dependencies rather than substituting synthetic inputs.

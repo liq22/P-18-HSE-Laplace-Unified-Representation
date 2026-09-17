@@ -86,6 +86,32 @@ class MatchedConditionerTests(unittest.TestCase):
         torch.testing.assert_close(m.flatten(1)[:, :5], z.flatten(1)[:, :5])
         self.assertEqual(int(torch.count_nonzero(z.flatten(1)[:, 5:])), 0)
 
+    def test_exact_frozen_T_composition_equals_M(self):
+        self.model.freeze_for_denoising()
+        ordinary = self.model(self.h, self.mask, self.side, 'B1_aux').flatten(1)
+        mean, factor = self.model.moments_from_code(ordinary)
+        prefix = torch.cat((mean, factor[:, self.model.tril[0], self.model.tril[1]]), -1)
+        composed = torch.cat((prefix, ordinary[:, self.model.semantic_size:]), -1)
+        direct = self.model(self.h, self.mask, self.side, 'M').flatten(1)
+        torch.testing.assert_close(composed, direct, rtol=0, atol=0)
+        consumer = torch.nn.Linear(self.model.budget, 3)
+        torch.testing.assert_close(consumer(composed), consumer(direct), rtol=0, atol=0)
+
+    def test_mean_only_and_affine_consumer_collapse_to_affine_R(self):
+        self.model.freeze_for_denoising()
+        ordinary = self.model(self.h, self.mask, self.side, 'B1_aux').flatten(1)
+        mean, _ = self.model.moments_from_code(ordinary)
+        q, d = self.model.budget, self.model.target_dim
+        transform = torch.eye(q)
+        shift = torch.zeros(q)
+        transform[:d] = self.model.moment_head.weight[:d]
+        shift[:d] = self.model.moment_head.bias[:d]
+        mean_only = torch.cat((mean, ordinary[:, d:]), -1)
+        consumer = torch.nn.Linear(q, 3)
+        collapsed = torch.nn.functional.linear(ordinary, consumer.weight @ transform,
+                                               consumer.bias + consumer.weight @ shift)
+        torch.testing.assert_close(consumer(mean_only), collapsed, rtol=1e-5, atol=1e-6)
+
     def test_invalid_history_and_unfrozen_message_fail(self):
         with self.assertRaises(ValueError):
             self.model.ordinary(self.h, torch.zeros_like(self.mask), self.side)

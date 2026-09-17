@@ -1,14 +1,14 @@
-# General-paper goals
+# General-paper task index
 
-This workspace is separate from the industrial TII paper. Follow `../../PAPER_SCOPE.md`; shared antecedents and the industrial message are not republished as new claims.
+This is the sole task index. `GOAL.md` only points here; `experiments.md` defines scientific protocols and `results.md` stores actual evidence. Do not create NEXT_GOAL, extra status logs or another reviewer/goal hierarchy. TII industrial scope remains in `paper/`.
 
-| Goal | Outcome |
+| Goal | Current action |
 |---|---|
-| [01 Scope/sync](01_SCOPE_SYNC.md) | independent manuscript ownership; unchanged accepted dependency unless requalified |
-| [02 Theory](02_THEORY.md) | general proofs, finite-policy certificate and actual witnesses |
-| [03 Data](03_DATA.md) | official five-domain protocols and real conversion/export prerequisites |
-| [04 Experiments](04_EXPERIMENTS.md) | minimal target/consumer/budget comparisons and strong single/static/dynamic controls |
-| [05 Results](05_RESULTS_PLOTS.md) | exact group estimands, actual CSVs and vector figures |
-| [06 Local GPU](06_LOCAL_GPU_8X4090.md) | genuine encoder/reference features and sequential single-GPU pilot |
+| [01 Scope/sync](01_SCOPE_SYNC.md) | Keep the already merged split; PHMFactory current accepted main is unchanged. |
+| [02 Theory](02_THEORY.md) | Verify affine/composition limits and current witnesses; no more generic routing theory. |
+| [03 Data](03_DATA.md) | UCI128 real conversion/reference is executed; preserve the four separately pending domains. |
+| [04 Experiments](04_EXPERIMENTS.md) | Get genuine R/M checkpoints/features; simple transformations and direct consumers precede routing. |
+| [05 Results](05_RESULTS_PLOTS.md) | Recompute actual predictions/common seeds; no method claim from the reference. |
+| [06 Local GPU](06_LOCAL_GPU_8X4090.md) | One-GPU paired learned pilot on the eight-4090 machine, never two GPUs. |
 
-Every completed slice requires executable code or a frozen configuration, an actual command and numerical result, and matching Results prose. Folder creation, download URLs and CLI help do not satisfy a trained-benchmark goal. Missing files, data permissions, conversion implementation or checkpoints must be named rather than substituted. A negative result can complete a scientific task.
+Completed slices require executable code or a frozen configuration, actual commands/numbers and matching Results. The two scientific-input fixes were handled separately in PR10. The current slice is one real external data path and its affine reference, not five integrated benchmarks or HSE superiority. A null/negative comparison can complete a task.
