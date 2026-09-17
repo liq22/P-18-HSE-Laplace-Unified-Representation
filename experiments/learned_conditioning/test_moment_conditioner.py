@@ -102,8 +102,7 @@ class MatchedConditionerTests(unittest.TestCase):
         ordinary = self.model(self.h, self.mask, self.side, 'B1_aux').flatten(1)
         mean, _ = self.model.moments_from_code(ordinary)
         q, d = self.model.budget, self.model.target_dim
-        transform = torch.eye(q)
-        shift = torch.zeros(q)
+        transform = torch.eye(q); shift = torch.zeros(q)
         transform[:d] = self.model.moment_head.weight[:d]
         shift[:d] = self.model.moment_head.bias[:d]
         mean_only = torch.cat((mean, ordinary[:, d:]), -1)
@@ -111,6 +110,44 @@ class MatchedConditionerTests(unittest.TestCase):
         collapsed = torch.nn.functional.linear(ordinary, consumer.weight @ transform,
                                                consumer.bias + consumer.weight @ shift)
         torch.testing.assert_close(consumer(mean_only), collapsed, rtol=1e-5, atol=1e-6)
+
+    def test_full_rank_complete_message_round_trip_float64(self):
+        model = self.model.double().freeze_for_denoising()
+        ordinary = model(self.h.double(), self.mask, self.side.double(), 'B1_aux').flatten(1)
+        message = model(self.h.double(), self.mask, self.side.double(), 'M').flatten(1)
+        s, d = model.semantic_size, model.target_dim
+        wp = model.moment_head.weight[:, :s]
+        self.assertEqual(int(torch.linalg.matrix_rank(wp)), s)
+        raw = model.moment_head(ordinary)
+        diagonal = model.tril[0] == model.tril[1]
+        self.assertLess(float(raw[:, d:][:, diagonal].max()), 20.)
+        factor = message.new_zeros((len(message), d, d))
+        factor[:, model.tril[0], model.tril[1]] = message[:, d:s]
+        original_factor = torch.linalg.cholesky(factor @ factor.transpose(-1, -2)
+            - model.covariance_floor * torch.eye(d, dtype=message.dtype))
+        raw_covariance = original_factor[:, model.tril[0], model.tril[1]].clone()
+        raw_covariance[:, diagonal] = torch.log(torch.expm1(raw_covariance[:, diagonal]))
+        recovered_h = torch.cat((message[:, :d], raw_covariance), -1)
+        tail = message[:, s:]
+        rhs = recovered_h - tail @ model.moment_head.weight[:, s:].T - model.moment_head.bias
+        recovered = torch.cat((torch.linalg.solve(wp, rhs.T).T, tail), -1)
+        error = float((recovered - ordinary).abs().max())
+        torch.testing.assert_close(recovered, ordinary, rtol=0, atol=1e-9)
+        print('complete_message_float64_roundtrip_max_error=', error,
+              'prefix_smallest_singular_value=', float(torch.linalg.svdvals(wp)[-1]))
+
+    def test_singular_prefix_has_an_ambient_code_collision(self):
+        model = self.model.double()
+        with torch.no_grad(): model.moment_head.weight[:, 0] = 0.
+        model.freeze_for_denoising()
+        ordinary = model.ordinary(self.h.double(), self.mask, self.side.double())
+        other = ordinary.clone(); other[:, 0] += 1.
+        m1, f1 = model.moments_from_code(ordinary)
+        m2, f2 = model.moments_from_code(other)
+        torch.testing.assert_close(m1, m2, rtol=0, atol=0)
+        torch.testing.assert_close(f1, f2, rtol=0, atol=0)
+        torch.testing.assert_close(ordinary[:, model.semantic_size:], other[:, model.semantic_size:], rtol=0, atol=0)
+        self.assertGreater(float((ordinary-other).abs().max()), .9)
 
     def test_invalid_history_and_unfrozen_message_fail(self):
         with self.assertRaises(ValueError):

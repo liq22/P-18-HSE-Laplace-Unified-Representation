@@ -17,41 +17,82 @@ $$
 \le \inf_{f\in\mathcal F_M}\mathbb E\ell(Y,f(X,M)).
 $$
 
-**Proof.** Each candidate on the right is, by the stated inclusion, a candidate on the left with exactly the same predictions. Taking infima proves the inequality. No existence of an optimizer is required. The inclusion must also hold under the actual parameter/computation restriction; installing T inside the R path is not cost-free. This is a population function-class comparison, not an assertion that gradient descent on R discovers T.
-
-The executable identity control is R → the **same frozen** T → the same consumer. Its output must equal the M path. An independently trained MLP is a competing finite method, not this identity control.
+**Proof.** Every candidate on the right is a candidate on the left with identical predictions. Taking infima proves the inequality; optimizer existence is unnecessary. Inclusion must also hold under the actual computation/parameter restriction. It does not mean gradient descent on R discovers T, or that installing T is free. The executable R→same frozen T→same consumer path is an identity control, not an independently trained competitor.
 
 ### The current mean readout is affine
 
-In `MatchedConditioner`, `moment_head` is a single Linear layer. Its mean output therefore has the form m(R)=W_m R+b_m. Appending that mean to a linear tail produces an affine map of R. Any subsequent affine classifier/regressor is consequently an affine function of R. A mean-only message cannot enlarge the unrestricted affine-consumer family of R; if the replacement is rank-deficient it can make the family smaller.
+`MatchedConditioner.moment_head` is a Linear layer. Its mean output is m(R)=W_mR+b_m. Any mean-plus-linear-tail message followed by an affine consumer is therefore an affine function of R. It cannot enlarge the original affine prediction family. A rank-deficient replacement may reduce the family.
 
-The actual M also includes softplus/Cholesky-derived covariance fields, so the whole map is not generally affine. Any method-specific claim must isolate those nonlinear fields from a mean-only control and a similarly sized generic nonlinear reparameterization. The nonlinear square-target witness R∈{-1,0,1}, T(R)=R² illustrates a possible finite-family benefit, but it does **not** explain this affine mean head by itself.
+The complete message also contains nonlinear softplus/Cholesky coordinates. Those fields must be compared with mean-only and generic nonlinear controls. The R² witness for R∈{-1,0,1} illustrates nonlinear finite-family utility, not the value of this affine mean head.
+
+### Conditional invertibility of the complete implemented message
+
+Let d be the supervised target dimension and s=d+d(d+1)/2. Split R=(R_p,R_t) into its first s coordinates and retained tail. The frozen head before statistical transformations is
+
+$$
+h=W_pR_p+W_tR_t+b,\qquad W_p\in\mathbb R^{s\times s}.
+$$
+
+The first d coordinates of h form m. Its remaining coordinates form a lower-triangular L, with a positive diagonal obtained from the mathematical softplus. For known λ≥0 the sent factor is C=chol(LLᵀ+λI), and the complete message is
+
+$$
+M=(m,\operatorname{vech}C,R_t).
+$$
+
+**Claim.** In exact arithmetic, with the specified injective positive-diagonal map and nonsingular W_p, M determines R. This applies to the complete M, not the tail-zeroed M0 variant.
+
+**Constructive proof.** From the message obtain C and R_t. Since the message was constructed from L with strictly positive diagonal,
+
+$$
+L=\operatorname{chol}(CC^\top-\lambda I)
+$$
+
+is well-defined and unique. Keep the off-diagonal entries of L and apply inverse softplus log(expm1(L_ii)) to its diagonal, recovering every raw covariance coordinate of h. Together with m this recovers h. Then
+
+$$
+\boxed{R_p=W_p^{-1}(h-W_tR_t-b).}
+$$
+
+The tail was transmitted unchanged, completing the inverse. If W_p is singular, any nonzero v in its null space gives identical messages for (R_p,R_t) and (R_p+v,R_t). That demonstrates noninjectivity on the ambient code space, not necessarily loss of a particular target on a restricted data manifold. ∎
+
+Consequently, under the full-rank ideal-map conditions, σ(X,M)=σ(X,R) and the Bayes information term Γ in Proposition1 equals zero. It is incorrect to call the current full-q message inherently lossy. A finite-consumer advantage can still be a coordinate/optimization effect. This observation does not make estimated moments statistically correct.
+
+**Numerical boundary.** This exact proof does not guarantee bitwise inversion in float16/float32. The actual library softplus uses a thresholded numerical implementation; the finite witness checks its smooth branch rather than claiming a global inverse across all branches. Small Cholesky diagonals, subtraction of λI, quantization and a nearly singular W_p can amplify roundoff. Holding head parameters fixed,
+
+$$
+\|\widehat R_p-R_p\|_2\le
+\frac{\|\widehat h-h\|_2+\|W_t\|_2\|\widehat R_t-R_t\|_2}{\sigma_{\min}(W_p)}.
+$$
+
+This follows directly by subtracting the two linear solves. It is not a global bound on the inverse-Cholesky/softplus error inside hhat; inverse-softplus derivative 1/(1-exp(-L_ii)) diverges as L_ii approaches zero. Evaluate rank, smallest singular value, preactivation range and numerical round trips on the actual selected checkpoint and message dtype. Do not add a hidden covariance repair or enforce invertibility by changing the method in this slice.
+
+The same-stem Notebook supplies the exact-map witness; the actual Torch conditioner tests check a float64 round trip and a singular-head collision. Invertible coupling transformations have classical predecessors, notably Dinh, Sohl-Dickstein and Bengio, *Density estimation using Real NVP*, ICLR2017, Sections3.2–3.3 (https://arxiv.org/pdf/1605.08803). No new normalizing-flow principle, density model or Flow Matching component is introduced here.
 
 ### Full-dimensional coordinates and the ridge objective
 
-Take source X∈R^(n×q), targets Y∈R^(n×k), fixed center c and nonsingular A∈R^(q×q). Set Z=(X-1cᵀ)A. Consider
+Take source X∈R^(n×q), targets Y∈R^(n×k), fixed center c and nonsingular A. Set Z=(X-1cᵀ)A. Compare
 
 $$
-J_R(W,b)=n^{-1}\|Y-(X-1c^\top)W-1b^\top\|_F^2+\lambda\|W\|_F^2,
+J_R(W,b)=n^{-1}\|Y-(X-1c^\top)W-1b^\top\|_F^2+\lambda\|W\|_F^2
 $$
 
-and the transformed problem
+with
 
 $$
 J_A(V,b)=n^{-1}\|Y-ZV-1b^\top\|_F^2+\lambda\|AV\|_F^2.
 $$
 
-For λ>0 and an unpenalized intercept, the solutions make identical predictions on every source or new input.
+For λ>0 and an unpenalized intercept, predictions coincide on every evaluation input.
 
-**Proof.** W=AV is a bijection because A is nonsingular. Substitution gives J_A(V,b)=J_R(AV,b), including the penalty. The positive ridge term makes the coefficient solution unique; the intercept is fixed by centering the residual. Thus W*=AV*, and for every x, (x-c)ᵀW*+b*=(x-c)ᵀAV*+b*. This is an exact objective equivalence, not a statement about finite-precision solver error. ∎
+**Proof.** W=AV is a bijection and J_A(V,b)=J_R(AV,b), including the penalty. Ridge makes the coefficient solution unique; the intercept is determined by the residual mean. Thus W*=AV*, and predictions are equal for every x. ∎
 
-With isotropic transformed penalty λ||V||² instead, the equivalent penalty in raw coordinates is λ||A^-1 W||². It agrees with ordinary ridge for an orthogonal A, but not for a general whitening transform. Therefore full-q PCA and random orthogonal coordinates are exact isotropic-ridge controls; whitening must be reported with both unchanged and transported penalties. Source covariance must be full rank for the present whitening experiment. Truncated PCA, covariance flooring, different λ or unequal training updates change the problem and are separately declared variants, not hidden repairs.
+An unchanged transformed penalty λ||V||² corresponds to λ||A^-1W||² in raw coordinates. This is the ordinary isotropic penalty for orthogonal A, but not for general whitening. Full-q PCA/random rotations are exact isotropic-ridge controls; whitening requires both penalties. Source covariance must be full rank in the present experiment. Truncation, flooring, different λ or unequal optimization budgets define separate problems.
 
-The same-stem Notebook and `affine_controls.py` execute this identity. The real Japanese Vowels reference uses source-fitted full-q coordinates and untouched official test utterances. It does not use HSE features or prove a conditional-moment advantage.
+The Notebook and `affine_controls.py` implement these statements. The real Japanese Vowels reference fits source-only full-q coordinates with untouched official test utterances. It is not an HSE or conditional-moment experiment.
 
 ## Proposition 1 — nested-message finite-risk decomposition
 
-Assume E||V||²<∞ for one common target. Put f_R=E[V|X,R], f_M=E[V|X,M]. For square-integrable fitted consumers d_j define
+Assume E||V||²<∞. Put f_R=E[V|X,R], f_M=E[V|X,M] and define square-integrable fitted consumers d_j with
 
 $$
 \Gamma(a)=\mathbb E[\|f_R-f_M\|^2\mid A=a],\qquad
@@ -61,16 +102,16 @@ $$
 For almost every a,
 
 $$
-\rho_M(a)-\rho_R(a)=\Gamma(a)+\mathcal E_M(a)-\mathcal E_R(a),\qquad\Gamma(a)\ge0.
+\rho_M(a)-\rho_R(a)=\Gamma(a)+\mathcal E_M(a)-\mathcal E_R(a),\quad\Gamma(a)\ge0.
 $$
 
-**Proof.** Since M=T(R), σ(X,M)⊂σ(X,R). Expand V-f_M=(V-f_R)+(f_R-f_M). Conditional expectation of the cross term vanishes by the tower property. Do the same with V-d_j=(V-f_j)+(f_j-d_j), then subtract. A is included in X so the identities can be conditioned on the acquisition stratum. ∎
+**Proof.** M=T(R) gives nested conditional sigma-algebras. Expand V-f_M=(V-f_R)+(f_R-f_M), then V-d_j=(V-f_j)+(f_j-d_j). The conditional cross terms vanish by the tower property. A is in X, permitting acquisition-conditional subtraction. ∎
 
-M gains only if its finite-consumer error reduction exceeds Γ. This identity applies to every deterministic T, not only a statistical message. It is not a macro-F1, Energy Score, arbitrary-domain-calibration or finite-reverse-sampler guarantee.
+This generic identity does not favor statistical T. Under the complete-message rank conditions above Γ=0; under a lossy map M must reduce finite-consumer error by more than Γ. Neither case is a macro-F1, Energy Score or finite reverse-sampler guarantee.
 
 ## Fixed-policy interpretation (secondary)
 
-For fixed trained arms j let ρ_j(a)=E[ℓ_j|A=a], R_j=E_πρ_j(A). The common integrable loss and acquisition weighting π are declared; balanced conditions and deployment prevalence define different estimands. Macro-F1 is not an additive event loss for fitting the rule.
+For fixed trained arms j, ρ_j(a)=E[ℓ_j|A=a], R_j=E_πρ_j(A). Loss and acquisition weighting π are declared; balanced and prevalence-weighted conditions differ. Macro-F1 is not an additive event loss.
 
 ### Proposition 2 — hard-selection opportunity
 
@@ -80,32 +121,30 @@ $$
 
 For finitely many arms it is zero iff a globally optimal arm is conditionwise optimal almost surely, ties allowed.
 
-**Proof.** The pointwise minimum is no larger than each fixed arm. Integrate and minimize. Equality means the nonnegative gap of a global minimizer has zero expectation and is therefore zero almost surely; the converse follows immediately. ∎
+**Proof.** The pointwise minimum is no larger than each fixed arm. Integrate and minimize. Equality means the nonnegative conditional gap of a global minimizer has zero expectation, hence is zero almost surely. The converse is immediate. ∎
 
-This is not a theorem about soft or newly trained fusion. With equally likely targets .25 and .40 and fixed predictions 0 and 1, the zero predictor is better in each condition and hard headroom is zero. Yet static fusion weight .325 reduces MSE from .11125 to .005625; a condition-dependent weight attains zero in this constructed example. Probability fusion must mix distributions; averaging arbitrary generated trajectories is not automatically a predictive mixture.
+This is not a fusion theorem. Equally likely targets .25/.40 and fixed predictions0/1 make the zero predictor best in each condition, so hard headroom is zero. Static weight .325 nevertheless reduces MSE from .11125 to .005625; a condition-dependent weight gives zero in this example. Predictive distributions must be mixed as distributions, not by averaging arbitrary generated trajectories.
 
-### Proposition 3 — transport sensitivity, not an observable deployment certificate
+### Proposition 3 — transport sensitivity
 
-Suppose on target support, uniformly over arms,
+Assume uniformly over arms on target support,
 
 $$
-|\widehat\rho_j^s(a)-\rho_j^s(a)|\le\epsilon(a),\qquad
+|\widehat\rho_j^s(a)-\rho_j^s(a)|\le\epsilon(a),\quad
 |\rho_j^s(a)-\rho_j^t(a)|\le b(a).
 $$
 
-For source plug-in selector jhat(a)=argmin_j ρhat_j^s(a), with a fixed tie rule and e=ε+b,
+With e=ε+b and source argmin selector jhat,
 
 $$
-\mathcal R_t(\widehat j)-\mathcal R_t(j_t^*)\le2\mathbb E_\pi e(A),\qquad
+\mathcal R_t(\widehat j)-\mathcal R_t(j_t^*)\le2\mathbb E_\pi e(A),\quad
 |\widehat{\mathcal H}_{s,\pi}-\mathcal H_{t,\pi}|\le2\mathbb E_\pi e(A).
 $$
 
-**Proof.** Each estimated source risk differs from target risk by at most e. Add/subtract estimated risks for selected and target-optimal arms; their estimated difference is nonpositive, leaving 2e. Integrate. The finite minimum is 1-Lipschitz in the sup norm; apply it to global and conditional minima for the second bound. ∎
+**Proof.** Estimated source risks differ from target by at most e. Add/subtract estimated risks for the selected and target-optimal arms; the estimated difference is nonpositive, leaving2e. Integrate. The finite minimum is1-Lipschitz in sup norm; applying it to global and conditional minima gives the second bound. ∎
 
-With additional declared selector penalty λc_g, its gain versus the target-best fixed arm is at least Hhat_s,π-4E_πe-λE_πc_g. Arm-dependent costs belong inside the arm objective. If b is unknown, this is a sensitivity expression, not a computable target-deployment guarantee. Target-labelled evaluation may measure failure after the fact but cannot be used to fit a zero-shot gate.
+With declared additional selector cost λc_g, its gain over target-best fixed risk is at least Hhat_s,π-4E_πe-λE_πc_g. Arm-dependent costs belong inside arm risks. Unknown b is a sensitivity parameter, not a computable deployment guarantee from unlabeled target data. Post-hoc target evaluation never selects a zero-shot gate.
 
 ## Validation and claims
 
-Fit transformations, targets, checkpoints, loss weights and tuning budgets on source data only. Use disjoint original groups for policy calibration; a noisy empirical minimum on the selection sample is not evidence of population headroom. The current computational fixes enforce exact Gaussian input dimensions and a condition-wide common seed set; predeclared seeds detect globally missing runs.
-
-The actual first external experiment is ordinary LPC coordinates plus a solved ridge consumer. A statistical-message result still needs real shared R/M features, exact-composition checks, PCA/whitening/orthogonal and generic learned controls, with direct task heads before attributing value to diffusion. Neither the coordinate identity nor a finite-policy certificate constitutes independent TPAMI novelty. TII industrial evidence remains in `paper/` and is not counted twice.
+Fit transformations, targets, checkpoints, loss weights and tuning budgets on source data only. Use disjoint original groups for calibration; noisy selection-sample minima do not establish population headroom. Formal statistics use common predeclared seeds. The official LPC/ridge reference is not genuine learned R/M evidence. Strong simple controls, actual checkpoint rank/precision and direct task heads precede any diffusion or routing necessity claim. Classical projection, invertibility and calibration results do not alone establish TPAMI novelty; TII industrial findings are not counted twice.
