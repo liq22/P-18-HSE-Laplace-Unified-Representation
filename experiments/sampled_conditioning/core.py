@@ -19,9 +19,20 @@ def _spd(matrix):
 
 
 def gaussian_kl(mean, covariance, other_mean, other_covariance):
-    """KL(N(mean,covariance) || N(other_mean,other_covariance)), in nats."""
+    """KL(N(mean,covariance) || N(other_mean,other_covariance)), in nats.
+
+    Each argument denotes one distribution. Scalar/length-one means may not
+    broadcast into a higher-dimensional Gaussian.
+    """
     p, q = _spd(covariance), _spd(other_covariance)
-    delta = np.asarray(other_mean) - np.asarray(mean)
+    if p.shape != q.shape or len(p) == 0:
+        raise ValueError('covariances must have the same nonzero dimension')
+    mu, other_mu = np.asarray(mean, dtype=float), np.asarray(other_mean, dtype=float)
+    if mu.shape != (len(p),) or other_mu.shape != (len(p),):
+        raise ValueError('each mean must be a vector matching the covariance dimension')
+    if not np.isfinite(mu).all() or not np.isfinite(other_mu).all():
+        raise ValueError('means must be finite')
+    delta = other_mu - mu
     return float(.5 * (np.trace(np.linalg.solve(q, p)) - p.shape[0]
                        + delta @ np.linalg.solve(q, delta)
                        + np.linalg.slogdet(q)[1] - np.linalg.slogdet(p)[1]))

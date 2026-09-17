@@ -1,8 +1,8 @@
-"""Paired independent-group means for additive metrics, not macro-F1.
+"""Paired original-group means with a condition-wide common training-seed set.
 
-One row per method/condition/group/seed/unit. Average units within group-seed,
-then matched seeds within group, then independent groups equally. The bootstrap
-is conditional on the trained seed set; it is not training-population uncertainty.
+Average units within group-seed, the same seeds within each group, then groups
+equally. The bootstrap conditions on these trained seeds; it does not estimate
+the population of training randomness. Macro-F1 requires pooled predictions.
 """
 from __future__ import annotations
 import argparse
@@ -53,12 +53,21 @@ def interval(values, draws=2000):
     return tuple(float(x) for x in np.quantile(means,[.025,.975]))
 
 
-def summarize(rows, reference, direction='lower', draws=2000):
+def summarize(rows, reference, direction='lower', draws=2000, expected_seeds=None):
     if direction not in ('lower','higher'):raise ValueError('direction must be lower or higher')
     methods=sorted({r['method'] for r in rows})
     if reference not in methods or len(methods)<2:raise ValueError('reference and candidate required')
+    declared=None if expected_seeds is None else {str(s) for s in expected_seeds}
+    if declared is not None and not declared:raise ValueError('expected seed set cannot be empty')
     output=[]
     for condition in sorted({r['condition_id'] for r in rows}):
+        selected=[r for r in rows if r['condition_id']==condition]
+        seeds={str(r['seed']) for r in selected} if declared is None else declared
+        by_group=defaultdict(set)
+        for r in selected:by_group[(r['method'],r['group_id'])].add(str(r['seed']))
+        for (method,group),observed in by_group.items():
+            if observed!=seeds:
+                raise ValueError(f'nonuniform seed set: {condition}/{method}/{group}; expected {sorted(seeds)}, got {sorted(observed)}')
         ru,rg=reduce_method(rows,reference,condition)
         for method in methods:
             if method==reference:continue
@@ -76,8 +85,9 @@ def main():
     p.add_argument('--input',required=True);p.add_argument('--reference',required=True)
     p.add_argument('--output',required=True);p.add_argument('--direction',choices=['lower','higher'],default='lower')
     p.add_argument('--bootstrap',type=int,default=2000)
+    p.add_argument('--expected-seeds',nargs='+',help='predeclared seeds; catches a seed missing from every arm/group')
     args=p.parse_args()
-    rows=summarize(read_rows(args.input),args.reference,args.direction,args.bootstrap)
+    rows=summarize(read_rows(args.input),args.reference,args.direction,args.bootstrap,args.expected_seeds)
     out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
     with out.open('w',newline='',encoding='utf-8') as f:
         w=csv.DictWriter(f,fieldnames=list(rows[0]));w.writeheader();w.writerows(rows)
