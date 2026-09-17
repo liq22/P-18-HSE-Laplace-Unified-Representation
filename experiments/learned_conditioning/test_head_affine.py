@@ -1,4 +1,4 @@
-"""Exact same-head controls; these tests do not establish task superiority."""
+"""Exact same-head controls and the actual finite-precision boundary."""
 import copy
 import unittest
 import torch
@@ -48,7 +48,7 @@ class HeadAffineTests(unittest.TestCase):
         changed = self.x.clone(); changed[:, 0] = float('nan')
         model.train()
         torch.testing.assert_close(reference, model(changed, self.mask, self.side, 'head_affine'), rtol=0, atol=0)
-        self.assertEqual(n, sum(p.numel() for p in model.parameters()))
+        self.assertEqual(n, sum(p.numel() for p in model.parameters()),)
         self.assertFalse(model.training)
         for key, value in model.state_dict().items():
             torch.testing.assert_close(before[key], value, rtol=0, atol=0)
@@ -65,5 +65,24 @@ class HeadAffineTests(unittest.TestCase):
         reconstructed = torch.cat((a[:, :model.target_dim], c[:, model.tril[0], model.tril[1]], a[:, model.semantic_size:]), -1)
         direct = model(self.x, self.mask, self.side, 'M').flatten(1)
         torch.testing.assert_close(reconstructed, direct, rtol=0, atol=0)
+
+    def test_public_floor_can_hide_distinct_codes_in_float32(self):
+        gaps={}
+        for dtype in (torch.float32,torch.float64):
+            model=MatchedConditioner(4,8,2,0,covariance_floor=1e-4).to(dtype)
+            with torch.no_grad():
+                model.moment_head.weight.zero_();model.moment_head.bias.zero_()
+                model.moment_head.weight[:,:5]=torch.eye(5,dtype=dtype)
+                code=torch.zeros(2,32,dtype=dtype)
+                code[:,2]=torch.tensor([-14.,-15.],dtype=dtype)
+                raw=model.moment_head(code)
+                mean,factor=model.moments_from_code(code)
+                message=torch.cat((mean,factor[:,model.tril[0],model.tril[1]],code[:,5:]),1)
+            self.assertEqual(int(torch.linalg.matrix_rank(model.moment_head.weight[:,:5])),5)
+            self.assertEqual(float((raw[0]-raw[1]).abs().max()),1.)
+            gaps[str(dtype)]=float((message[0]-message[1]).abs().max())
+        self.assertEqual(gaps['torch.float32'],0.)
+        self.assertGreater(gaps['torch.float64'],1e-11)
+        print('same_head_precision_fixture:',gaps,'rank=5; not a trained-checkpoint observation')
 
 if __name__ == '__main__': unittest.main()

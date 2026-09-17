@@ -1,12 +1,22 @@
-# Goal05 — actual prediction metrics and figures
+# Goal05 — actual predictions, explicit contrasts and CSV plots
 
-**Scope:** reference classification metrics are recomputed from predictions; additive group effects use common predeclared seeds; bounded policy certification has separate assumptions. **Products:** actual CSV, checkpoint verification, SVG/PDF/PNG and accurate Results. No repeated-window or seed pseudo-replication.
+## Scope and products
+
+Use actual retained scores/predictions, not expected curves. Affine class-score tables, native Energy Score and bounded policy certificates are different estimands. Preserve source/test provenance and independent-unit limits. Outputs are numerical CSVs and editable SVG/PDF/PNG, with no model execution inside a plot command.
+
+## Commands
 
 ```bash
-bash paper_TPAMI/run.sh reference-plot --csv outputs/tpami/vowels-reference-01/affine_summary.csv --output-dir outputs/tpami/vowels-reference-01/figures
-bash paper_TPAMI/run.sh group-statistics --input /absolute/event_scores.csv --reference B1_aux --expected-seeds 0 1 2 --output outputs/tpami/effects.csv
+bash paper_TPAMI/run.sh reference-plot --csv paper_TPAMI/assets/vowels_affine_reference.csv --output-dir outputs/tpami/affine_figures
+bash paper/run.sh native-figures comparison outputs/tpami/native_control_01/event_scores.csv outputs/tpami/native_control_01/M_vs_R --reference B1_aux --candidate M
+bash paper/run.sh native-figures comparison outputs/tpami/native_control_01/event_scores.csv outputs/tpami/native_control_01/M_vs_head --reference head_affine --candidate M
+bash paper_TPAMI/run.sh group-statistics --input /absolute/additive_group_scores.csv --reference R --expected-seeds 0 1 2 --output outputs/tpami/group_effects.csv
 ```
 
-**Acceptance:** reference figures show validation/test, with calibration values retained inCSV but not used for selection. Scores from ridge are not probabilities or automatically bounded proper losses. All groups within a condition have the same seed set; expected seeds catch a run missing everywhere. Classification F1 is recomputed, not averaged by window. Only measured comparable latency/memory supports a Pareto figure; a single fitting timer is insufficient.
+## Acceptance
 
-**Failure:** reject malformed or incomplete comparisons; do not silently drop matching missing seeds. No expected curves, clipped error bars or invented CI from dependent utterances. Raw predictions and negative outcomes remain available.
+Original groups and predeclared seeds are matched. Multi-arm native files require explicit candidate/reference; selecting a pair does not delete the other source rows. Check common posterior draws/sampler steps and actual cost before interpretation. Recompute class metrics from all fixed-ontology predictions; ridge scores are not probabilities. No iid certificate or population interval is inferred from Japanese Vowels utterance IDs. Preserve whitening's unchanged classification outcome.
+
+## Failure handling
+
+Duplicate, missing or inconsistent paired rows/budgets fail rather than being silently joined. A score outside the certificate assumptions stays an empirical score; it is not clipped. Unknown confidence intervals are not filled. Plot only executed results, and retain null/negative effects.

@@ -1,43 +1,38 @@
-# TII experiments — industrial data only
+# Industrial experiments — primary diagnosis, mechanism scores separate
 
-## Primary question
+## I0: analytical and interface checks
 
-Does M=T(R) improve industrial diagnosis or latent prediction over B1-aux at the same observation access, supervision, selected checkpoint, message size and native consumer? This is the only primary intervention. General multi-domain datasets and finite-policy certification are in `../paper_TPAMI/`.
+Execute the existing proofs and the actual conditioner tests. Check full-map invertibility under its rank/arithmetic conditions, same-head affine composition, numerical collision under a declared covariance floor, native loss alignment and actual field consumption. Synthetic fixtures do not enter industrial empirical tables.
 
-## I0 — mathematical and component checks
+## I1: accepted PHMFactory reference
 
-Run the shared theoretical witnesses and the applied `theory_main.ipynb`; run actual native mask/field/loss/gradient checks. These numerical checks are not nonindustrial empirical benchmark tables. Inputs explicitly labelled synthetic cannot establish genuine HSE/reference extraction.
+Retain the unchanged accepted MFPT config, seeds17/18/19, five CPU epochs, 20 files and original10/4/6 split. Restore selected checkpoints and independently recalculate pooled metrics. PHMFactory owns raw preparation/labels/splits. Its six-parameter reference and six test files do not establish proposed-method or cross-machine performance. Additional datasets require their own upstream acceptance, not a parent-side alternate reader.
 
-## I1 — PHMFactory reference acceptance
+## I2: direct industrial diagnosis
 
-Use the current accepted submodule and unchanged MFPT GlobalAverageLinear config, five CPU epochs and seeds17/18/19. Preserve provider labels, 10/4/6 original-file split, checkpoint selection and independent pooled-window accuracy/F1 recomputation. Reference acceptance is already recorded in `results_native.md`; it does not train this paper's HSE conditioner. Additional industrial datasets must pass their own maintained PHMFactory data/reader/split acceptance; no parent-side alternate reader.
+Obtain genuine source-trained HSE/reference exports and original-recording identities. Main comparison: B1-aux/R, M, and raw same-head H_A. The checkpoint, auxiliary supervision, q/dtype, targets and consumer are common. Primary endpoint is recording-balanced pooled-confusion macro-F1 with a fixed ontology. Add B1 to separate auxiliary training from message layout. Use a common linear diagnosis head first, then a small MLP and matched CNN/Transformer capacity control. The existing native-generation script is not a diagnosis trainer; label-probe implementation and actual exports remain required locally.
 
-## I2 — minimal learned industrial comparison
+Freeze source selection metric, HPO trials, patience, loss grid, normalization, update count, seeds and practical/equivalence margins before evaluating held-out acquisitions. Produce rate/missing/channel views after original splitting, and separate fixed-point from fixed-duration protocols. Speed/load shifts are a different axis. Broader conclusions require at least two industrial sources or sufficiently many independently identified machines/bearings; file names alone do not establish that independence.
 
-Export genuine source-trained HSE/reference targets with original group IDs, acquisition descriptors, masks and source-only preprocessing. Main arms: B1-aux and M from the same checkpoint. Three paired seeds run sequentially on one GPU first. For classification, primary endpoint is recording-balanced pooled-confusion macro-F1 with a fixed full ontology; report pooled-window metrics separately. For native generation, report recording-macro Energy Score separately. Do not substitute a latent score for diagnostic evidence.
+## I3: mechanism and strong simple alternatives
 
-Industrial factors: rate, fixed physical duration versus fixed point budget, structured missingness, and sensor/channel changes where documented. Speed/load and machine shifts are separate from acquisition changes. All derived views are generated after original recording/group splitting. MFPT filenames alone do not prove physical bearing or machine independence.
+| Contrast | Competing explanation |
+|---|---|
+| M vs same raw head H_A | nonlinear covariance-coordinate map rather than trained affine head access |
+| PCA/orthogonal/whitened R, with explicit ridge penalty | scale or regularization, not statistical semantics |
+| matched learned linear/small-MLP transform | generic nonlinear reparameterization |
+| mean-only, covariance/mean/target shuffles | unused fields or nonspecific auxiliary information |
+| R/M prefix/tail/reference latent probes | acquisition/file shortcut rather than diagnostic information |
+| direct diagnosis vs LLapDiff-mediated diagnosis | generation is unnecessary |
 
-## I3 — practical controls and SOTA candidates
+The optional native script now executes `--arms B1_aux M head_affine` with the same anchor and denoiser setup; its Energy Score is secondary. Report native loss, score components, source/unseen residuals and actual cost. Never call them a proof of macro-F1 improvement. Gaussian/mixture heads and separately named mean-MSE/beta-NLL controls follow only after the primary path works.
 
-Reference B1 controls auxiliary supervision; the official LLapDiff conditioner B0 controls inherited model capability. Compare the strongest single representation and a source-selected static prediction/distribution fusion before considering a source-only acquisition selector. A route is optional; it must improve the actual industrial endpoint at accounted cost. General hard-selection headroom is not a proof that it beats static fusion.
+## I4: industrial SOTA, fusion and costs
 
-Industrial strong methods: HSE, compatible official FISHER/TF-ProFM, a matched raw Conv1D/Transformer, physical STFT/wavelet front ends, same linear diagnosis head and one small-MLP capacity control. Gaussian/finite-mixture probability heads receive the same condition as Diffusion. Methods without an accessible compatible implementation remain pending, not silently replaced.
+FISHER is a closest industrial baseline, with official sub-band access and pretrained cost recorded, alongside compatible HSE/TF-ProFM, raw Conv1D/Transformer and physical STFT/wavelet front ends. Unavailable methods remain pending. Compare strongest source-selected single and static predictive fusion before optional acquisition routing. A source hard-headroom gap does not guarantee a win over static fusion; unknown target shift remains a sensitivity parameter.
 
-## I4 — focused ablations
+Report q, dtype/bytes, rank/scales/condition, all source-head/consumer parameters, training updates, inference latency, peak memory and draw count when actually measured. `head_affine` omits covariance factorization, so equal checkpoint parameters are not equal inference work. Only real comparable measurements enter performance–latency–memory plots.
 
-| Axis | Industrial contrast | Alternative explanation |
-|---|---|---|
-| Loss | B1 vs B1-aux; score decomposition; explicit covariance floor | extra supervision or instability |
-| Representation | R, M, moment-only, ordinary tail shuffle; oracle moments only in known simulator controls | shape information or moment error |
-| Structure | one target dimension/prefix budget change at matched consumer | capacity rather than semantics |
-| Fusion/routing | best single, static mixture, optional acquisition selector, descriptor shuffle | complementary predictors or shortcuts |
-| Statistics | pooled windows vs recording-balanced confusion | unequal recording counts/pseudoreplication |
-| Explanation | prefix/tail intervention and source/unseen residuals | fields stored but not consumed; no causal claim |
-| Cost | HSE, trunk/head, denoiser, diagnosis head, draws, all-arm fusion and training updates | unreported computation |
+## Outputs and go/no-go
 
-The theoretical and simple simulator controls may diagnose assumptions but do not count as extra empirical datasets. Full general selection experiments belong to the TPAMI workspace.
-
-## Outputs and decision
-
-Preserve per-recording predictions, truth/class probabilities, seed, condition and actual command. Recompute nonlinear F1 after pooling confusion; never average per-window F1. For additive scores use `experiments/p19/statistics.py`; for classification use `phm_metrics.py`. Missing pairs fail rather than disappearing in a join. A null/worse M result or a static mixture matching a route completes the question and favors simplification. No target dataset is replaced to conceal failure.
+Keep full original-group predictions and shared seed sets. For nonlinear macro-F1 pool the recording-weighted confusion matrix first and recompute under group resampling; never average window or single-class file F1. Preserve null/worse M, unchanged affine predictions, static-fusion wins and target-order reversal. They are completed findings. Method performance, current reference acceptance and synthetic interface tests remain separate in Results. All nonindustrial empirical datasets are in `paper_TPAMI/`.

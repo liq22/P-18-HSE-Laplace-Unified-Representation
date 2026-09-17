@@ -1,53 +1,57 @@
-# Experiments: test representation specificity before general expansion
+# General experiments: specificity before expansion
 
-## G0. Shared calculations and fixed-policy witnesses
+## E0 — exact and finite-precision witnesses
 
-The historical analytical studies and existing policy/certification witnesses remain regression evidence with their stated scope. No new routing theorem is added. Exact Gaussian mean dimensions/nonfinite rejection and condition-wide common seed sets are mandatory before numerical interpretation. Formal studies supply `--expected-seeds` so a missing seed everywhere is not mistaken for a smaller planned experiment.
+Use the current same-stem main proof/Notebook and actual conditioner tests. Required controls: full-rank inverse, singular-prefix collision, affine-consumer collapse, same raw head H_A→M, and the actual float32 covariance-floor collision. Exact arithmetic and finite precision are different claims. Keep the earlier hard-route/fusion and source-shift counterexamples without making routing the new research center.
 
-## G1. Actual first external reference
+Commands: `bash paper_TPAMI/run.sh theory`; `bash paper/run.sh conditioner-tests`; with original LLapDiff installed, `bash paper/run.sh native-acceptance`. The last command uses explicitly synthetic component/loop inputs, not genuine HSE features.
 
-`vowels-reference` converts the official UCI128 archive, preserving native lengths and original test labels. Source utterances are divided18/6/6 per speaker into fit/validation/calibration; test370 is unchanged. Fit full-q identity/PCA/orthogonal/whitened coordinates on source-fit time-mean LPC features only. Each isotropic ridge model gets the same three source-validation trials; coordinate-matched controls use the selected R penalty. Calibration/test never choose transforms or hyperparameters.
+## E1 — real affine reference before learned messages
 
-The consumer is closed-form onehot ridge with an intercept. Its nine outputs are class scores, not normalized probabilities. Main metrics are accuracy and fixed-ontology macro-F1. Onehot MSE is an auxiliary score, not a certified Brier loss. Check coefficient restore, per-utterance predictions and exact transported-penalty equivalence. This is a real external data/reference slice, not a conditional-moment or HSE method comparison. No IID confidence guarantee is asserted from unique utterance IDs; the archive does not identify independent sessions.
+The UCI128 Japanese Vowels converter/reference is implemented. Preserve original370 test utterances, source18/6/6 per speaker, native-length masks and0.0064-second LPC frame hop. Features are twelve time-mean LPC coefficients, not raw audio/HSE. Seven affine ridge models with source-only selection and serialized/restored coefficients produce21 summary rows. PCA/rotation and transported-whitening objectives must reproduce ordinary scores; unchanged whitening penalty is a different objective. Equal class decisions are a valid null result.
 
-## G2. Minimal learned contrast and fixed choices
+`vowels-reference` prepares and fits this reference; `reference-plot` reads CSV only. No confidence guarantee is inferred from unique utterance IDs because speaker/session dependence remains unresolved. This reference neither creates M nor validates conditional-moment utility.
 
-Next use actual source-trained encoder/checkpoints to produce a common R and conditional-moment map. The first genuine pilot compares M against B1-aux, exact R→T composition, full-q PCA/whitening/orthogonal, and a same-budget linear/small-MLP reparameterization. Preserve B1 without auxiliary supervision, mean-only, shuffled mean/covariance and shuffled auxiliary-target controls. Execute the identity/plain controls first, then learned alternatives; a listed arm is not an implemented trainer.
+## E2 — minimal genuine representation comparison
 
-Freeze source checkpoint criterion, auxiliary-loss grid, HPO trials, early stopping, normalization, seed set, q/dtype, consumer architecture, update budget and original groups before inspecting test. Native defaults150 anchor/200 denoiser updates are only smoke-pilot settings, not tuned method results. A fair expanded learned configuration must give every paired arm its declared share of fitting and search. No test-conditioned floor, target map or dataset replacement.
+Freeze genuine source-trained encoder/reference targets, actual masks/side fields, source groups, target map, q, dtype, supervised head checkpoint, consumer, HPO count, validation criterion and practical margins. Main arms are B1-aux/R, same-head H_A and M. The explicit native `--arms B1_aux M head_affine` reuses one anchor and unchanged denoiser settings; original two-arm defaults remain available. Predeclare two comparisons: M−R and M−H_A. Do not report only the favorable one after testing.
 
-Classification: start with R/M + linear and small MLP, then the same direct CNN/Transformer head if appropriate. LLapDiff-based classification must outperform these before generator necessity is claimed. Forecast/imputation: same target and query protocol, simple Gaussian/mixture heads, then native LLapDiff. Main task metric and squared denoising/latent scores remain distinct. Genuine HSE/reference exports and these learned comparisons are pending; the implemented native entry still runs only B1-aux/M generation.
+The first primary task depends on the dataset. Classification uses direct label heads and fixed-ontology group-aware metrics; generation uses a declared probabilistic target and Energy Score with equal draw budgets. Native denoising loss, predicted-moment scores and task outcomes remain separate. A classifier does not become implemented merely because the data can enter a generation CLI.
 
-## G3. Five fixed external families
+## E3 — target, consumer and simple-alternative controls
 
-| Domain | Source | Task / evaluation unit | Current status |
+| Contrast | Explanation to exclude |
+|---|---|
+| B1 vs B1-aux | extra statistical supervision rather than message layout |
+| M vs H_A | trained affine head rather than nonlinear statistical coordinates |
+| full-q PCA/orthogonal/whitening, correctly specified ridge penalty | scale/conditioning/regularization |
+| same-budget learned linear/small MLP | generic nonlinear transformation |
+| mean-only, covariance/mean/target shuffles; oracle moments where known | shape loss or errors carrying identity |
+| two declared targets, two encoders, two finite consumer families | one privileged target/model explains the effect |
+| q/dtype/total work and field consumption | hidden message channel or extra inference cost |
+
+Vary one axis at a time, not a Cartesian hyperparameter search. Preserve original input/target access and independent groups. Check checkpoint rank and precision without retuning the head to force invertibility. Covariance-floor/score changes are named model constraints/ablations, not silent repairs. Report actual FLOPs/latency/memory only when measured under a common procedure.
+
+## E4 — five external scientific domains
+
+| Domain | Dataset / task | Strong controls | Current state |
 |---|---|---|---|
-| Clinical | PhysioNet2012 v1.0.0 | imputation/future queries; patient | SOP ready; real converter/features pending |
-| Wearable | UCI HAR240 | activity classification; subject | SOP ready; real inertial-series conversion pending |
-| Climate | USHCN monthly v2.5 | station forecasting; chronological blocks | monthly protocol, not daily; conversion pending |
-| Energy | ETTh1 | forecasting; chronological blocks | official version specified; conversion/features pending |
-| Speech features | Japanese Vowels UCI128 | nine-class recognition; utterance with dependence limits | official conversion, source-fitted affine reference, restored predictions executed; learned HSE pending |
+| Clinical | PhysioNet2012 v1.0.0; irregular imputation/future query, patient grouping | CSDI, Neural CDE, t-PatchGNN, LLapDiff | official SOP; converter/features/model pending |
+| Wearable | UCI HAR; subject-disjoint activity labels | linear/MLP, Conv1D, MOMENT | inertial-series preparation/features pending |
+| Climate | USHCN monthly v2.5; station/time forecasting | seasonal baseline, DLinear, PatchTST, Moirai-MoE | explicitly monthly, not daily; conversion pending |
+| Energy | ETTh1; chronological multivariate forecasting | DLinear, PatchTST, Moirai-MoE, compatible LLapDiff | local source preparation and targets pending |
+| Speech features | Japanese Vowels;9-class speaker labels, native lengths | solved ridge and affine references; later learned consumers | real conversion/reference executed, learned M pending |
 
-Do not average incompatible domain metrics into one score. At least two encoder and consumer families plus target/budget changes are needed before a broad general conclusion. Industrial PHM transfer, when reused, is attributed to TII; it is not a new duplicate empirical contribution.
+Use the official source/version/license/grouping in DATA_DOWNLOAD_SOP.md. Each dataset has a task-specific result table, not a mean of incompatible scores. More datasets alone do not create a distinct TPAMI contribution beyond the TII industrial intervention. Industrial transfer data come only through PHMFactory and remain attributed to the companion, not duplicated.
 
-## G4. Strong baselines, policy and ablations
+## E5 — single, static and optional dynamic policies
 
-| Axis | Required comparison | Explanation tested |
-|---|---|---|
-| Representation | raw/full-q PCA/whitened/orthogonal; matched regularizer | ordinary coordinate conditioning |
-| Structure | M vs mean-only, covariance fields, generic learned linear/MLP | statistical versus generic nonlinear feature |
-| Loss | same auxiliary supervision; mean-MSE, Gaussian score; beta-NLL optional with its exact definition | auxiliary training or unstable variance |
-| Target/reference | label/proper-score probes for R,prefix,tail,Z0; acquisition and speed/load probes where observed | nuisance/target-map preference rather than task information |
-| Consumer | linear/small MLP/direct task head versus diffusion | unnecessary generator or capacity advantage |
-| Policy | best single and source-selected static mixture; hard route optional afterward | ensembling explains apparent routing gain |
-| Statistics | original-group weights; common predeclared seeds; fresh calibration | pseudoreplication/selection bias |
-| Explanation | actual field interventions, source/unseen residuals and paired retrieval | stored but unused statistics; not causal identification |
-| Cost | dtype/bytes/rank/scales, encoder/readout/consumer work, training/search, latency/memory | extra information access or unpriced work |
+First compare strongest source-selected single and tuned static prediction/distribution fusion at actual cost. A dynamic hard selector is optional and must beat static fusion rather than only an arbitrary single model. Mixtures evaluate all required arms or use a declared fixed sampling budget; averaging trajectories is not automatically a mixture distribution. Moirai-MoE and AME-TS are direct expert-specialization predecessors, not proof that a new router is needed.
 
-A file-ID closed-set probe is undefined for held-out unseen file labels; use a separately named within-source diagnostic or same-event retrieval rather than adding test identities to training. Acquisition predictability alone is not proof of a shortcut: it is harmful only in relation to target evidence or generalization loss. Covariance shuffling/normalization choices are declared before testing.
+Fit/checkpoint/select on independent source groups; reserve fresh calibration groups when invoking the bounded finite-policy certificate. Unknown target drift remains a sensitivity allowance. Do not apply iid bounded-loss guarantees to raw Energy Score, cross-entropy, nonlinear F1 or correlated rolling windows. Declared block evaluation is empirical unless the dependence assumptions are separately justified. Unavailable official SOTA implementations remain pending with no fabricated scores.
 
-Task-compatible SOTA candidates remain MOMENT/UniTS, Moirai-MoE/AME-TS, Neural CDE/t-PatchGNN/Hi-Patch/HyperIMTS/ContiFormer, CSDI/LLapDiff and simple PatchTST/DLinear. Match official task/input/pretraining access and budgets; unavailable code stays pending. Industrial FISHER and TF-ProFM remain TII closest controls, not automatically run on all five nonindustrial domains.
+## E6 — actual outputs and decisions
 
-## G5. Results and stop rules
+Retain raw predictions, source choices, selected checkpoints, all predeclared contrasts and per-group paired scores. Distinguish source/unseen acquisitions and seed/draw/recording units. Costs include q/dtype/bytes, fitted transforms, shared head/trunk, consumer, factorization, training updates and measured inference resources. Same q does not prove equal computation.
 
-Plot actual prediction/metric CSVs only. A performance-latency-memory Pareto figure requires all three actual compatible measurements; the present one-shot CPU fit timer is not enough. Report null effects and limited independent groups. Failure to beat PCA/MLP means statistical specificity is unsupported. Direct classification matching diffusion removes generator necessity; static fusion dominating routing removes a compulsory router. These outcomes finish a comparison, rather than trigger a new model or replacement test dataset.
+Multi-arm CSV comparison requires explicit `--reference` and `--candidate`. Each selected pair must retain exact event/condition/seed/group matching and common draw/sampler budgets. Nonlinear classification statistics are recomputed from predictions. CSV-only figures output SVG/PDF/PNG; no expected curves. A null M/head or M/PCA/MLP result, static-fusion win or negative target transfer completes the question and narrows the method claim.

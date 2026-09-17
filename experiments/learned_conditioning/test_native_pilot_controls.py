@@ -1,4 +1,4 @@
-"""Native loop integration test with EXPLICIT synthetic fixtures, not a benchmark."""
+"""Native loop test with EXPLICIT synthetic fixtures, not a benchmark."""
 import csv
 import tempfile
 import unittest
@@ -36,6 +36,12 @@ class NativePilotControlTests(unittest.TestCase):
             with (output/'costs.csv').open() as f: costs=list(csv.DictReader(f))
             self.assertEqual({int(r['message_bytes_per_event']) for r in costs},{128})
             self.assertEqual(len({r['denoiser_parameters'] for r in costs}),1)
-            print('native_three_arm_integration: checkpoints=3 event_scores=12; synthetic fixture, no method result')
+            # Plot actual generated score rows, never an expected performance curve.
+            from paper.plot_native import select_comparison_rows, render_comparison
+            pair=select_comparison_rows(rows,'head_affine','M',explicit=True)
+            render_comparison(pair,output/'figures','head_affine','M')
+            self.assertTrue(all((output/'figures'/f'native_paired_comparison.{ext}').is_file()
+                                for ext in ('svg','pdf','png')))
+            print('native_three_arm_integration: checkpoints=3 event_scores=12 figures=3; synthetic fixture, no method result')
 
 if __name__=='__main__':unittest.main()

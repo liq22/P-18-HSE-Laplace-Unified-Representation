@@ -1,30 +1,29 @@
-# Closest work and claim boundaries
+# Closest work and inspected scope
 
-## Restricted consumers and statistical summaries
+## Conditional representations and exact coordinate maps
 
-Xu et al. (ICLR2020) defines predictive V-information through restricted observer families; Definitions1–3 and the monotonicity/special cases are direct antecedents [@xu2020usable]. Deterministic computation helping a finite consumer is not a new principle. Our implemented mean head is affine, so a nonlinear square-target example alone cannot explain its value. Function-class inclusion and affine ridge equivalence motivate controls, not an independent general information theorem.
+HSE supplies the industrial interface; the inherited global conditional-moment readout shares its supervision with an ordinary code. The inspected Real NVP full paper (ICLR2017), Sections3.2–3.3 and the inverse in Section3.3, is a direct antecedent for invertible partial-coordinate transformations: https://arxiv.org/pdf/1605.08803 . The present analysis identifies an inverse of the existing statistical message and a same-head affine control; it is not a new normalizing-flow principle, density-training algorithm or Flow Matching method.
 
-Alsing–Wandelt, Spantini and Oko remain direct compression, target-posterior and sufficiency predecessors [@alsing2018compression; @spantini2015lowrank; @spantini2017goal; @oko2025sufficiency]. Their contributions are positively acknowledged; no omitted mechanism is inferred from an unavailable abstract or final text. Proper scoring identifies the specified distributional/statistical target under its assumptions [@gneiting2007proper]. Seitzer et al., full Section4.1, defines beta-NLL with a **detached** variance multiplier and discusses finite optimization pitfalls [@seitzer2022pitfalls]. Its training objective is not interchangeable with a predictive NLL metric or our unmodified Gaussian moment-identification derivation.
+The exact map differs from its finite-precision implementation. `head_affine` keeps raw head coordinates, while M applies softplus and a covariance floor before Cholesky. A public-floor float32 fixture now demonstrates a collision even with full-rank replaced-coordinate weights. This is a method-specific numerical boundary, not a statement that all trained messages lose information or that invertibility implies better generalization.
 
-## Time-series models and adaptive experts
+V-information [@xu2020usable], inspected Definitions1–3/Proposition1, already formalizes observer-family-dependent usable information. Affine-consumer inclusion and transported ridge penalties are classical facts. Kornblith et al., ICML2019 (https://proceedings.mlr.press/v97/kornblith19a.html), is a representation-comparison reference; only its official record was revisited in this update, not its full proofs. We do not infer a novel gap from those uninspected sections.
 
-Neural CDE, t-PatchGNN, Hi-Patch, HyperIMTS and ContiFormer address irregular observations using different constructions. MOMENT and UniTS are broad time-series references; DLinear and PatchTST remain necessary task-compatible simple models. The official Moirai-MoE ICML2025 record and inspected preprint describe token-level sparse specialization [@liu2025moiraimoe]. AME-TS full Sections3.2–3.4 uses supervised structural descriptors and a training-time expert alignment prior [@wang2026amets]. Thus structural routing is already close work; the current study demotes routing until the representation itself beats simple transformations and static fusion.
+## Statistical and generative antecedents
 
-Mao et al. (ICML2024/2025) and Learn then Test precede fixed/joint expert selection, costs and risk calibration [@mao2024regression; @mao2025routing; @angelopoulos2025ltt]. The retained finite-policy bound is a specialization. Unknown target conditional drift remains a sensitivity parameter, not a measurable deployment guarantee from unlabeled observations alone.
+Alsing, Spantini and Oko are direct compression/target-posterior/sufficiency predecessors [@alsing2018compression; @spantini2015lowrank; @spantini2017goal; @oko2025sufficiency]. The previously recorded Oko sections remain antecedents; the full HTML retrieval failed again, so this update draws no new negative scope claim from its abstract or unavailable text.
 
-## Generator and data provenance
+The full LLapDiff v2 Section5.1 explicitly conditions on observed values, finite-difference proxies and timestamp/gap/mask information; Sections5.2–5.3 and Appendices E–H define latent targets and native denoising: https://arxiv.org/html/2605.19805v2 . New methods must not gain access to timing or side information denied to the original baseline. Direct physical-time evaluation is not single-step diffusion sampling. The generator is inherited, not part of a first-Laplace-generation claim.
 
-LLapDiff full v2 Section3 and AppendicesE–H distinguish the pretrained target VAE, history summary, modal denoiser and iterative reverse process [@you2026llapdiff]. Solver-free physical time is not one-step diffusion. It is one inherited consumer, not required by a speech classifier or proof of better industrial diagnosis. CSDI and Neural Laplace are earlier conditional/continuous-time precedents [@tashiro2021csdi; @holt2022neurallaplace].
+Gaussian proper scoring and neural optimization are separate questions [@gneiting2007proper; @seitzer2022pitfalls]. The full Seitzer paper Section3 and Appendix D.5 were inspected: its beta-NLL uses a **detached** variance weight (https://arxiv.org/pdf/2203.09168). It is not silently interchangeable with ordinary Gaussian scoring and its population interpretation. M/head_affine comparisons retain the same trained score checkpoint rather than changing the loss to favor one arm.
 
-The official UCI Japanese Vowels documentation specifies270 training and370 test utterances, twelve LPC coefficients per frame, native lengths7–29, original speaker block labels, a6.4ms frame shift and10kHz **audio** analysis sampling. Our real converter respects those distinctions. It evaluates time-mean LPC features and ridge, not HSE or a posterior. The clinical/wearable/climate/energy data remain separate pending protocols; one reference is not five integrated benchmarks.
+## Strong temporal and routing neighbors
 
-## Primary reading locations
+Neural CDE, t-PatchGNN, Hi-Patch/HyperIMTS, MOMENT and UniTS remain task-compatible reference families [@kidger2020cde; @zhang2024tpatchgnn; @luo2025hipatch; @li2025hyperimts; @goswami2024moment; @gao2024units]. Moirai-MoE's official ICML2025 record and previously inspected methodology establish sparse specialization [@liu2025moiraimoe]. AME-TS's inspected preprint method already uses structure-supervised expert organization [@wang2026amets]; unavailable final code is not evidence of an absent idea.
 
-- https://arxiv.org/pdf/2002.10689 — full V-information definitions and properties.
-- https://arxiv.org/pdf/2203.09168 — heteroscedastic optimization and beta-NLL Section4.1.
-- https://arxiv.org/html/2605.19805v2 — actual LLapDiff target and full method.
-- https://proceedings.mlr.press/v267/liu25an.html — Moirai-MoE final bibliographic record; inspected preprint methodology is distinguished from inaccessible final text.
-- https://arxiv.org/html/2605.25166v1 — AME-TS full method, preprint status.
-- https://archive.ics.uci.edu/dataset/128/japanese+vowels — original sequence, label, timing and license specification, DOI10.24432/C5NS47.
+Multi-expert regression/deferral and Learn then Test precede the secondary policy study [@mao2024regression; @mao2025routing; @angelopoulos2025ltt]. Unknown target drift remains a sensitivity allowance rather than an observable deployment guarantee. No router is promoted before it exceeds source-selected best single and static predictive fusion under actual cost.
 
-The companion TII industrial intervention and any reused proof/code/result are disclosed. An extra calibration theorem or more datasets alone does not establish a distinct TPAMI method.
+## Industrial boundary and originality
+
+FISHER's full technical-report SectionsII-A/II-B describe fixed-duration STFT sub-bands and concatenated representations (https://arxiv.org/html/2507.16696v2). It is a close industrial competitor, not background decoration. That inspected technical version is distinguished from a final TII article not inspected here. Industrial experiments and method claims belong to `paper/`; TPAMI needs additional target/consumer/budget findings across more than one encoder and consumer family, not duplicate ownership of the industrial intervention.
+
+The current gap under test is whether nonlinear conditional-moment coordinates improve an actual finite consumer beyond the complete ordinary code, the same trained affine head and strong generic transformations. Neither a classical exact-map proof nor seven equal affine reference scores establishes that advantage.

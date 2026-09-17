@@ -1,54 +1,51 @@
-# Results — executed evidence and untested method claims
+# Results — executed references and actual-message boundaries
 
-## 1. Scientific-input corrections
+## 1. Previously completed scientific corrections
 
-PR10 corrected the two verified review defects before this reference experiment. Invalid Gaussian mean shapes no longer broadcast into a different-dimensional distribution, and nonfinite means fail. Correct [0,0] versus [1,2] under identity covariance still yields 2.5 nats. Generic group statistics now enforce a common condition-wide seed set; `--expected-seeds` additionally detects a seed absent everywhere. The regression fixture's planned mean effect is3.0, whereas the previous incomplete seed mixture could yield1.5. These values demonstrate software semantics, not model gains.
+PR10 fixed Gaussian mean-shape/nonfinite handling and condition-wide seed mixtures. The valid Gaussian2.5-nat fixture stays unchanged; invalid broadcast inputs fail. `--expected-seeds` catches a seed missing everywhere. Its planned group-effect fixture is3.0 rather than the old incomplete-mixture1.5. These are computation-semantics checks, not model gains.
 
-## 2. First real external data/reference slice
+## 2. Official Japanese Vowels reference
 
-Run35227181539, PR11 initial code d7610230, executed the official UCI archive download, native-length conversion, source fit/validation selection, coefficient restoration, predictions and actual CSV figures on CPU. The command was:
+PR11 runs35227181539,35230324773 and35239616437 executed public UCI128 download, native-length conversion, source-only transform/selection, fitted-coefficient restoration and CSV plots. Reproduce using:
 
 ```bash
-python -m experiments.p19.japanese_vowels --archive "$RUNNER_TEMP/japanese_vowels.zip" --output-dir "$RUNNER_TEMP/vowels-reference"
+bash paper_TPAMI/run.sh vowels-reference --archive /absolute/japanese_vowels.zip --output-dir outputs/vowels-reference
+bash paper_TPAMI/run.sh reference-plot --csv outputs/vowels-reference/affine_summary.csv --output-dir outputs/vowels-reference/figures
 ```
 
-The later public paper entry invokes the same implementation. Source split was fixed before the real run:18/6/6 utterances per speaker. All nine labels are present in each split; original official test membership is unchanged.
+Original test370 utterances are unchanged. Source18/6/6 per speaker produces fit162/validation54/reserved-calibration54; valid frame counts are2613/828/833/5687 across fit/validation/calibration/test. Length ranges7–26/10–25/9–25/7–29, all nine classes present. LPC hop is0.0064s, not the raw audio sample interval.
 
-| Split | Utterances | Valid frames | Observed length range |
-|---|---:|---:|---:|
-|Fit|162|2613|7–26|
-|Validation|54|828|10–25|
-|Reserved calibration|54|833|9–25|
-|Official test|370|5687|7–29|
+The representation is twelve time-mean LPC values, float64,96 message bytes, not HSE. Onehot ridge has117 fitted coefficient/intercept values. Source validation selects lambda0.0001 from three predeclared choices. Scores are not posterior probabilities.
 
-The representation is **time-mean LPC coefficients**, q=12, float64, 96 message bytes. It is not HSE. The consumer has117 fitted coefficient/intercept scalars and solves onehot ridge; outputs are unnormalized class scores, not posterior probabilities. Source validation selected λ=0.0001 from the predeclared three-value grid for every isotropic arm. Matched controls use the same R-selected λ.
-
-### Test results
-
-| Coordinate / penalty | Accuracy | Macro-F1 | Onehot score MSE | Maximum score difference from R |
+|Test reference|Accuracy|Macro-F1|Onehot score MSE|Max score difference from R|
 |---|---:|---:|---:|---:|
-|Ordinary / isotropic|0.8594594595|0.8523978638|0.0451129981|0|
-|Full-q PCA / isotropic|0.8594594595|0.8523978638|0.0451129981|1.80e-15|
-|Random orthogonal / isotropic|0.8594594595|0.8523978638|0.0451129981|4.11e-15|
-|Whitened / transported penalty|0.8594594595|0.8523978638|0.0451129981|1.78e-15|
-|Whitened / isotropic|0.8594594595|0.8523978638|0.0451666902|0.02625145|
+|Ordinary/isotropic|0.8594594595|0.8523978638|0.0451129981|0|
+|Full PCA/isotropic|0.8594594595|0.8523978638|0.0451129981|1.80e-15|
+|Random orthogonal/isotropic|0.8594594595|0.8523978638|0.0451129981|4.11e-15|
+|Whitened/transported|0.8594594595|0.8523978638|0.0451129981|1.78e-15|
+|Whitened/isotropic|0.8594594595|0.8523978638|0.0451666902|0.02625145|
 
-The full seven-model, three-evaluation-split output contains21 rows. All seven models predict the same test labels:318 correct out of370. PCA and orthogonal matched-penalty rows, omitted from the display for brevity, are retained in the source CSV. Every serialized model was reloaded and its evaluation metrics reproduced. The downloaded prediction CSV was also used to recompute classification outcomes.
+All seven models, including the additional equivalent matched rows in `assets/vowels_affine_reference.csv`, give318/370 correct test labels. Full output has21 rows. Source feature condition number16.0680669 becomes approximately1 after whitening, without a classification gain. Restored coefficients reproduce predictions and independently recomputed metrics. Variable one-shot CPU solve times remain descriptive artifact values, not stable latency claims. Calibration did not select the models. Utterance IDs do not justify an iid certificate because session/speaker dependence is unresolved.
 
-Source centered feature condition number decreases from16.0680669 to approximately1 after whitening. That improvement did **not** yield a classification gain here. Transporting the regularizer recovers ordinary scores to floating-point precision. Leaving it isotropic changes real-valued scores but not test decisions in this run. Thus coordinate conditioning, changed regularization and improved task risk must not be conflated.
+## 3. Same-head and precision witnesses
 
-`assets/vowels_affine_reference.csv` retains the numerical summary without variable one-shot CPU fitting times; the complete run artifact includes those descriptive times, source-trial results, predictions and fitted coefficients. They are not a GPU latency or memory Pareto experiment. Figures display validation and test; reserved calibration is retained in CSV and was not used for selection. No confidence interval or iid certificate is asserted from these utterance IDs, whose session dependence is not resolved.
+Five actual-conditioner tests now accompany the existing exact-map Notebook. The local same-head affine-consumer collapse residual was4.163336342344337e-17. Existing float64 complete-message recovery was1.7763568394002505e-15 with prefix smallest singular value0.0421791480. These are finite configured-head witnesses, not observations about a trained checkpoint.
 
-## 3. Method-specific finite witnesses
+A further test sets W_p=I_5, a full-rank head, with raw covariance diagonal coordinates−14 and−15 and the unchanged public floor1e-4. Other code coordinates agree. `MatchedConditioner.moments_from_code` gives:
 
-The existing main-theory Notebook now checks full-q coordinate/penalty equivalence and its failure under an unchanged isotropic whitening penalty. A separate selected-source solver fixture gave matched errors at most1.20e-15 and a whitening/isotropic score change0.47649716. These are algebraic regression values, not a speech or HSE performance result.
+|dtype|q|message bytes|raw-head max gap|statistical-message max gap|
+|---|---:|---:|---:|---:|
+|float32|32|128|1.0|0.0|
+|float64|32|256|1.0|2.98931626e-11|
 
-The actual shared moment-conditioner tests additionally verify exact R→frozen T composition and collapse of the mean-only affine-consumer path to an affine R consumer. The full covariance message can still be nonlinear; neither check validates a learned superiority claim.
+The covariance floor plus finite rounding erases the small variance difference in float32. This demonstrates why ideal invertibility does not certify numerical information preservation. It does not justify removing the floor, silently switching dtype or claiming such collisions occur frequently in learned data. `assets/head_coordinate_precision.csv` retains the exact configured values; the native tests reproduce the qualitative equality/difference with the actual implementation.
 
-## 4. Earlier general evidence retained
+## 4. Native integration executed, method comparison still pending
 
-The earlier routing_controls.csv still shows hard routing losing to static fusion in its crossing cell, and failing after target ordering reverses. The selection_summary.csv retains the finite independent-calibration study with explicit target-shift failures. These are known finite controls, not expanded into new routing contributions. Unknown drift bounds remain sensitivity assumptions.
+Code0aedf0b passed run35239616423. Original native batch reconstruction retained24 comparisons/96 rows and maximum loss difference0 in that run. The new optional `head_affine` loop then ran three actual native denoisers using **four explicitly synthetic events per split**, one anchor update, one denoiser update, two draws and two sampler steps. It checked three restored checkpoints, identical frozen conditioner states,12 finite score rows and128-byte messages. Temporary fixture scores do not enter a method table.
 
-## 5. What has not been measured
+The real-export entry accepts `--arms B1_aux M head_affine`. Costs now distinguish the affine head and statistical factorization actually evaluated, and retain dtype/bytes and parameter/time records. Multi-arm plots require explicit selected pairs and reject draw/sampler or event/seed mismatch. Full current-head validation is recorded in the PR rather than inferred by adding earlier test counts.
 
-This is one real external **reference** and converter, not a conditional-moment, HSE, LLapDiff or SOTA result. Genuine source-trained R/M features, learned linear/MLP bottlenecks, direct task-head comparison, meaningful same-task cost measurements and all five neural benchmark integrations are pending. Four other raw converters remain pending separately. MFPT remains TII-owned reference acceptance, not duplicated as new TPAMI evidence. A negative M/PCA/MLP or direct-head comparison is retained and can complete the scientific question.
+## 5. Retained boundaries and missing results
+
+Earlier routing/fusion and independent-calibration CSVs retain static-fusion wins and target-order reversal. They are not new routing contributions. The speech experiment is a real reference/converter, not an HSE/M/LLapDiff/SOTA result. Four other raw converters, genuine source-trained feature/reference checkpoints, learned simple alternatives, direct industrial/general task heads and actual cost-matched M comparisons remain pending. MFPT belongs to the TII reference record, not a duplicated TPAMI method table. Equal or adverse results remain valid completed outcomes.
