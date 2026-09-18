@@ -43,3 +43,7 @@ Only after representation specificity is tested compare source-selected best sin
 `run_native_pilot.py` preserves the original two-arm default; `--arms B1_aux M head_affine` explicitly runs the new comparison on supplied genuine frozen exports. Its native CI test uses four synthetic fixture events per split and one optimizer update: an integration test, not learned task evidence. CSV plots require an explicit reference/candidate when multiple arms exist; no unmentioned rows vanish.
 
 The Japanese Vowels real reader/reference remains mean-LPC/closed-form ridge, with restored coefficients and the original test set. It is not HSE, a moment model or calibrated probability prediction. Four other external raw converters and genuine multi-domain HSE/reference checkpoints remain missing prerequisites. TII remains industrial-only through PHMFactory, with all code shared rather than copied.
+
+## Fixed-prediction stopping check
+
+Before fitting a classification selector for already evaluated fixed predictors, check whether their unique argmax decisions differ on the saved examples. Complete strict agreement eliminates classification-label improvement by hard selection or convex score fusion on those examples. It does not eliminate probability/score improvement or the value of a new/retrained model. The current affine reference bank satisfies this condition; no classifier gate is trained for that bank. The strong same-head control remains `head_affine` in the existing implementation; no parallel A_raw arm is introduced.
