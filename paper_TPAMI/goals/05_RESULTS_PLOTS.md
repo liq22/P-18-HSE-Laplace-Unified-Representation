@@ -20,3 +20,15 @@ Original groups and predeclared seeds are matched. Multi-arm native files requir
 ## Failure handling
 
 Duplicate, missing or inconsistent paired rows/budgets fail rather than being silently joined. A score outside the certificate assumptions stays an empirical score; it is not clipped. Unknown confidence intervals are not filled. Plot only executed results, and retain null/negative effects.
+
+## Current complementary CPU slice: prediction agreement
+
+Scope: replay the actual seven-model score bank; no raw-data conversion, model retraining or new gate. Products:9-row summary,478-row per-example checks, two CSV-only vector/raster figures and the matching Results subsection.
+
+```bash
+python -m unittest discover -s tests -p 'test_prediction_agreement.py' -v
+bash paper_TPAMI/run.sh prediction-check --predictions /absolute/PR11_artifact/predictions.csv --output-dir outputs/tpami/prediction_check
+bash paper_TPAMI/run.sh prediction-check --plot-only outputs/tpami/prediction_check/agreement_summary.csv --output-dir outputs/tpami/prediction_check/figures
+```
+
+Acceptance: exact model/group/truth pairing, no duplicate or ignored split, strictly positive common-label margins where asserted, and mixture fitting restricted to validation. This is post-hoc replay, not independent replication. Missing/malformed data stop the calculation; no probabilities or confidence intervals are fabricated. Keep `head_affine` as the single native raw-head implementation. GPU work and unresolved genuine feature/checkpoint dependencies remain in the existing Goal06, with one initial GPU on the8×4090 machine and no two-GPU training.
