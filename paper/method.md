@@ -1,87 +1,117 @@
-# Acquisition-Support-Aware HSE–LLapDiff
+## 3. Method
 
-## 1. Source reference and observation model
+### 3.1 Overview
 
-Let e denote an acquisition domain and i an independent event or original recording:
+The proposed construction first fixes a source-supported joint target, then learns its conditional distribution, and finally integrates that distribution into diagnosis. Figure 2 distinguishes inherited HSE and temporal-denoising components from the target qualification and support restriction introduced in this construction. A source reference supplies training targets only. At deployment, the measured record follows two paths: a fixed observed-evidence path and a compressed condition for the missing-state generator. The same observed-state draw conditions every reverse step of a missing-state draw. Generated samples enter a fixed source-trained diagnostic readout; unestimated coordinates do not become zero-valued physical recoveries.
 
-$$
-x_{ei}=\mathcal A_e\Psi_e(z_i,u_i)+\varepsilon_{ei}.
-$$
+![**Source-qualified temporal posterior inference.** The upper strip defines source-only preparation. The lower flow separates measured evidence, observed-state uncertainty and the eligible missing-state sampler. Solid neutral blocks denote inherited components; colored blocks mark the proposed target selection and restricted process. Dashed connections supply training/reference information or the frozen target definition, not extra deployment measurements. The inset expands the reverse loop into velocity prediction, clean/noise conversion and an eligible-only update. The intervention labels correspond to Eq. (5); posterior, diagnosis and cost are evaluated separately.](figures/overview.pdf){width=100%}
 
-The operating condition u, mechanical response map Psi and acquisition operator are distinct. A common class label does not establish a common mechanical coordinate. The first reference model uses a source-calibrated finite dictionary, giving x_e=A_e z+epsilon_e with a declared noise law. A learned extension requires validated cross-source block correspondence and a compatible decoder. Without physical calibration, its target is a reference-feature posterior, not a recovered mechanical mode. Pair source views within an original recording or a declared joint acquisition, never by sorting labels from unrelated datasets.
+### 3.2 Source-qualified reference targets and observation conditioning
 
-## 2. Qualifying a target together with its condition
-
-Write O_e=range(A_e^T), U_s=sum_j O_j and C_s=intersection_j O_j over sources. For the declared deployment scope O_e subset U_s, define
+**Operational source construction.** Split original recordings before forming views. For each source recording with a reference measurement, use a source-frozen encoder $E_{\rm ref}$ and a declared acquisition transformation $\mathcal D_a$ to construct
 
 $$
-C_e=C_s\cap O_e,\quad P_e=O_e\cap C_e^\perp,\quad
-M_e=U_s\cap O_e^\perp,\quad N_0=U_s^\perp.
+z_i^{\rm ref}=E_{\rm ref}(x_i^{\rm ref}),\quad
+C_{F,i}^{(a)}=\operatorname{record}(\mathcal D_a x_i^{\rm ref},a),\quad
+(z_{o,i},w_{0,i})=(P_{o,e}z_i^{\rm ref},B_e^\top z_i^{\rm ref}). \tag{6}
 $$
 
-These orthogonal spaces denote currently common, observed-private, source-supported-missing and source-global-null components. Recompute C_e for the current acquisition. General operators require subspace projectors; diagonal sensitivity alone is not coordinate recoverability. Separate exact nullity from weak noisy directions, using a source-selected tolerance with sensitivity analysis.
+$P_{o,e}$ projects onto $\mathcal O_e$; columns of $B_e$ form an orthonormal basis of a selected $\mathcal I_e$, and $G_e=B_eB_e^\top$. For trajectories, these maps act at each query time. They are fixed during sampling. The source-calibrated observation relation must justify this geometric assignment. If only reference-feature correspondence is established, Eq. (6) defines a reference-feature target, not a noise-free mechanical state. Finite bandwidth, filtering and reference noise are part of that target definition.
 
-Let C_T be the complete condition supplied to the posterior, including HSE features, private evidence, acquisition descriptors and support information. Fix a candidate target I_e subset M_e. The pair (I_e,C_T) is admissible when every joint model compatible with the source observation law and the stated physical/statistical assumptions gives the same required conditional p(Z_I given C_T), almost surely on its supported conditioning domain. Joint identification, not separate coordinate-wise identification, is required. This is a population property of the observation design and assumptions, not a score threshold that proves identifiability from a finite dataset.
+The paired tuple $(C_F,z_o,w_0)$ makes the required joint reference law observable on the source design. It does not guarantee accurate estimation or validity on a new machine. Only blocks jointly observed in a source reference design, or identified under a stated alternative observation model, are admitted together. A union of separately available blocks is not a substitute. Deployment descriptors determine which source-defined target applies; target labels never select it. A different complete condition requires its corresponding identification argument. Source-to-target conditional transport and overlap remain assumptions evaluated by held-out datasets, not consequences of pairing.
 
-For coherent observed/missing draws, the stronger required object is p(Z_o,Z_I given C_T). Its factorization into observed and missing conditionals does not supply identification by itself. In particular, identification of p(M given C) cannot authorize p(M given C,P). Source pairing with an identifiable observation model, an identifiable corruption ensemble, or an explicit physical coupling can supply the missing relationship. Source-to-target transportability and conditioning-domain overlap remain separate assumptions. The finite common-view counterexample is given in the accompanying analysis.
-
-Freeze the chosen joint target and its orthogonal projector G_e from source information. No largest universally identifiable subspace is presumed. Ineligible missing components and N_0 have no recovered-value output; an externally assumed prior may still express beliefs about them. A target with genuinely new measured support lies outside this four-role deployment scope, rather than being rejected as invented evidence.
-
-## 3. HSE condition and statistical anchor
-
-The complete encoder-visible record C_F includes values, times, masks and all allowed descriptors. HSE produces a fixed-budget condition. A source-supervised ordinary code R and one trained affine moment head h(R) give three interfaces:
+**HSE statistical condition.** A shared source-trained trunk produces $R$; the same affine head $h(R)$ parameterizes a mean $\mu$ and covariance $\Sigma=LL^\top+\lambda I$. For a predeclared reference functional $U$, its auxiliary loss is
 
 $$
-H_R=R,\qquad H_A=[h(R),R_{\rm tail}],\qquad H_M=\Phi(H_A).
+\mathcal L_{\rm anc}=\tfrac12\mathbb E\!\left[
+ (U-\mu)^\top\Sigma^{-1}(U-\mu)+\log\det\Sigma\right]. \tag{7}
 $$
 
-Phi maps raw covariance coordinates to a positive-definite factor; H_M retains the same tail. The Gaussian auxiliary score trains the exact R path used by the ordinary comparator. Freeze the source-selected checkpoint before comparing the three interfaces. All arms receive the same allowed side information and inference eligibility; side fields count toward memory and computation. Conditional moments anchor a declared source target but do not identify a non-Gaussian conditional law. In ideal arithmetic H_A and H_M are invertible on the attainable image of the existing factor map; finite precision and conditioning remain measurable diagnostics.
-
-## 4. Restricted temporal posterior
-
-For an orthonormal basis B_e of I_e, perturb only the admitted target:
+The loss updates the trunk consumed by all ordinary-code controls. Source validation selects one checkpoint, which is then frozen. Proper moment scoring motivates the anchor, while optimization and shift remain empirical issues [@gneiting2007proper; @seitzer2022pitfalls]. The three same-width interfaces are
 
 $$
-v_\tau=\alpha_\tau v_0+\sigma_\tau\epsilon,
-\qquad v_0=B_e^Tz,\qquad\epsilon\sim\mathcal N(0,I).
+H_R=R,\qquad H_A=[h(R),R_{\rm tail}],\qquad
+H_M=\Phi(H_A),\qquad C_T=(H_c,a,\text{roles},\mathcal I_e). \tag{8}
 $$
 
-The equivalent ambient noise has covariance sigma_tau^2 G_e. Each reverse proposal is projected by G_e. The Laplace component parameterizes the temporal prediction schematically as
+$\Phi$ converts raw covariance coordinates to the declared positive-definite factor. Extra metadata and factorization cost are included in the budget. The fixed observed-evidence and diagnostic paths receive the same $R$ across conditioner arms; only the generative interface changes in the primary conditioner contrast. Moment coordinates do not establish a complete non-Gaussian posterior.
+
+### 3.3 Eligible-only diffusion and temporal prediction
+
+Let $n_e$ be the number of admitted scalar targets over the query window. We fit a denoiser to Eq. (3) on those targets, sampling source groups first and views within a group. Noise levels follow a common declared distribution, and the primary objective uses unweighted velocity error:
 
 $$
-\widehat z(t)=\sum_k e^{-\rho_k t}
-\{b_k\cos(\omega_k t)+c_k\sin(\omega_k t)\},\qquad\rho_k>0.
+\widehat v_\theta=B_e^\top D_{\theta,\ell}
+ (B_ew_k,k,C_T,z_o,\boldsymbol t),\qquad
+\mathcal L_{\rm diff}=\mathbb E\!\left[
+ n_e^{-1}\|\widehat v_\theta-v_k\|^2\right]. \tag{9}
 $$
 
-Physical time t is distinct from diffusion time tau. Damping and arbitrary-time evaluation motivate a local temporal bias, not a claim that the predicted poles are identified machine modes. A block-consistent reference/decoder is needed to translate latent support preservation into physical support preservation. Diffusion remains iterative and uses Gaussian perturbations.
+The same source $z_o$ conditions target generation during training. Complementary coordinates carry no clean target or loss. Empty eligibility invokes no missing-state training or sampler. Where reference targets themselves are missing, the fitted target is further restricted to a jointly available, identified block; numerical padding does not provide supervision.
 
-Observed noisy values are not exact clean latents. Preserve the original HSE evidence path and, when joint draws are needed, use the source-identified factorization
-
-$$
-q(z_o,z_m\mid C_T)=q_o(z_o\mid C_T)\,
-q_\theta(z_m\mid z_o,C_T),\qquad z_m\in I_e.
-$$
-
-The observed posterior q_o is analytical under a known oracle or an independently evaluated source readout. The missing sampler conditions on the same sampled z_o; independently sampling the two marginal posteriors is not a substitute for the joint. For rank(G_e)=0, no missing-state sampler is invoked.
-
-## 5. Diagnosis and algorithm
-
-A source-trained diagnostic model averages predictions over coherent draws:
+For $\ell=1$, the denoiser uses LLapDiff's modal analysis/synthesis with positive damping. Its temporal basis has the form
 
 $$
-\widehat p(y\mid x_e)=L^{-1}\sum_{\ell=1}^{L}
- h_y(z_o^{(\ell)},z_m^{(\ell)},a_e,\text{support status}).
+m_\theta(t)=\sum_{j=1}^{J}e^{-\rho_j\widetilde t}
+ \{b_j\cos(\omega_j\widetilde t)+c_j\sin(\omega_j\widetilde t)\},
+\qquad \rho_j>0,\quad\widetilde t=t-t_1\geq0. \tag{10}
 $$
 
-A posterior-moment summary is a cheaper, separately named ablation. Direct observed-only diagnosis remains a primary comparator.
+This is an inherited temporal bias [@you2026llapdiff], not Laplace-distributed perturbation. The modal branch is embedded in the denoiser, whose output in Eq. (9) is velocity. Therefore a decaying basis does not prove that the clean generated sample, the nonlinear denoiser or the reverse process is globally stable. The ordinary temporal comparator replaces this branch under the same condition, target, prediction type and selection budget. Physical modal interpretation additionally requires the calibrated reference; learned poles alone do not supply it.
 
-**Algorithm 1 — source-qualified temporal inference.**
+Velocity predictions determine clean and noise estimates through the standard conversion [@salimans2022distillation]:
 
-1. Split original source groups; establish the reference, observation/noise model and class ontology using source data only.
-2. Specify the actual C_T and qualify its joint target; freeze I_e, B_e and G_e under the declared assumptions.
-3. Fit the shared HSE/statistical anchor on source training groups and select its checkpoint on source validation groups.
-4. Train the conditional generator on the admitted target with the specified noise schedule, target parameterization and weighting. Retain the observed-evidence branch.
-5. At inference, sample the observed uncertainty and run eligible-only reverse updates for coherent missing draws; omit unestimated coordinates.
-6. Apply the source-trained diagnostic rule and report posterior, diagnosis, admitted coverage and total cost separately.
+$$
+\widehat w_0=\alpha_kw_k-\sigma_k\widehat v_\theta,
+\qquad \widehat\epsilon=\sigma_kw_k+\alpha_k\widehat v_\theta. \tag{11}
+$$
 
-The restriction–dynamics comparison fixes steps 1–3, observed uncertainty, diagnostic training and evaluation targets, changing only the declared generative restriction and temporal parameterization in steps 4–5. Comparisons use the same prediction type and conditioning horizon. Velocity-target and clean-target objectives require explicit parameterization and weighting before an equivalence comparison. Every run records the actual parameter count, active dimension, updates, draws, latency and memory.
+For a shared forward sample, $\|\widehat v-v\|^2=\|\widehat w_0-w_0\|^2/\sigma_k^2$. Thus, plain clean-target MSE is not the same objective. Any clean-target variant retains the corresponding weight or is reported as a separate loss intervention.
+
+### 3.4 Reverse update, coherent uncertainty and diagnosis
+
+We use a deterministic DDIM update, with unit guidance and no thresholding modification of the predicted target [@salimans2022distillation]. For successive reverse noise levels $s<k$,
+
+$$
+w_s=\alpha_s\widehat w_0+\sigma_s\widehat\epsilon,
+\qquad
+z_s^m=B_ew_s
+ =G_e\!\left(\alpha_sB_e\widehat w_0+\sigma_sB_e\widehat\epsilon\right). \tag{12}
+$$
+
+Initialize in the admitted basis with $w_K\sim\mathcal N(0,I)$, using the same near-zero terminal signal level in all compared arms; finite terminal mismatch and finite-step sampling error are measured approximations. The endpoint uses $\alpha_0=1,\sigma_0=0$. Every state, denoiser output and update is mapped through the same $B_e$, so $(I-G_e)z_s^m=0$ at every step. Since $P_{o,e}B_e=0$, this update does not overwrite the observed branch. These are structural properties, not posterior calibration guarantees.
+
+Training on the admitted conditional is essential. For a bivariate Gaussian $(W,V)$ with unit variances and correlation $\rho$, evaluating its joint score at $V=0$ gives $-W/(1-\rho^2)$, whereas the marginal score of $W$ is $-W$. At this fixed noise level, the restricted score corresponds to variance $1-\rho^2$ instead of 1; this is not a claim about the output variance of a finite reverse sampler. This elementary counterexample motivates target-specific fitting in Eq. (9), rather than masking the output of a differently trained posterior. E4 compares those procedures in a known-law setting.
+
+Measured values are not clamped as clean latents. An observed-state readout $q_o(z_o\mid C_F)$ is fitted on the same source reference pairs, or calculated analytically under a known observation/noise model. The first learned readout may be Gaussian and is evaluated as an approximation. It is shared across mechanism arms. The construction samples
+
+$$
+z_o^{(b)}\sim q_o(\cdot\mid C_F),\qquad
+w_0^{(b)}\sim q_\theta(\cdot\mid z_o^{(b)},C_T),\qquad
+q(z_o,w_0\mid C_F)=q_o(z_o\mid C_F)q_\theta(w_0\mid z_o,C_T). \tag{13}
+$$
+
+Each $z_o^{(b)}$ remains fixed within its reverse trajectory. The factorization preserves the learned dependence; it does not make either fitted factor exact. Independently drawing the observed and missing marginal posteriors is a different, generally incoherent procedure. In the primary mechanism comparison, a common diagnostic readout $h_\psi$ is trained on source reference tuples and source labels, then frozen. It retains the same observed code $R$ and averages coherent predictions:
+
+$$
+\widehat p(y\mid C_F)=L^{-1}\sum_{b=1}^{L}
+ h_\psi(y\mid R,z_o^{(b)},B_ew_0^{(b)},a,\text{support status}). \tag{14}
+$$
+
+A separately trained observed-only classifier uses the same source labels. It is not constructed by forcing a complete-state head to consume missing-state zeros. End-to-end head refitting and moment-only summaries are secondary ablations, distinct from the fixed-readout contrast. No inferred value is reported for ineligible or global-null coordinates.
+
+### 3.5 Algorithm and mechanism contrasts
+
+**Algorithm 1. Source-qualified temporal posterior inference.**
+
+| Step | Operation |
+|------|------------------------------------------------------------------------------------------|
+| A1 | Split source recordings; fix reference, acquisition transformations, ontology and observation horizon. Construct the paired targets in Eq. (6). |
+| A2 | Select a jointly identified target under the complete observation; freeze $B_e,G_e$ and their deployment descriptor rule. |
+| A3 | Fit the shared anchor, observed readout and diagnostic head on source data. Select/freeze them on source validation; form $C_T$ with Eq. (8). |
+| A4 | Draw a source tuple, noise level and Gaussian noise. Construct Eq. (3), predict velocity and update $\theta$ with Eq. (9). Select the generator on source validation. |
+| A5 | For each deployment recording, compute the measured-evidence code. For each posterior draw, sample $z_o$ once and initialize $w_K$ in the admitted basis. |
+| A6 | At each declared reverse level, predict $\widehat v$, convert with Eq. (11), and apply Eq. (12). Keep $z_o$ fixed throughout that draw. |
+| A7 | Aggregate Eq. (14); report support status and unestimated components. Score the common target and original recording groups. Empty eligibility returns the observed-only prediction without a missing sampler. |
+
+For the restriction-by-dynamics experiment, $r=1$ uses the admitted basis; $r=0$ permits an ambient missing-state trajectory, but receives only the same admitted source targets and loss. Its complementary forward state is independent nuisance noise, not an unknown clean complement. All arms receive identical support descriptors. With unrestricted function classes, independent nuisance noise supplies no additional Bayes information; any predictive benefit of restriction concerns finite-model fitting, sampling or resource use. When the entire missing space is admitted, the restriction contrast may collapse to an equivalence check. Posterior score, diagnostic macro-F1, emitted coverage and cost are reported separately using Eq. (5). Changing only the final output mask tests output suppression, not the proposed training-and-sampling intervention.

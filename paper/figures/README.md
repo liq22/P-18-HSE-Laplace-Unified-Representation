@@ -1,20 +1,28 @@
-# Motivation figure
+# Chapter 2 concept and Chapter 3 overview
 
 ```bash
 python paper/figures/motivation.py --output-dir paper/figures
 ```
 
-The sole drawing source is `motivation.py`. It exports independently editable SVG objects with real text, vector PDF and a 4252×3260 PNG (approximately600dpi at180×138mm). No raster is embedded in the SVG. PDF/PNG are regenerated locally or by the existing manuscript workflow rather than tracked as redundant binaries.
+One source generates `motivation` (180×64 mm) and `overview` (180×132 mm), each as independently editable SVG, vector PDF and 600-dpi PNG. Text remains SVG text; boxes, arrows and labels have separate IDs. No raster is embedded. The diagrams describe a problem and a proposed inference procedure, not performance measurements.
 
-| Panel / object | Meaning | Manuscript / experiment |
-|---|---|---|
-| a: C,P,M,N0 columns and source rows | Aligned reference support, not paired events or measured sensor calibration. | Introduction1–5; Method1–2; E4/E5. |
-| b: two binary worlds | Equal source pair laws do not identify the conditional after private evidence is included. | Proposition2 and executable common-view witness; E4. |
-| b: (I_e,C_T),G_e | Target qualified together with complete condition; fixed admitted projector. | Method2; Algorithm1 step2. |
-| c: HSE | Observed/private evidence plus source-trained moment anchor. | Method3; E3 same-head controls. |
-| c: restricted LLapDiff | Gaussian latent diffusion with a stable temporal parameterization. | Method4; E2. |
-| c: observed bypass and posterior samples | Preserve observed uncertainty and sample the identified joint, not independent marginal blocks. | Method4–5; Algorithm1 steps5–6. |
-| c: excluded outputs | Unidentified missing and global-null coordinates have no recovered-value output. | Propositions3–4; E4 coverage/utility. |
-| d: outcomes and factorial | Separate posterior/diagnosis; cross restriction with temporal parameterization. | E1/E2/E4; interaction estimand. |
+## Figure 1 — problem only, Section 2.4
 
-The two-world example is an analytical counterexample. The diagram contains no expected performance curves or trained-model results. Its caption defines the independent fair bits and explains why common-view overlap does not identify the full-input conditional. The actual source-qualified native sampler remains to be implemented; existing coordinate controls retain their original scope.
+Purpose: show why the source observation law, not feature availability alone, determines the conditional target. The figure contains the C/P/M/N0 support matrix and the two common-view binary worlds. It contains no HSE, generator or proposed update block. Section 2.4 gives the caption, source-law explanation and connection to the missing joint target; Section 2.2 defines the underlying spaces.
+
+## Figure 2 — method, Section 3.1
+
+Purpose: separate source-only target construction from deployment, and expose exactly where the new restriction enters an inherited conditional denoiser. Neutral boxes denote inherited mechanisms; colored boxes denote the selected target and restricted process. Dashed arrows supply source preparation/frozen definitions, not target-time clean evidence. Source targets do not enter deployment. The observed branch is shared, and each observed-state draw is held fixed within its conditional reverse path.
+
+| Mechanism / object ID | Formula or variable | Section | Algorithm | Experiment |
+|---|---|---|---|---|
+| `qualified-target` | paired (C_F,z_o,w_0), B_e, G_e; Eq.6 | 3.2 | A1–A2 | E4/E5 |
+| `hse-condition` | shared R and H_R/H_A/H_M; Eqs.7–8 | 3.2 | A3 | E3 |
+| `temporal-denoiser` | velocity objective and modal branch; Eqs.9–10 | 3.3 | A4/A6 | E2/E5 |
+| `velocity-conversion` | clean/noise conversion; Eq.11 | 3.3 | A6 | E2 parameterization control |
+| `restricted-update`, `reverse-loop` | basis DDIM; Eq.12 | 3.4 | A5–A6 | E2/E4 |
+| `observed-readout`, `observed-draw-to-sampler` | q_o and same z_o per draw; Eq.13 | 3.4 | A3/A5–A6 | E2 joint-dependence control |
+| `coherent-tuple`, `fixed-diagnostic-head` | fixed source h_psi, retained R; Eq.14 | 3.4 | A3/A7 | E1/E2/E3 |
+| restriction/temporal labels | intervention (r,l,c), Eq.5 | 2.3/3.5 | A4–A7 | E2 factorial |
+
+Both figures have section-specific captions and prose explanations. The full manuscript build renders them from this file; PDFs and PNGs are build products, not extra tracked drawing sources.

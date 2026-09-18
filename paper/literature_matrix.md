@@ -43,3 +43,9 @@ The capability and evidence columns summarize the sources. The last column speci
 ## Resulting gap and comparison
 
 Existing work establishes heterogeneous industrial features, partial-view inference, constrained diffusion and corrupted-source prior/posterior learning. This study asks how the *identified target under the actual condition* interacts with support restriction and temporal parameterization in source-only industrial diagnosis. The shared-view counterexample, restriction–dynamics factorial and conditioner contrasts are this revision's formulation and experimental design, not findings reported by the cited works. Native projected training and industrial LODO remain unrun.
+
+## Additional foundation used in Chapters 2–3
+
+[Salimans and Ho, ICLR 2022](https://arxiv.org/pdf/2202.00512) (`salimans2022distillation`) supplies the velocity parameterization and the clean/velocity loss relationship. Read Sections 2 and 4, Section 5.1 and Appendix D; its parameterization table was inspected. The paper varies output parameterization and loss weighting independently, and derives the deterministic DDIM conversion. This supports Eqs. (3), (9), (11) and (12), not a new sampler or distillation contribution. Distillation is not introduced into the industrial method.
+
+The Chapter 3 revision also checked LLapDiff v2 Sections 5.2–5.3 against the accepted native model and the P18 pilot: the paper's clean-target exposition and the pilot's velocity objective have distinct loss weights. The current method declares velocity prediction; stable modal basis functions are not promoted to a global stability theorem for its converted clean samples. These selected readings supplement the 33-work Introduction/Related Work matrix above.

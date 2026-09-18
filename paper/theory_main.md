@@ -96,3 +96,41 @@ Neither identity proves diagnostic macro-F1 improvement or transport of an unide
 ## 7. Executable and empirical scope
 
 The same-stem Notebook checks role algebra, target loss of common support, mixed-coordinate ambiguity, the overlapping-source counterexample, prior-mediated null inference, projected proposals and conditional reversal. Its 14 retained numerical values are finite theoretical witnesses. They are not trained restricted-LLapDiff results. The source-reference calibration, actual native projected training and industrial LODO remain required. Rejecting every target is assessed with admitted coverage and diagnostic utility, not structural compliance alone.
+
+## 8. Objective and reverse-update consistency
+
+Use the same forward sample and alpha_k^2+sigma_k^2=1, with sigma_k>0 at a trained noise level. Velocity v_k=alpha_k epsilon-sigma_k w_0 gives
+
+$$
+\widehat w_0-w_0=-\sigma_k(\widehat v-v_k),\qquad
+\|\widehat v-v_k\|^2=\sigma_k^{-2}\|\widehat w_0-w_0\|^2.
+$$
+
+This follows by substituting w_k=alpha_k w_0+sigma_k epsilon. It is the standard velocity/clean-target identity used by Salimans and Ho (2022), not a new objective. The noise-level distribution and target normalization also have to agree. Equal unweighted MSE in the two parameterizations is generally unequal training.
+
+For an orthonormal B and G=BB^T, deterministic DDIM in intrinsic coordinates gives z_s=B(alpha_s w0_hat+sigma_s epsilon_hat). Thus (I-G)z_s=0 and P_o z_s=0 whenever P_o B=0. An oracle on a known common-noise trajectory recovers alpha_s w_0+sigma_s epsilon at each step. This checks conversion and geometry, not exact finite-step sampling by a learned conditional denoiser. The method keeps physical time separate from diffusion index and uses no extra guidance or thresholding in this comparison.
+
+## 9. Why restricting a joint score is not marginalization
+
+Let p(w,v|c) be a smooth positive density; assume differentiation can pass through the integral. Then
+
+$$
+\nabla_w\log p(w\mid c)
+=\mathbb E[\nabla_w\log p(w,V\mid c)\mid w,c].
+$$
+
+**Derivation.** Differentiate p(w|c)=integral p(w,v|c)dv, divide by p(w|c), and recognize the conditional expectation. Evaluating the joint score at one fixed complementary coordinate is not this integral.
+
+At a fixed noise level, consider zero-mean Gaussian (W,V) with unit variances and correlation rho. Its score along the slice V=0 is -W/(1-rho^2); the marginal score is -W. For rho=0.8, the slice field corresponds to a Gaussian variance 0.36 instead of 1. These are implied densities at this level, not measured variances from a finite DDIM sampler. The counterexample motivates fitting the admitted conditional using its own forward process. E4 tests post-hoc score restriction against target-specific fitting with the same known-law supervision.
+
+An independent nuisance complement is different: if forward nuisance noise is independent of (w_0,w_k,C_T,z_o), conditioning on it leaves the Bayes denoising target unchanged. In the matched E2 experiment, a restriction advantage must therefore come from finite approximation, optimization, sampling or resource use, not additional information.
+
+## 10. Coherent versus independent marginal draws
+
+For a fixed observation, take a joint Gaussian posterior with unit marginal variances and correlation rho. Drawing Z_o~N(0,1), then W=rho Z_o+sqrt(1-rho^2) epsilon with independent epsilon, preserves the cross-covariance rho. Drawing W~N(0,1) independently instead makes that covariance zero. Both marginal distributions agree, but the variance of Z_o+W is 2+2rho versus 2. For rho=0.8 these values are 3.6 and 2.
+
+This finite example supports keeping one observed draw fixed throughout each conditional reverse trajectory. It does not establish that an estimated observed readout or conditional sampler is calibrated. Dependence-sensitive posterior checks and the diagnostic endpoint remain necessary.
+
+## 11. Executable coverage of the chapter revision
+
+The same Notebook retains the original 14-row support witness and adds a separate `method_witness.csv` for velocity conversion/weighting, a non-diagonal admitted basis, the explicit oracle DDIM update, the score-slice counterexample and coherent covariance. These are finite analytical checks, not new industrial model results. The method now has explicit source-pair construction, losses, update equations and a fixed-readout comparison; source-calibrated native training remains a separate empirical step.
