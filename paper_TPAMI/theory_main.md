@@ -151,3 +151,18 @@ Additional fixed-priced selector cost λc_g gives the sensitivity lower bound Hh
 ## Verification and originality
 
 Freeze target, transforms, score/weight rules and checkpoints using source groups. Preserve a common declared seed set. Test changes do not modify source selection. The real LPC/ridge reference and native synthetic loop are not genuine HSE method results. Strong simple controls, actual numerical diagnostics and direct task heads precede a Diffusion/routing necessity claim. Classical projection, affine invertibility and calibration results alone do not establish TPAMI novelty or a second independent TII contribution.
+
+## Finite prediction agreement before fitting a classifier selector
+
+For one fixed evaluation example x, let s_j(x) be the saved C-class scores of J fixed predictors. Suppose they all have the same unique winning class c. For any nonnegative weights summing to one, even if those weights depend on x,
+
+$$
+\sum_j w_j(x)s_{j,c}(x)-\sum_j w_j(x)s_{j,k}(x)
+=\sum_jw_j(x)[s_{j,c}(x)-s_{j,k}(x)]>0,\qquad k\ne c.
+$$
+
+Thus the mixture still predicts c. Hard selection is a vertex of that simplex. If the premise holds on every stored example, any such selector or convex score mixture has the same confusion matrix, accuracy and macro-F1 on these examples. This elementary convexity implication is a stopping check, not a new routing theorem or population performance certificate.
+
+The actual calculation checks the minimum common-label margin over all models and competing classes. A zero margin is a tie, not strict agreement; it is not discarded with an arbitrary tolerance. The claim excludes negative/class-specific weights, changed scores, new experts, different thresholds and retrained fusion. It also does not imply identical score MSE, calibration or probabilistic utility. Saved ridge scores are not normalized probabilities and their onehot MSE is not reported as Brier loss.
+
+`prediction_agreement.py` replays the complete saved prediction bank. A separate two-score mixture fits its single weight on source validation only, then evaluates reserved calibration/test. Since original test results were already public, this is exploratory post-hoc re-analysis, not an independently preregistered confirmation. The same-stem Notebook carries the finite convexity witness; the real CSV replay supports only the observed score-bank conclusion. No new HSE, conditional-moment or industrial performance is inferred.
