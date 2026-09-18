@@ -1,0 +1,49 @@
+name: tii-source-supported-manuscript
+on:
+  pull_request:
+  push:
+    branches: [dev]
+permissions:
+  contents: read
+jobs:
+  build-and-finite-witness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install manuscript and vector-figure runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pandoc texlive-xetex fonts-dejavu-core
+          python -m pip install numpy nbformat nbclient ipykernel cairosvg
+      - name: Execute finite proof witness, regenerate figure and build cited text
+        run: bash paper/build_frontmatter.sh "$RUNNER_TEMP/tii-support"
+      - name: Compare retained finite values with the actual notebook output
+        run: |
+          python - <<'PY'
+          import csv, os
+          from pathlib import Path
+          import numpy as np
+          with Path('paper/assets/support_witness.csv').open() as f: expected=list(csv.DictReader(f))
+          with (Path(os.environ['RUNNER_TEMP'])/'tii-support/support_witness.csv').open() as f: actual=list(csv.DictReader(f))
+          assert len(expected)==len(actual)==14
+          for a,b in zip(actual,expected):
+              assert a['witness']==b['witness'] and a['scope']==b['scope']=='finite_theory_only'
+              np.testing.assert_allclose(float(a['value']),float(b['value']),rtol=0,atol=1e-12)
+          print('All 14 finite witness rows reproduced; no learned model result asserted.')
+          PY
+          git diff --exit-code -- paper/figures/motivation.svg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tii-source-supported-writing
+          path: |
+            ${{ runner.temp }}/tii-support/
+            paper/figures/motivation.svg
+            paper/figures/motivation.pdf
+            paper/figures/motivation.png
+            paper/figures/motivation.py
+            paper/figures/README.md
+          if-no-files-found: error

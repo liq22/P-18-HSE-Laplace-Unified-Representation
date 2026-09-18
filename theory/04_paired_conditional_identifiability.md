@@ -58,17 +58,19 @@ This is the standard disintegration result for probability measures on standard 
 
 ## HSE–LLapDiff implication
 
-Training a canonical posterior requires one of:
+The source observation design must identify the required joint conditional under the declared assumptions. Possible routes include:
 
-- paired acquisition and reference latent data for the same `latent_event_id`;
-- a known simulator;
-- a physical model that identifies the joint coupling.
+- paired acquisition and reference latent data for the same `latent_event_id`, with an identifiable observation model;
+- a known simulator or physical model that identifies the joint coupling;
+- an identifiable corruption ensemble, as in Ambient Diffusion and related corrupted-data learning.
 
-Class matching or distribution alignment is not a substitute for event pairing.
+Pairing is not universally necessary. Class matching or distribution alignment alone does not establish the missing joint relationship. See the current TII Related Work for the corrupted-data predecessors.
+
+Qualify the target together with the complete condition actually consumed. The stronger construction in `../paper/theory_main.md` uses source A observing (C,P) and source B observing (C,M): both observed pair laws can coincide across two worlds while p(M given C,P) differs. Shared C does not establish a conditional-independence separator. A common-view conditional cannot be silently extended with private evidence.
 
 ## Executable prediction
 
-A finite witness must show two data-generating worlds with identical unpaired marginals and opposite conditionals. A paired sample reveals which world generated the data.
+A finite witness must show source-compatible joint worlds with opposite required conditionals. The same-stem TII Notebook now verifies the overlapping-source construction; no duplicate experiment is needed here.
 
 ## Failure conditions
 

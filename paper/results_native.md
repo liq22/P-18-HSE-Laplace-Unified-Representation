@@ -25,3 +25,27 @@ The fixed-predictor routing/fusion table and its source CSV now live under `../p
 ## Pending industrial method table
 
 Actual source-trained HSE/reference checkpoints and feature extraction are still needed. M vs B1-aux, B1, industrial static fusion/selection, real acquisition changes and industrial strong baselines remain unrun. No blank slot is filled with reference accuracy, synthetic scores or anticipated improvement. `formal_claim_supported: false` concerns the learned method. A negative comparison is retained and can complete the industrial task.
+
+## Source-supported posterior writing/theory slice — 2026-09-18
+
+The current manuscript promotes cross-dataset source-supported posterior inference to the main problem, with HSE conditioning and restricted LLapDiff as the proposed mechanism. Existing R/head_affine/M results are unchanged and retained as condition-interface controls. No native model training was performed by this writing revision.
+
+Executed locally with `bash paper/build_frontmatter.sh outputs/tii_support`: 31 recorded original papers are cited in the Introduction/Related Work; the same-stem Notebook produces 14 finite witness values; source SVG/PDF/PNG and a cited front-matter PDF are regenerated. The build is not a complete learned-method or full-paper experimental validation. Full current-commit CI is recorded by the merge discussion after its actual execution rather than presumed here.
+
+| Finite check | Actual value | What it establishes |
+|---|---:|---|
+| Four source-role projector sum residual | 0 | Completeness in the stated finite linear example |
+| Target source-common rank / target missing rank | 0 / 1 | A target can lose a direction shared by all sources |
+| Ambiguous state distance under A=[1,1] / observation difference | 1.4142135623730951 / 0 | Nonzero coordinate sensitivity does not imply coordinate recoverability |
+| Opposite conditionals with identical unpaired marginals | gap 1 | Source support alone does not identify a joint conditional |
+| Correlated-prior null posterior mean / variance | 0.4 / 0.68 | No direct likelihood term does not imply no prior-mediated update |
+| Independent-prior null variance | 1 | Contrasts the role of the assumed prior |
+| 100 projected updates: forbidden component / observed drift | 0 / 0 | Algebraic support compliance of projected proposals, not correct posterior sampling |
+| Empty eligibility | 0 generated coordinates; no public estimate | No sampling target is not a confident zero reconstruction |
+| Source-to-target conditional reversal | gap 1 | Identification on source does not establish transportability |
+
+These are analytical witnesses from the explicit models in `theory_main.md`, not measurements on learned industrial latent states. `assets/support_witness.csv` retains the values. Unknown source coordinate correspondence, uncertain operators and finite-window leakage remain scientific prerequisites.
+
+## New mechanism still to implement and evaluate
+
+The current native `run_native_pilot.py` does not implement source-qualified modal blocks, an identified joint missing target or support-projected reverse updates. The new formulation therefore requires source-reference validation and a real native restriction before an E1/E2 method result exists. Existing unrestricted native/synthetic tests cannot be renamed as that validation. Future tables separate same-target posterior quality, eligible coverage and unsupported emissions, and per-target original-group diagnostic performance. Reject-all and wrong-support controls prevent perfect structural rejection from being mistaken for useful inference. A Gaussian/mixture or ordinary latent diffusion matching LLapDiff is retained as a decisive negative result.

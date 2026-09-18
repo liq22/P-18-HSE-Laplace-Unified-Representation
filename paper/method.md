@@ -1,38 +1,87 @@
-# Industrial method and decisive controls
+# Acquisition-Support-Aware HSE–LLapDiff
 
-## 1. Primary task and frozen information
+## 1. Source reference and observation model
 
-Primary task: industrial fault diagnosis; endpoint: recording-balanced pooled-confusion macro-F1. Native LLapDiff loss/latent Energy Score are secondary mechanism diagnostics. Direct linear, small-MLP and matched neural classifiers are required before claiming that Diffusion is necessary.
-
-Use accepted PHMFactory data and original-recording splits. F=HSE_0(O,a_enc), Z0=E_ref(X_ref), U=L vec(Z0). HSE/reference encoders are source-trained and frozen. Declare L and its source selection before comparison. The actual conditioner input C_F=(F,M_F,a) retains mask, named side fields, units, deterministic evaluation patches and source-only normalization. The reference view may provide training targets, not an extra inference input for one arm. Acquisition-ID, fault-label, operating-condition and recording-shortcut probes test whether the reference target encodes the intended task rather than dataset identity.
-
-## 2. Shared supervision and three messages
-
-A trunk produces R∈R^q and a Linear head produces h=WR+b. Its first d coordinates give a mean; the rest form a lower-triangular factor with softplus diagonal. Let C=chol(LLᵀ+λI) with publicly declared λ. The Gaussian score updates the exact R path later consumed by B1-aux. Select one source-validation checkpoint, then freeze encoder, preprocessing, buffers, trunk and head.
-
-With s=d+d(d+1)/2<q, the principal messages are
+Let e denote an acquisition domain and i an independent event or original recording:
 
 $$
-H_R=R,\qquad H_A=[h,R_{s+1:q}],\qquad
-H_M=[m,\operatorname{vech}C,R_{s+1:q}].
+x_{ei}=\mathcal A_e\Psi_e(z_i,u_i)+\varepsilon_{ei}.
 $$
 
-H_A is implemented as `head_affine`: same trained head, target, checkpoint, q and dtype, no new weights or training. Its raw covariance coordinates are not moment estimates. M=Φ(H_A) differs only by the nonlinear statistical coordinates. The exact Φ inverse on its attainable image shows that M and H_A have the same information in ideal arithmetic even when the R-to-head map is rank deficient. The M/R inverse additionally needs a nonsingular replaced-coordinate head block. Actual rank and finite precision remain checkpoint diagnostics, not assumptions silently imposed by training.
+The operating condition u, mechanical response map Psi and acquisition operator are distinct. A common class label does not establish a common mechanical coordinate. The first reference model uses a source-calibrated finite dictionary, giving x_e=A_e z+epsilon_e with a declared noise law. A learned extension requires validated cross-source block correspondence and a compatible decoder. Without physical calibration, its target is a reference-feature posterior, not a recovered mechanical mode. Pair source views within an original recording or a declared joint acquisition, never by sorting labels from unrelated datasets.
 
-## 3. Consumer and numerical checks
+## 2. Qualifying a target together with its condition
 
-All outputs are dense global summaries with explicitly all-valid output masks; input masks remain consumed upstream. Statistical meaning is checked at the raw moment readout. Verify actual prefix/tail consumption and the exact R→same T→consumer path. An affine consumer after H_A can be absorbed into an affine consumer of R; mean-only likewise adds no affine capacity. Nonlinear covariance coordinates require the H_A and same-budget MLP controls, not a generic assertion of extra information.
+Write O_e=range(A_e^T), U_s=sum_j O_j and C_s=intersection_j O_j over sources. For the declared deployment scope O_e subset U_s, define
 
-Log the auxiliary score's logdet/Mahalanobis components, covariance eigenvalues and source/unseen residuals. Finite positive-definite output is not calibrated full-posterior evidence. Mean-MSE and beta-NLL are optional separately named loss controls; do not replace the score silently. No oracle moment RMSE is reported for real data lacking true conditional moments.
+$$
+C_e=C_s\cap O_e,\quad P_e=O_e\cap C_e^\perp,\quad
+M_e=U_s\cap O_e^\perp,\quad N_0=U_s^\perp.
+$$
 
-## 4. Matched downstream execution
+These orthogonal spaces denote currently common, observed-private, source-supported-missing and source-global-null components. Recompute C_e for the current acquisition. General operators require subspace projectors; diagonal sensitivity alone is not coordinate recoverability. Separate exact nullity from weak noisy directions, using a source-selected tolerance with sensitivity analysis.
 
-The native pilot retains its original B1-aux/M default and offers explicit `--arms B1_aux M head_affine`. All arms share the anchor checkpoint and initialized native denoiser, target, times/noise policy, optimizer, update budget, mask and source checkpoint selection. First recompute the native loss on an actual batch. Synthetic integration tests exercise the code but do not substitute genuine HSE/reference exports.
+Let C_T be the complete condition supplied to the posterior, including HSE features, private evidence, acquisition descriptors and support information. Fix a candidate target I_e subset M_e. The pair (I_e,C_T) is admissible when every joint model compatible with the source observation law and the stated physical/statistical assumptions gives the same required conditional p(Z_I given C_T), almost surely on its supported conditioning domain. Joint identification, not separate coordinate-wise identification, is required. This is a population property of the observation design and assumptions, not a score threshold that proves identifiability from a finite dataset.
 
-For diagnosis use identical direct heads on each message. B1 without auxiliary supervision distinguishes auxiliary training from message structure. PCA/orthogonal/whitened R and a same-supervision small-MLP transformation test simple alternatives. Full-q whitening changes ridge regularization unless the penalty is transported; use both as named controls. Keep strongest source-selected single and static predictive fusion; add routing only after it beats these at measured cost.
+For coherent observed/missing draws, the stronger required object is p(Z_o,Z_I given C_T). Its factorization into observed and missing conditionals does not supply identification by itself. In particular, identification of p(M given C) cannot authorize p(M given C,P). Source pairing with an identifiable observation model, an identifiable corruption ensemble, or an explicit physical coupling can supply the missing relationship. Source-to-target transportability and conditioning-domain overlap remain separate assumptions. The finite common-view counterexample is given in the accompanying analysis.
 
-## 5. Grouping, budget and claims
+Freeze the chosen joint target and its orthogonal projector G_e from source information. No largest universally identifiable subspace is presumed. Ineligible missing components and N_0 have no recovered-value output; an externally assumed prior may still express beliefs about them. A target with genuinely new measured support lies outside this four-role deployment scope, rather than being rejected as invented evidence.
 
-PHMFactory alone owns industrial readers, metadata, labels and initial splits. Derive acquisition views after grouping. File separation does not prove physical-bearing or machine independence. Pool the group-weighted confusion matrix before calculating macro-F1; do not average single-class file F1 or window F1.
+## 3. HSE condition and statistical anchor
 
-Measure q, dtype/message bytes, actual feature rank/scales/condition, HSE/trunk/head/consumer parameters, training updates, latency and memory. The new native costs record q/bytes, trunk/head/denoiser parameter counts and execution timing; they do not provide unmeasured FLOPs or stable GPU latency. H_A evaluates the head but omits M's Cholesky/softplus work, which must be charged rather than declared equal. A gain only against R is insufficient; equality with H_A or a generic MLP favors the simpler explanation. No upstream PHMFactory core is changed.
+The complete encoder-visible record C_F includes values, times, masks and all allowed descriptors. HSE produces a fixed-budget condition. A source-supervised ordinary code R and one trained affine moment head h(R) give three interfaces:
+
+$$
+H_R=R,\qquad H_A=[h(R),R_{\rm tail}],\qquad H_M=\Phi(H_A).
+$$
+
+Phi maps raw covariance coordinates to a positive-definite factor; H_M retains the same tail. The Gaussian auxiliary score trains the exact R path used by the ordinary comparator. Freeze the source-selected checkpoint before comparing the three interfaces. All arms receive the same allowed side information and inference eligibility; side fields count toward memory and computation. Conditional moments anchor a declared source target but do not identify a non-Gaussian conditional law. In ideal arithmetic H_A and H_M are invertible on the attainable image of the existing factor map; finite precision and conditioning remain measurable diagnostics.
+
+## 4. Restricted temporal posterior
+
+For an orthonormal basis B_e of I_e, perturb only the admitted target:
+
+$$
+v_\tau=\alpha_\tau v_0+\sigma_\tau\epsilon,
+\qquad v_0=B_e^Tz,\qquad\epsilon\sim\mathcal N(0,I).
+$$
+
+The equivalent ambient noise has covariance sigma_tau^2 G_e. Each reverse proposal is projected by G_e. The Laplace component parameterizes the temporal prediction schematically as
+
+$$
+\widehat z(t)=\sum_k e^{-\rho_k t}
+\{b_k\cos(\omega_k t)+c_k\sin(\omega_k t)\},\qquad\rho_k>0.
+$$
+
+Physical time t is distinct from diffusion time tau. Damping and arbitrary-time evaluation motivate a local temporal bias, not a claim that the predicted poles are identified machine modes. A block-consistent reference/decoder is needed to translate latent support preservation into physical support preservation. Diffusion remains iterative and uses Gaussian perturbations.
+
+Observed noisy values are not exact clean latents. Preserve the original HSE evidence path and, when joint draws are needed, use the source-identified factorization
+
+$$
+q(z_o,z_m\mid C_T)=q_o(z_o\mid C_T)\,
+q_\theta(z_m\mid z_o,C_T),\qquad z_m\in I_e.
+$$
+
+The observed posterior q_o is analytical under a known oracle or an independently evaluated source readout. The missing sampler conditions on the same sampled z_o; independently sampling the two marginal posteriors is not a substitute for the joint. For rank(G_e)=0, no missing-state sampler is invoked.
+
+## 5. Diagnosis and algorithm
+
+A source-trained diagnostic model averages predictions over coherent draws:
+
+$$
+\widehat p(y\mid x_e)=L^{-1}\sum_{\ell=1}^{L}
+ h_y(z_o^{(\ell)},z_m^{(\ell)},a_e,\text{support status}).
+$$
+
+A posterior-moment summary is a cheaper, separately named ablation. Direct observed-only diagnosis remains a primary comparator.
+
+**Algorithm 1 — source-qualified temporal inference.**
+
+1. Split original source groups; establish the reference, observation/noise model and class ontology using source data only.
+2. Specify the actual C_T and qualify its joint target; freeze I_e, B_e and G_e under the declared assumptions.
+3. Fit the shared HSE/statistical anchor on source training groups and select its checkpoint on source validation groups.
+4. Train the conditional generator on the admitted target with the specified noise schedule, target parameterization and weighting. Retain the observed-evidence branch.
+5. At inference, sample the observed uncertainty and run eligible-only reverse updates for coherent missing draws; omit unestimated coordinates.
+6. Apply the source-trained diagnostic rule and report posterior, diagnosis, admitted coverage and total cost separately.
+
+The restriction–dynamics comparison fixes steps 1–3, observed uncertainty, diagnostic training and evaluation targets, changing only the declared generative restriction and temporal parameterization in steps 4–5. Comparisons use the same prediction type and conditioning horizon. Velocity-target and clean-target objectives require explicit parameterization and weighting before an equivalence comparison. Every run records the actual parameter count, active dimension, updates, draws, latency and memory.

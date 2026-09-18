@@ -1,12 +1,20 @@
-# TII 引言意群：工业诊断为主问题
+# Introduction scientific chain
 
-| 段 | 推进问题 | 论据与过渡 |
+| Paragraph | One logical task | Evidence and transition |
 |---|---|---|
-| 1 | 工业采集怎样影响可用证据？ | 物理学习与表示理论；HSE、FISHER、TF-ProFM是直接先例，不声称首次统一。 |
-| 2 | 采集异构与工况变化有何不同？ | 原始recording分离、同侧信息；避免混为随机窗口精度。 |
-| 3 | 一般理论已解决什么？ | Alsing/Spantini/Oko/Xu；确定性不等于有损，满秩完整消息可逆。 |
-| 4 | 本文真正改变哪条计算路径？ | 同监督、同checkpoint的R/H_A/M；H_A与M只差统计非线性，不新增一个模型。 |
-| 5 | 为什么先做直接诊断？ | macro-F1为主；LLapDiff/概率评分是消费者与机制诊断，不能代替分类结果。 |
-| 6 | 什么证据决定去留？ | PHMFactory工业记录、简单重参数化、静态融合、实际成本；框架验收移出贡献。 |
+| 1 | Industrial relevance and the missing-evidence question | HSE/FISHER establish input compatibility; ask what a deployment observation can support. |
+| 2 | Representation capability and transfer boundary | TS-TCC/TF-C/DSN; Zhao/DomainBed separate invariance, private evidence and evaluation access. |
+| 3 | Existing partial-observation inference | MVAE/MMVAE/CSDI/SSSD/DDRM/DDNM/DPS establish missing-view and measurement-conditioned generation. |
+| 4 | Closest corrupted-source learning | Ambient/consistent Ambient/A-DPS/DiEM/DiffEM already learn/use source priors or posteriors. |
+| 5 + Fig.1 | Identify the precise unresolved ambiguity | Same overlapping source laws can imply opposite missing conditionals after including private evidence; latent coordinates also need a reference. |
+| 6 | Three scientific challenges | Identify the actual conditional; separate restriction from temporal structure; attribute downstream diagnostic effects. |
+| 7 | Proposed response | Joint target–condition qualification, HSE/statistical anchor, eligible-only LLapDiff and observed uncertainty. |
+| 8 | Three bounded contributions | Formulation; restricted temporal construction; crossed mechanism-resolved evaluation. |
 
-正文在 `main.md`。通用多领域数据和一般路由分析留在 `paper_TPAMI/`，不复制成工业成绩。保留直接统计经典，不用无关名刊引用凑数。正式正文不混入任务状态或工具日志；未获得的结果不写成方法优势。
+| Challenge | Mathematical/experimental difficulty | Required mechanism | Observable consequence | Experiment |
+|---|---|---|---|---|
+| Comparable conditional target | Shared support and separate marginals do not identify the complete-input conditional or physical coordinate. | Source reference plus qualification of (I_e,C_T), including the coherent joint law when sampled. | Same-source-law conditional disagreement; admitted coverage. | E4/E5 |
+| Restriction–dynamics interaction | A full-model comparison changes two mechanisms at once. | Fixed eligible target; ordinary/Laplace × unrestricted/projected contrast. | Simple effects and interaction in posterior quality, leakage and cost. | E2/E4/E5 |
+| Posterior-to-diagnosis attribution | Extra supervision, nonlinearity and computation can explain gains. | Same-head R/H_A/H_M; generic transforms; simple posteriors; observed-only diagnosis. | Separate per-target diagnosis and same-target posterior effects. | E1/E2/E3 |
+
+`literature_matrix.md` records 33 primary works and their actual selected reading scopes. The formal prose excludes execution status and internal review language. The matrix and contribution map retain implementation/evidence status for authors.

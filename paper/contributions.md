@@ -1,16 +1,17 @@
-# Industrial contribution-to-evidence map
+# Contribution–mechanism–evidence map
 
-The primary claim is an industrial diagnosis effect of conditional-moment coordinates, not a new generator or general information principle.
+## Scientific question
 
-| Contrast | Interpretation it can support | Evidence required |
-|---|---|---|
-| B1-aux vs B1 | auxiliary-supervision effect | same original industrial groups and diagnostic head |
-| M vs B1-aux/R | complete message-layout effect | same source checkpoint, inputs, q/dtype and consumer |
-| M vs same-head H_A | nonlinear statistical-coordinate effect | actual `head_affine` control and measured incremental factorization cost |
-| M vs PCA/whitening/MLP | specificity beyond ordinary reparameterization | fair penalty/HPO/normalization and consumer matching |
-| Direct head vs LLapDiff-mediated head | necessity or optionality of generation | primary diagnostic endpoint, full latency/memory/draw cost |
-| Best single vs static/optional routing | practical combination value | source-only selection, honest fusion cost and untouched test groups |
+In source-only cross-dataset industrial diagnosis, when does temporal inference of a missing latent component help, once the source design identifies its conditional under the complete observed input? Does support restriction contribute independently of the temporal parameterization, conditioner and additional computation?
 
-The current full-q message can be invertible; it is not presumed lossy. M/H_A share exact attainable-image information, so a gain cannot be explained as new Bayes information. These are implementation-specific consequences of classical arguments, not stand-alone new information theory.
+| Contribution | Literature-derived gap | New element in this study | Figure / formulation | Algorithm / experiment / metric | Evidence currently available |
+|---|---|---|---|---|---|
+| C1: conditioning-qualified formulation | Missing-view and corrupted-source learning depend on an identified joint model; a shared view does not identify every conditional with private evidence. | Qualify a source-relative target together with its actual conditioning information. | Fig.1a–b; Method2; Proposition2. | Algorithm1 steps1–2; E4 common-view/joint-acquisition contrast; conditional-law disagreement and admitted coverage. | Analytic three-variable counterexample and executable finite witness; no multi-dataset physical reference calibration. |
+| C2: support-restricted temporal inference | Missing-only/null-space diffusion and stable temporal parameterizations already exist; their independent interaction is not established by stacking them. | HSE-conditioned admitted-subspace LLapDiff with observed uncertainty retained. | Fig.1c; Method3–4; Proposition4. | Steps3–5; E2 restriction × dynamics; same-target Energy Score, leakage and cost. | Projector property and existing conditioner components; restricted native learned path remains to implement. |
+| C3: mechanism-resolved diagnostic evaluation | A complete-model gain confounds conditioning, generation, temporal structure and consumer effects. | Factorial simple/interaction effects linked to same-head controls and source-only industrial diagnosis. | Fig.1d; Method5. | Step6; E1–E3/E5; per-target macro-F1, balanced accuracy, posterior score and cost separately. | Defined estimands/protocol; no new industrial LODO result. |
 
-MFPT acceptance is data/configuration/checkpoint verification under experimental setup. Its reference accuracy is not proposed-method evidence. Native fixture training is also not genuine HSE training. A supported industrial claim needs real source-trained features and at least two industrial data sources or enough independently identified machines/bearings. If M only improves over B1, matches H_A/PCA/MLP, or is dominated by static fusion, narrow or remove the message-specific claim. A negative result completes the comparison.
+The three statements in `main.md` are formulation, proposed mechanism and controlled experimental design, not three empirical findings. Common subspace algebra, conditional-KL identities, generic projection and Laplace dynamics retain their prior status. The new common-view example refines the existing identification boundary; it is not claimed as a new general identifiability theorem.
+
+## Decisions from this revision
+
+Add DiEM and DiffEM as direct corrupted-source/posterior neighbors. Correct FISHER's inspected protocol to frozen features with labelled dataset-specific kNN references. Replace the inference-eligibility shortcut with joint target–condition qualification. Add the crossed restriction–dynamics estimand rather than calling a full-model comparison evidence of interaction. Keep R/head_affine/M as E3 and retain all prior negative results. A Gaussian/mixture/direct classifier or ordinary temporal denoiser matching the proposal narrows the method claim.
