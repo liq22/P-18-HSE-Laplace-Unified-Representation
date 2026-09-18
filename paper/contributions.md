@@ -1,16 +1,19 @@
-# Industrial contribution-to-evidence map
+# Contribution–mechanism–evidence map (author material)
 
-The primary claim is an industrial diagnosis effect of conditional-moment coordinates, not a new generator or general information principle.
+The main question is source-supported latent posterior inference for unseen industrial datasets. Conditional-moment coordinates are a conditioner ablation. LLapDiff is the proposed core generative mechanism; its necessity remains testable rather than assumed.
 
-| Contrast | Interpretation it can support | Evidence required |
-|---|---|---|
-| B1-aux vs B1 | auxiliary-supervision effect | same original industrial groups and diagnostic head |
-| M vs B1-aux/R | complete message-layout effect | same source checkpoint, inputs, q/dtype and consumer |
-| M vs same-head H_A | nonlinear statistical-coordinate effect | actual `head_affine` control and measured incremental factorization cost |
-| M vs PCA/whitening/MLP | specificity beyond ordinary reparameterization | fair penalty/HPO/normalization and consumer matching |
-| Direct head vs LLapDiff-mediated head | necessity or optionality of generation | primary diagnostic endpoint, full latency/memory/draw cost |
-| Best single vs static/optional routing | practical combination value | source-only selection, honest fusion cost and untouched test groups |
+| Contribution | Literature-derived gap | New element proposed here | Figure | Method / estimand / experiment | Current evidence |
+|---|---|---|---|---|---|
+| C1: source-referenced partially observable formulation | Shared/private features, measurement-null generation and corrupted-data identification are established separately; source union alone does not determine which industrial conditional is identified. | Four source-relative roles plus an explicit source-identified missing target, with a target-common-support correction. | A–B | Method 1–2; support assignment, eligible coverage and known-joint conditional error; E4–E5. | Finite subspace and nonidentifiability witnesses. No physical source reference established on multiple real datasets. |
+| C2: support-restricted HSE–LLapDiff design | Existing masked diffusion does not by itself validate a mask on arbitrary learned physical coordinates or its source evidence. | Acquisition-aware HSE/statistical anchor, a source-justified eligible latent subspace, and stable Laplace temporal prediction restricted to that target while retaining observed evidence. | B–C | Method 3–4; projected-update leakage, posterior Energy Score and generator cost; E2–E4. | Projection theorem and finite update witness; actual source-restricted native implementation pending. |
+| C3: posterior-to-diagnosis attribution | Better posterior or denoising scores do not imply cross-dataset diagnostic benefit; ordinary nonlinear coordinates and extra supervision can confound the claim. | A joint evidence chain with fixed-condition generator contrasts, fixed-generator conditioner contrasts and untouched target-dataset diagnosis. | D | Method 5; per-target group-balanced macro-F1, same-target posterior score and cost; E1–E3. | Existing coordinate/native component controls remain valid; no learned LODO method result yet. |
 
-The current full-q message can be invertible; it is not presumed lossy. M/H_A share exact attainable-image information, so a gain cannot be explained as new Bayes information. These are implementation-specific consequences of classical arguments, not stand-alone new information theory.
+## Claim language
 
-MFPT acceptance is data/configuration/checkpoint verification under experimental setup. Its reference accuracy is not proposed-method evidence. Native fixture training is also not genuine HSE training. A supported industrial claim needs real source-trained features and at least two industrial data sources or enough independently identified machines/bearings. If M only improves over B1, matches H_A/PCA/MLP, or is dominated by static fusion, narrow or remove the message-specific claim. A negative result completes the comparison.
+Use “we formulate”, “we specify/propose” and “we derive” for the actual formulation, proposed mechanism and proved scope properties. Do not write that the support-restricted LLapDiff was implemented/trained or that industrial diagnosis improved before it occurs. General subspace algebra, KL decomposition, Bayes denoising projection and prior-mediated null inference are attributed supporting theory, not independently new principles.
+
+The current three contribution statements are therefore not three verified empirical findings. A paper-level method contribution requires C2's actual native mechanism and C3's new industrial evidence. If Gaussian/mixture or ordinary diffusion matches it, report that result and narrow the LLapDiff claim. If only the conditioner improves, retain the coordinate result as a component finding rather than pretending it demonstrates the full posterior program.
+
+## Changes accepted from the supplied comments
+
+Promote cross-dataset posterior inference above coordinate attribution. Keep four observational roles and conditional identifiability distinct. Retain the same-head controls. Correct Laplace-noise motivation to Laplace-domain modal dynamics; separate dataset family from same-event pairing; qualify arbitrary learned-coordinate support; retain the correlated-prior null counterexample. Explicitly test reject-all rather than using zero unsupported emissions as sufficient success.
