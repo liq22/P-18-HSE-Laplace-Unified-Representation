@@ -55,3 +55,9 @@ Fit/checkpoint/select on independent source groups; reserve fresh calibration gr
 Retain raw predictions, source choices, selected checkpoints, all predeclared contrasts and per-group paired scores. Distinguish source/unseen acquisitions and seed/draw/recording units. Costs include q/dtype/bytes, fitted transforms, shared head/trunk, consumer, factorization, training updates and measured inference resources. Same q does not prove equal computation.
 
 Multi-arm CSV comparison requires explicit `--reference` and `--candidate`. Each selected pair must retain exact event/condition/seed/group matching and common draw/sampler budgets. Nonlinear classification statistics are recomputed from predictions. CSV-only figures output SVG/PDF/PNG; no expected curves. A null M/head or M/PCA/MLP result, static-fusion win or negative target transfer completes the question and narrows the method claim.
+
+## Immediate fixed-bank decision
+
+Run `prediction-check` on the actual retained reference outputs before adding a classification gate to that bank. The present seven-model affine bank has no observed label disagreement, so this gate experiment is stopped for classification accuracy/macro-F1. A score-quality comparison is separately defined; it does not turn unnormalized ridge scores into a proper probability forecast. A new model family or task would require its own source-frozen comparison, not extrapolation of the current finite conclusion.
+
+The genuine learned comparison continues to use the repository's `B1_aux`, `head_affine` and `M` from the same checkpoint. It is not replaced by this reference replay. Industrial label experiments remain in TII, direct diagnosis heads precede diffusion necessity claims, and all five general-domain protocols retain their actual integration status.
