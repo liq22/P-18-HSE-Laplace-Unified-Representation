@@ -1,76 +1,87 @@
 # Acquisition-Support-Aware HSE–LLapDiff
 
-## 1. Dataset, event and target
+## 1. Source reference and observation model
 
-Let e index a dataset/acquisition domain and i an independent physical event or original recording. Write
+Let e denote an acquisition domain and i an independent event or original recording:
 
 $$
-x_{ei}=\mathcal A_e\Psi_e(z_i,u_i)+\varepsilon_{ei},
+x_{ei}=\mathcal A_e\Psi_e(z_i,u_i)+\varepsilon_{ei}.
 $$
 
-where u is operating condition, z a source-referenced latent state and Psi_e the mechanical response map. A common fault ontology does not imply identical Psi_e. Same-event pairing is used only for complementary source acquisitions or transformations of one recording; unrelated datasets are not paired by sorting class labels.
+The operating condition u, mechanical response map Psi and acquisition operator are distinct. A common class label does not establish a common mechanical coordinate. The first reference model uses a source-calibrated finite dictionary, giving x_e=A_e z+epsilon_e with a declared noise law. A learned extension requires validated cross-source block correspondence and a compatible decoder. Without physical calibration, its target is a reference-feature posterior, not a recovered mechanical mode. Pair source views within an original recording or a declared joint acquisition, never by sorting labels from unrelated datasets.
 
-The first identifiable oracle fixes a source-calibrated finite dictionary and reduces this model to x_e=A_e z+epsilon_e with known noise. For a learned extension, the reference encoder must establish comparable, block-structured target coordinates across the declared mechanical family. Its support assignment is fitted from source data/physics only. An arbitrary nonlinear VAE latent does not satisfy this requirement automatically. The native LLapDiff's predicted modal parameters are not taken as ground-truth mechanical coefficients.
+## 2. Qualifying a target together with its condition
 
-## 2. Structural support and inference eligibility
-
-For the linear reference let O_e=range(A_e^T), U_s=sum_j O_j and C_s=intersection_j O_j over sources. The first deployment scope requires O_e contained in U_s. Define
+Write O_e=range(A_e^T), U_s=sum_j O_j and C_s=intersection_j O_j over sources. For the declared deployment scope O_e subset U_s, define
 
 $$
 C_e=C_s\cap O_e,\quad P_e=O_e\cap C_e^\perp,\quad
 M_e=U_s\cap O_e^\perp,\quad N_0=U_s^\perp.
 $$
 
-For a source domain C_e=C_s; for an unseen acquisition, a previously common direction may be missing. The four spaces are orthogonal and complete under the declared nesting. Their projectors need not be diagonal in raw latent coordinates. Coordinate masks are used only for an aligned, block-separable reference. A positive diagonal entry of A^T R^{-1}A signals sensitivity, not individual-mode recoverability. Near-singular directions require a source-frozen numerical tolerance and a reported sensitivity analysis, not a silent structural-null label.
+These orthogonal spaces denote currently common, observed-private, source-supported-missing and source-global-null components. Recompute C_e for the current acquisition. General operators require subspace projectors; diagonal sensitivity alone is not coordinate recoverability. Separate exact nullity from weak noisy directions, using a source-selected tolerance with sensitivity analysis.
 
-Let I_e be a source-justified subspace within M_e whose required conditional distribution is identifiable, and let G_e project onto I_e. This is an inference permission, not a padding mask or a learned certainty score. Its justification is paired source joint observations with an identifiable observation map, an identifiable random corruption ensemble, or a stated physical coupling. The first implementation may use a binary all-or-none decision per declared modal block; it must not infer permissions from target test labels. Identification is required for the joint eligible target, not merely for each of its one-dimensional marginals. Source identification and source-to-target conditional transportability remain separate assumptions.
+Let C_T be the complete condition supplied to the posterior, including HSE features, private evidence, acquisition descriptors and support information. Fix a candidate target I_e subset M_e. The pair (I_e,C_T) is admissible when every joint model compatible with the source observation law and the stated physical/statistical assumptions gives the same required conditional p(Z_I given C_T), almost surely on its supported conditioning domain. Joint identification, not separate coordinate-wise identification, is required. This is a population property of the observation design and assumptions, not a score threshold that proves identifiability from a finite dataset.
 
-The unresolved part M_e minus I_e is retained as missing-without-an-identified-conditional. N_0 is excluded from data-supported recovery outputs. A prior can still induce beliefs on N_0; that is not a measured reconstruction and is not reported as one.
+For coherent observed/missing draws, the stronger required object is p(Z_o,Z_I given C_T). Its factorization into observed and missing conditionals does not supply identification by itself. In particular, identification of p(M given C) cannot authorize p(M given C,P). Source pairing with an identifiable observation model, an identifiable corruption ensemble, or an explicit physical coupling can supply the missing relationship. Source-to-target transportability and conditioning-domain overlap remain separate assumptions. The finite common-view counterexample is given in the accompanying analysis.
+
+Freeze the chosen joint target and its orthogonal projector G_e from source information. No largest universally identifiable subspace is presumed. Ineligible missing components and N_0 have no recovered-value output; an externally assumed prior may still express beliefs about them. A target with genuinely new measured support lies outside this four-role deployment scope, rather than being rejected as invented evidence.
 
 ## 3. HSE condition and statistical anchor
 
-Construct the complete encoder-visible record C_F from observed values, timestamps, valid-value mask, acquisition descriptors, support projectors/mode roles and the identification decision. HSE supplies fixed-budget features; the statistical readout anchors a source-defined target functional. The generator consumes the same declared C_T=(H,a,roles,eligibility) in every compared arm. Role/eligibility metadata and side inputs count toward transmission and computation, even if sent outside the token tensor.
-
-The existing matched mechanism uses one source-supervised code R and a trained affine head h(R). Its messages are H_R=R, H_A=[h(R),R_tail] (`head_affine`) and H_M=Phi(H_A), where Phi converts raw covariance coordinates to a positive-definite factor. These remain conditioner ablations, not the main scientific endpoint. The auxiliary Gaussian score acts on the path later consumed by the ordinary comparator. Freeze that path after source-only selection; retain score components, covariance constraints, dtype and rank diagnostics. Conditional moments are not a complete non-Gaussian posterior, and a moment-only condition can lose distributional shape.
-
-## 4. Conditional posterior with restricted latent dynamics
-
-The generative target is the eligible missing component. In an orthonormal basis B_e of I_e, use Gaussian forward perturbations
+The complete encoder-visible record C_F includes values, times, masks and all allowed descriptors. HSE produces a fixed-budget condition. A source-supervised ordinary code R and one trained affine moment head h(R) give three interfaces:
 
 $$
-v_\tau=\alpha_\tau v_0+\sigma_\tau\epsilon,\quad
-v_0=B_e^Tz,\quad \epsilon\sim\mathcal N(0,I).
+H_R=R,\qquad H_A=[h(R),R_{\rm tail}],\qquad H_M=\Phi(H_A).
 $$
 
-Equivalently the ambient perturbation is G_e z_tau=alpha_tau G_e z+sigma_tau G_e epsilon. A reverse update is projected into I_e before it is combined with the retained observed-evidence representation. The projection must be applied throughout the reverse process, not only to its final displayed output. For zero eligible dimension, no diffusion process is invoked; the output carries the observed representation and its support status, not confident zero-valued recovered latents.
+Phi maps raw covariance coordinates to a positive-definite factor; H_M retains the same tail. The Gaussian auxiliary score trains the exact R path used by the ordinary comparator. Freeze the source-selected checkpoint before comparing the three interfaces. All arms receive the same allowed side information and inference eligibility; side fields count toward memory and computation. Conditional moments anchor a declared source target but do not identify a non-Gaussian conditional law. In ideal arithmetic H_A and H_M are invertible on the attainable image of the existing factor map; finite precision and conditioning remain measurable diagnostics.
 
-LLapDiff parameterizes the clean latent trajectory with stable damped modes, schematically
+## 4. Restricted temporal posterior
+
+For an orthonormal basis B_e of I_e, perturb only the admitted target:
+
+$$
+v_\tau=\alpha_\tau v_0+\sigma_\tau\epsilon,
+\qquad v_0=B_e^Tz,\qquad\epsilon\sim\mathcal N(0,I).
+$$
+
+The equivalent ambient noise has covariance sigma_tau^2 G_e. Each reverse proposal is projected by G_e. The Laplace component parameterizes the temporal prediction schematically as
 
 $$
 \widehat z(t)=\sum_k e^{-\rho_k t}
-\{b_k\cos(\omega_k t)+c_k\sin(\omega_k t)\},\qquad \rho_k\ge0.
+\{b_k\cos(\omega_k t)+c_k\sin(\omega_k t)\},\qquad\rho_k>0.
 $$
 
-This is Laplace-domain temporal structure, not Laplace noise. The eligibility map applies to source-identified latent blocks; an unconstrained dense decoder must not remix them into claimed physical-null reconstructions. The block-separable target/decoder relation is therefore part of the source reference definition. Event-local damping, arbitrary-time evaluation and residual adequacy motivate the parameterization. Heavy tails or spikes alone do not establish its necessity.
+Physical time t is distinct from diffusion time tau. Damping and arbitrary-time evaluation motivate a local temporal bias, not a claim that the predicted poles are identified machine modes. A block-consistent reference/decoder is needed to translate latent support preservation into physical support preservation. Diffusion remains iterative and uses Gaussian perturbations.
 
-Observed noisy measurements are not clamped as exact latent truth. Retain their original HSE evidence path. When a full joint posterior representation is needed, use the factorization
+Observed noisy values are not exact clean latents. Preserve the original HSE evidence path and, when joint draws are needed, use the source-identified factorization
 
 $$
 q(z_o,z_m\mid C_T)=q_o(z_o\mid C_T)\,
-q_\theta(z_m\mid z_o,C_T),\qquad z_m\in I_e,
+q_\theta(z_m\mid z_o,C_T),\qquad z_m\in I_e.
 $$
 
-and carry observed uncertainty into the conditional sampler. q_o may be analytical in the oracle or an explicitly validated source readout. No independence between observed and missing posterior blocks is assumed. Preserving observed evidence is an architectural property; it is not a claim that its noise-free state has already been recovered.
+The observed posterior q_o is analytical under a known oracle or an independently evaluated source readout. The missing sampler conditions on the same sampled z_o; independently sampling the two marginal posteriors is not a substitute for the joint. For rank(G_e)=0, no missing-state sampler is invoked.
 
-## 5. Diagnosis and attribution
+## 5. Diagnosis and algorithm
 
-A source-trained diagnostic model aggregates predictions over coherent posterior draws,
+A source-trained diagnostic model averages predictions over coherent draws:
 
 $$
-\widehat p(y\mid x_e)=\frac1L\sum_{\ell=1}^L
-h_y(z_o^{(\ell)},z_m^{(\ell)},a_e,\text{support status}).
+\widehat p(y\mid x_e)=L^{-1}\sum_{\ell=1}^{L}
+ h_y(z_o^{(\ell)},z_m^{(\ell)},a_e,\text{support status}).
 $$
 
-Use the same source label ontology and diagnostic training rule for observed-only, point, Gaussian, finite-mixture, ordinary diffusion and LLapDiff arms. Do not use a random target head as zero-shot diagnosis. A posterior-mean/variance concatenation is a named cheaper ablation, not an assertion of full-distribution sufficiency. The output does not include an inferred value for N_0 or an ineligible missing component.
+A posterior-moment summary is a cheaper, separately named ablation. Direct observed-only diagnosis remains a primary comparator.
 
-The comparison fixes target, conditioner, actual side information and eligible support when isolating the generative family; it fixes the generator and support when isolating R/H_A/H_M. Measure total encoder/reference-training/generator/head costs, posterior draws and factorization cost. Static prediction fusion and direct observed-only classifiers remain strong alternatives; dynamic routing is not required by this formulation.
+**Algorithm 1 — source-qualified temporal inference.**
+
+1. Split original source groups; establish the reference, observation/noise model and class ontology using source data only.
+2. Specify the actual C_T and qualify its joint target; freeze I_e, B_e and G_e under the declared assumptions.
+3. Fit the shared HSE/statistical anchor on source training groups and select its checkpoint on source validation groups.
+4. Train the conditional generator on the admitted target with the specified noise schedule, target parameterization and weighting. Retain the observed-evidence branch.
+5. At inference, sample the observed uncertainty and run eligible-only reverse updates for coherent missing draws; omit unestimated coordinates.
+6. Apply the source-trained diagnostic rule and report posterior, diagnosis, admitted coverage and total cost separately.
+
+The restriction–dynamics comparison fixes steps 1–3, observed uncertainty, diagnostic training and evaluation targets, changing only the declared generative restriction and temporal parameterization in steps 4–5. Comparisons use the same prediction type and conditioning horizon. Velocity-target and clean-target objectives require explicit parameterization and weighting before an equivalence comparison. Every run records the actual parameter count, active dimension, updates, draws, latency and memory.

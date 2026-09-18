@@ -1,77 +1,78 @@
-# Source-supported partial posterior: assumptions, proofs and boundaries
+# Source-supported partial posterior: assumptions and analysis
 
-## 1. Defined scope
+## 1. Scope
 
-Consider a finite-dimensional real reference space H, with linear source acquisitions x_e=A_e z+epsilon_e. Operators and noise laws are fixed independently of the unobserved z, or their dependence is included in the likelihood. The same reference coordinate has the same stated meaning across source acquisitions. Different machines need a validated correspondence, not merely identical class names. For nonlinear learned coordinates the results apply only after a valid induced observation/support relation is established.
+Consider a finite-dimensional real reference space H and source acquisitions x_e=A_e z+epsilon_e. Operators and noise laws are fixed independently of unobserved z, or their dependence is included in the likelihood. Coordinates have the same declared meaning across acquisitions; a learned reference needs an established induced observation relation. All complements use the reference inner product.
 
-All orthogonal complements below use the declared reference inner product. Let O_e=range(A_e^T), U_s=sum_j O_j, C_s=intersection_j O_j. The target scope assumes O_e subset U_s. Source-global-null means invisible to every **declared source operator**, not to every possible future sensor.
+Let O_e=range(A_e^T), U_s=sum_j O_j and C_s=intersection_j O_j. The deployment scope assumes O_e subset U_s. Source-global-null means invisible to the declared source operators, not to every possible sensor. Exact nullity differs from noisy ill-conditioning.
 
-## 2. Proposition 1 — source-referenced four-role decomposition
+## 2. Proposition 1 — source-relative role decomposition
 
-Set C_e=C_s intersection O_e, P_e=O_e intersection C_e^perp, M_e=U_s intersection O_e^perp and N_0=U_s^perp. Then
+Define C_e=C_s intersection O_e, P_e=O_e intersection C_e^perp, M_e=U_s intersection O_e^perp and N_0=U_s^perp. Then
 
 $$
 H=C_e\oplus P_e\oplus M_e\oplus N_0.
 $$
 
-**Proof.** C_e is a subspace of O_e, so O_e=C_e direct-sum (O_e intersection C_e^perp). Similarly O_e subset U_s implies U_s=O_e direct-sum (U_s intersection O_e^perp). Finally H=U_s direct-sum U_s^perp. Substitute the first two decompositions into the third. Each is orthogonal; hence the four component projectors sum to the identity and have zero pairwise products. ∎
+**Proof.** Since C_e subset O_e subset U_s subset H, successively decompose O_e into C_e and its orthogonal complement inside O_e, U_s into O_e and its orthogonal complement inside U_s, and H into U_s and U_s^perp. Substitution gives the four orthogonal components. Their projectors sum to the identity. $\square$
 
-For sources C_e=C_s. For a target acquisition C_e can be smaller: keeping the old common mask fixed would misclassify previously common but now absent information. If O_e is not contained in U_s, this four-role source model does not cover its newly observed directions. Such genuine new measurements must not be called source-supported recovery of N_0.
+For source domains C_e=C_s. A target can lose a source-common direction, requiring a new C_e. If O_e is not contained in U_s, genuinely new measurements fall outside this four-role scope. With A=[1,1], positive diagonal entries of A^T A do not identify either coordinate separately: z and z+(1,-1) have identical measurements. These are elementary subspace facts, not a new observability theorem.
 
-**Sensitivity is not observability.** With A=[1,1], both diagonal entries of A^T A equal one, yet z and z+(1,-1) have the same observation. Neither individual coordinate is identified; only their sum is. Diagonal sensitivity masks therefore cannot replace row-space observability without an additional block-separable assumption. Finite-noise ill-conditioning must also be separated from exact nullity.
+## 3. Proposition 2 — common source views do not identify the full-input conditional
 
-This is elementary subspace algebra used to define an industrial inference contract, not a new general observability theorem.
-
-## 3. Proposition 2 — source support does not identify every conditional
-
-Let C and M be binary and uniformly distributed marginally. The joint laws M=C and M=1-C have the same separate marginals but opposite conditionals. If source acquisition 1 observes only C and source acquisition 2 observes only M on unpaired events, the two laws produce identical observed-data distributions. Therefore that source experiment does not identify p(M|C).
-
-**Proof.** For either law, each separately observed bit is Bernoulli(1/2). The likelihood of any unpaired sample is consequently the same, while p(M=1|C=1) is one in the first law and zero in the second. ∎
-
-Paired events that reveal the joint state resolve this finite example. More generally, pairing still needs an identifiable observation/noise model. Conversely, suitable random corruption ensembles can identify a joint distribution without paired clean views, as shown in Ambient Diffusion. Pairing is one sufficient route under its assumptions, not a universal necessity. An inferable target is defined by invariance of its joint conditional law across all joint models compatible with the source observation law and the declared assumptions. Separately identified marginal conditionals do not establish an identified multivariate joint posterior.
-
-A source-identified conditional does not automatically transfer. Holding source C,M fixed and changing the target relation from M=C to M=1-C leaves source validation unchanged but reverses the correct target prediction. Any deployment guarantee needs an explicit transportability condition or must remain an empirical held-out result. Source and target acquisition descriptors alone do not prove that condition.
-
-## 4. Proposition 3 — global-null likelihood and prior-mediated updates
-
-Let P_0 project onto N_0. Then A_e P_0=0 for each source. Writing z=z_s+z_0 gives
+Let C and P be independent Bernoulli(1/2) variables. In world W_plus let M=P; in world W_minus let M=1-P. Source A observes (C,P), source B observes (C,M), and their events are unpaired. Both source observation laws are identical across the two worlds, yet
 
 $$
-p(\{x_e\}_e\mid z_s,z_0)=p(\{x_e\}_e\mid z_s)
+p_+(M=1\mid C=1,P=1)=1,\qquad
+p_-(M=1\mid C=1,P=1)=0.
 $$
 
-for a declared noise model independent of z_0 given z_s. This is a likelihood statement conditional on the supported state. It does **not** imply p(z_0|x)=p(z_0) for a correlated prior.
+**Proof.** In both worlds, C is independent of P and of M, and each bit is fair. Hence each observed pair has the same uniform distribution on four outcomes. The conditional statements follow from the respective deterministic relationships between P and M. $\square$
 
-**Proof.** Substitute A_e(z_s+z_0)=A_e z_s into each acquisition likelihood (or its correctly correlated joint likelihood). ∎
+The source-B conditional p(M given C) is the same uniform law in both worlds. It is identified in this example, while p(M given C,P) is not. The source-common variable C is therefore not automatically a conditional-independence separator. Adding observed private evidence changes the required conditional; a model trained for one cannot simply be claimed to represent the other. Removing C recovers the earlier two-marginal counterexample, so the new witness strengthens rather than contradicts that boundary.
 
-For an unrestricted prior extension, two distributions with identical supported-state marginal but different conditional laws p(z_0|z_s) induce the same source observations. Hence that conditional extension is not identified by source likelihood alone. If an external prior fixes it, posterior inference can propagate observations through that assumed coupling.
+Fix the source observation law and declared model class. For a source-selected candidate I_e subset M_e and a fixed complete conditioning function C_T, require agreement of p(Z_I given C_T) across every compatible joint law, almost surely on the supported conditioning domain. When diagnosis consumes coherent observed/missing draws, require the corresponding joint p(Z_o,Z_I given C_T). Separate marginal identification is insufficient. No automatic largest admissible subspace or empirical reconstruction threshold is implied by this definition.
 
-**Finite Gaussian counterexample.** Let (Z_s,Z_0) have unit variances and correlation 0.8, and X=Z_s+epsilon with unit independent Gaussian noise. Given X=1,
+A joint source acquisition revealing (C,P,M) distinguishes these finite worlds. More generally, pairing requires an identifiable observation/noise model. Suitable corruption ensembles can also identify distributions, as studied in Ambient Diffusion and related corrupted-data work. Paired clean data are not a universal necessity. Source identification remains distinct from transportability: changing a target from M=P to M=1-P leaves every source-validation result unchanged. A deployment guarantee requires an explicit conditional-transport and overlap assumption.
+
+## 4. Proposition 3 — source-null likelihood and prior-mediated inference
+
+Let P_0 project onto N_0. For every source, A_e P_0=0. If the declared noise law has no additional dependence on z_0 given z_s, then
+
+$$
+p(\{x_e\}_e\mid z_s,z_0)=p(\{x_e\}_e\mid z_s).
+$$
+
+**Proof.** Substitute A_e(z_s+z_0)=A_e z_s into the correctly specified joint measurement likelihood, allowing dependent noise where declared. $\square$
+
+This does not imply an unchanged marginal posterior under a correlated prior. Two prior extensions with the same supported-state marginal but different p(z_0 given z_s) produce the same source observation law. Source likelihood alone does not identify that extension.
+
+For unit-variance Gaussian (Z_s,Z_0) with correlation 0.8 and X=Z_s+epsilon with independent unit Gaussian noise, X=1 gives
 
 $$
 \mathbb E[Z_0\mid X=1]=0.4,\qquad
 \operatorname{Var}(Z_0\mid X)=1-0.8^2/2=0.68.
 $$
 
-The likelihood still contains no direct Z_0 term. Under an independent prior the same observation instead leaves mean zero and variance one. These are different prior assumptions, not different source measurements. The proposed method excludes N_0 from recovery outputs to make this evidential boundary explicit; it does not claim that all Bayesian beliefs on N_0 are impossible.
+An independent prior instead gives mean zero and variance one. Excluding N_0 from recovered-value outputs declares an evidential scope; it does not prohibit externally assumed Bayesian beliefs.
 
-## 5. Proposition 4 — eligibility-preserving generation
+## 5. Proposition 4 — support-preserving reverse proposals
 
-Let I_e be a source-justified subspace of M_e and G_e its fixed orthogonal projector. In an internal accumulator, initialize v_K in I_e and, for any measurable proposed reverse update F_k, set
+Let G_e be the fixed orthogonal projector onto an admitted I_e subset M_e. Initialize v_K in I_e and let F_k be any measurable proposal. Set
 
 $$
 v_{k-1}=G_eF_k(v_k,C_T,\xi_k).
 $$
 
-Then v_k belongs to I_e at every step and (I-G_e)v_k=0. Equivalently, a representation r_o carried outside I_e remains unchanged if the full update is r_o+v_{k-1}, with r_o orthogonal to I_e.
+Then v_k lies in I_e at every step and (I-G_e)v_k=0. A separately retained r_o orthogonal to I_e remains unchanged in r_o+v_k.
 
-**Proof.** The initialization is in the projector's range. Applying G_e maps any proposed update into that range, so induction proves the statement. Orthogonality eliminates the complementary component. ∎
+**Proof.** The initialization lies in range(G_e), and applying G_e maps each proposal to that range. Induction and orthogonality give both statements. $\square$
 
-Zero in the internal accumulator is not a claimed recovered value for an unsupported coordinate; those coordinates are omitted or marked unestimated in the public output. With rank(G_e)=0 there is no generative target. If the support projector changes during sampling, or a final dense decoder mixes supported and unsupported physical coordinates, this proof no longer certifies the corresponding physical output. It is a support-compliance property, not proof that q_theta is the correct posterior. Masked and null-space generation have direct predecessors in CSDI, SSSD and DDNM; the proposed contribution concerns the source-qualified target and its industrial coupling, not projection alone.
+With rank(G_e)=0 there is no missing-state sampler. Internal zero means no update, not a certain zero-valued reconstruction. Changing projectors during sampling or mixing blocks through a dense physical decoder requires a different support analysis. The proposition establishes structural compliance, not posterior correctness. Missing-only and null-space generation have predecessors in CSDI, SSSD and DDNM.
 
-## 6. Existing error identities on the admitted target
+## 6. Inherited error identities on a fixed admitted target
 
-Fix one acquisition/design and its eligible target Z_m. Let C_T be a deterministic measurable function of complete visible C_F, including all actual side inputs in both. With compatible conditional densities and finite expected KL,
+Fix an acquisition and admitted target Z_m. Let the complete consumed C_T be a deterministic function of full visible C_F, including all actual side inputs. With compatible conditional densities and finite expected KL,
 
 $$
 \mathbb E\operatorname{KL}\{p(Z_m\mid C_F)\Vert q_\theta(Z_m\mid C_T)\}
@@ -79,21 +80,19 @@ $$
 +\mathbb E\operatorname{KL}\{p(Z_m\mid C_T)\Vert q_\theta(Z_m\mid C_T)\}.
 $$
 
-**Derivation.** Insert p(Z_m|C_T) into the log density ratio. The first expectation is conditional mutual information because C_T is determined by C_F. For the second use the tower property to integrate first conditional on C_T, obtaining its conditional KL. This is the shared Theory 09, applied to the same admitted target. An arbitrary diagonal-Gaussian plug-in is not automatically the true compressed conditional.
+**Derivation.** Insert p(Z_m given C_T) in the log ratio. The first expected term is conditional mutual information; conditioning and the tower property give the second conditional KL. This applies the shared compression identity, not a new information principle. A Gaussian plug-in need not equal the true compressed conditional.
 
-Under the same Gaussian diffusion schedule and a square-integrable regression target V_tau, the optimal full/compact denoisers satisfy
+For a common square-integrable denoising target V_tau and nested information sets containing the same noisy target, time and metadata,
 
 $$
 \mathcal R_T^\star-\mathcal R_F^\star
 =\mathbb E\|f_F^\star-f_T^\star\|^2.
 $$
 
-**Derivation.** Expand V_tau-f_T as (V_tau-f_F)+(f_F-f_T). The cross expectation vanishes by conditional-mean orthogonality. This requires the nested information sets to contain the same noisy target, time and consumed metadata. An actual finite model has a further fitting/optimization term. Changing target mask, sampling schedule, parameterization or batch-weight normalization changes the estimand and requires the corresponding weighting. The detailed shared Theory 10 retains those conditions.
+**Derivation.** Expand V_tau-f_T as (V_tau-f_F)+(f_F-f_T); conditional-mean orthogonality cancels the cross term. Fitted consumers have additional approximation/optimization errors. Different target parameterizations, weights, schedules or masks require their actual objectives rather than an unweighted substitution.
 
-Neither identity guarantees better diagnostic macro-F1 or identifies an unknown target conditional. The learned prior and all posterior samples are functions of the same observations plus source training/randomness; they create no new measured information. If the fault label depends on omitted unsupported components, no task-sufficiency guarantee follows for the partial posterior; this is an explicit diagnostic failure condition rather than an assumption erased by rejection.
+Neither identity proves diagnostic macro-F1 improvement or transport of an unidentified conditional. Posterior samples use the same observations plus source learning and randomness. If labels require omitted unsupported components, the partial posterior need not be task-sufficient.
 
-## 7. Executable scope and contribution boundary
+## 7. Executable and empirical scope
 
-The same-stem Notebook checks the four-role algebra, target loss of source-common support, mixed-coordinate ambiguity, unpaired conditional counterexample, correlated-prior null update and projected sampling compliance. Its CSV records finite witnesses only. The existing full-statistic/diagonal-token collision and native three-arm tests are retained elsewhere, not relabelled as support-constrained LLapDiff training.
-
-The current native code does not yet implement source-qualified modal blocks or their restricted reverse process. General algebra and standard information identities are supporting results. A new industrial method claim requires a validated source-reference correspondence, actual projected native training and unseen-dataset evidence against matched posteriors/conditioners. Rejecting every missing block yields perfect structural compliance but no recovery utility; report admitted support coverage and useful posterior/diagnostic performance jointly.
+The same-stem Notebook checks role algebra, target loss of common support, mixed-coordinate ambiguity, the overlapping-source counterexample, prior-mediated null inference, projected proposals and conditional reversal. Its 14 retained numerical values are finite theoretical witnesses. They are not trained restricted-LLapDiff results. The source-reference calibration, actual native projected training and industrial LODO remain required. Rejecting every target is assessed with admitted coverage and diagnostic utility, not structural compliance alone.

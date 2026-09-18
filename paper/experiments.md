@@ -1,31 +1,54 @@
-# Five experiments for the source-supported posterior claim
+# Industrial experiments: target identification, mechanism and diagnostic value
 
-## E1 — source-only cross-dataset industrial diagnosis
+## Common design
 
-Use multiple accepted industrial source datasets and hold out one complete target dataset at a time. PHMFactory alone owns raw preparation, labels, source splits and grouping keys. A shared fault ontology, documented mechanical correspondence and deployment acquisition descriptors are prerequisites, not assumptions inferred from matching dataset names. Source labels are permitted; target labels are used only for final scoring. No target normalization, representation fitting, covariance threshold selection or checkpoint choice. Unsupported target classes require a separate open-set protocol, not a randomly initialized target classifier.
+All industrial data, labels, original-group identities and initial splits come from PHMFactory. TII uses industrial data only. Split original recordings/bearings/machines before generating paired acquisition views. Use a source-established reference and common fault ontology; unrelated datasets are not paired by matching labels. Source labels and source validation are allowed. Target labels are for final scoring only: no target normalization fitting, representation fitting, covariance-threshold choice, head fitting or hyperparameter selection. Unsupported classes require a separate open-set protocol.
 
-Split original recording/bearing/machine groups before constructing paired views. Pairings for posterior supervision are within the same source event/recording or declared simulator; unrelated source datasets are not class-sorted into paired samples. Compare the complete proposed model with observed-only HSE/direct diagnosis, strongest same-input single model and static prediction fusion. Report each target's recording-balanced pooled-confusion macro-F1 and balanced accuracy, then dataset-macro differences. Latent windows, training seeds and posterior draws are not independent datasets. Predeclare practical/equivalence margins and model-selection budgets. MFPT's existing six-parameter reference is data-path acceptance only and cannot alone support this experiment.
+The target–condition pair, noise model, query horizon, side inputs and numerical support tolerance are fixed before comparing methods. Known synthetic laws support identification/error analysis; they do not enter industrial performance tables. Sampled windows, optimizer seeds and posterior draws do not increase the number of independent recordings or datasets.
 
-## E2 — the conditional generative mechanism
+## E1 — unseen-dataset diagnosis
 
-Fix the same source data, admitted target, observed condition and side inputs. Compare deterministic imputation, Gaussian posterior, finite mixture, ordinary latent diffusion and LLapDiff. The ordinary latent denoiser must match target coordinates, support restriction, network/update/sampling budgets as closely as feasible; report residual cost differences rather than calling equal token width equal computation. A generic masked conditional diffusion/SSSD-style temporal model and appropriate inverse-posterior formulation are direct mechanism references; FISHER/HSE remain industrial representation references.
+Train on multiple accepted source datasets and leave one complete dataset out in turn. Compare the complete proposal with observed-only HSE/direct diagnosis, the strongest source-selected same-input single method, static prediction fusion and compatible industrial references such as FISHER. Reproduce the source-only protocol rather than importing target-labelled kNN or target fine-tuning results as zero-shot baselines. HSE/TF-ProFM comparisons require available compatible implementations and equal data access.
 
-Primary posterior score: joint Energy Score on held-out eligible targets. Report conditional/marginal coverage, sharpness, target error and coherent-sample diagnostics separately. Exact posterior KL and exact NLL are limited to known-law or tractable-density settings; approximate diffusion likelihood is not ranked against exact Gaussian likelihood without matching conventions. A deterministic point has a valid point/Dirac scoring interpretation but not a finite continuous-density NLL by default. Report diagnosis separately. A better posterior score without a diagnostic gain is a mechanism result, not a successful E1 claim.
+Primary endpoint: recording-balanced pooled-confusion macro-F1 for each target, followed by the dataset-macro paired difference. Also report balanced accuracy, conventional pooled-window metrics and cost. Give each original group equal total weight, pool its weighted confusion contributions, then compute F1. Resample original groups for uncertainty; do not average single-class file F1. Freeze practical margins and selection budgets using sources. MFPT reference acceptance alone is not an E1 method result.
 
-## E3 — HSE and conditional-anchor attribution
+## E2 — posterior family and the restriction–dynamics interaction
 
-Within the same eligible posterior process compare existing R, same-head raw H_A (`head_affine`), statistical H_M, full-q PCA/whitening/orthogonal coordinates and a matched nonlinear MLP conditioner. Use the same auxiliary-supervised source checkpoint when isolating the coordinate map; retain ordinary B1 without auxiliary supervision to isolate training effects. Transport regularization when claiming affine equivalence, and record dtype/bytes, rank, scale, factorization cost and all learned parameters.
+First hold the same admitted target, observed condition and source supervision fixed and compare point prediction, Gaussian, finite mixture, ordinary latent diffusion and LLapDiff. The primary sample-based posterior endpoint is joint Energy Score on the common admitted target. Report uncertainty coverage, sharpness and joint dependence diagnostics separately. Exact KL/NLL is used only when its density and reference law are available. Do not compare an approximate diffusion likelihood with exact Gaussian NLL without matching conventions; a point predictor has a Dirac scoring interpretation, not a finite continuous-density NLL.
 
-In the known linear oracle compare full (b,J), compact (b,diag J) and declared blocks. Coarse versus full operator side-information regimes must be explicit and equal across methods. Full a=(A,R_noise) can restore J even when tokens omit it. Distinguish true conditional compression loss from a mismatched Gaussian plug-in. These are mechanism ablations within HSE–LLapDiff, not the paper's top-level objective.
+Then cross two interventions, rather than removing them together:
 
-## E4 — permitted inference versus unsupported output
+| Reverse-process restriction r | Ordinary temporal denoiser l=0 | Laplace temporal denoiser l=1 |
+|---|---|---|
+| r=0: no eligibility projection | ordinary / unrestricted | Laplace / unrestricted |
+| r=1: eligible-only process | ordinary / projected | Laplace / projected |
 
-Hold the source reference and posterior family fixed. Compare no support restriction, source support only, support plus conditional-identification restriction, and a reject-all missing baseline. Include all-missing generation, observed-branch update and source-global-null negative controls. Known simulators provide exact support and identifiable/nonidentifiable joint laws; real support labels require independently justified acquisition metadata/reference calibration.
+All four arms receive identical support/eligibility descriptors, source groups, actual condition, observed-uncertainty model and diagnostic training rule. Match backbone scale, selection trials, prediction type, loss weighting, schedule and sampling steps as closely as possible. Record residual parameter/cost differences. The active state/noise geometry deliberately changes with restriction; do not describe this as identical computation.
 
-Report (i) generated energy outside the admitted subspace, (ii) the fraction of unsupported coordinates emitted as recovered values, (iii) admitted target coverage, (iv) proper score on the common admitted target, and (v) whole-task diagnosis. The first two are structural compliance/unsupported-emission measures, not a general detector of factual hallucinations. Reject-all cannot win simply by deleting every difficult target; conditional scores require the same target set, and coverage/utility are always reported. Wrong or uncertain support maps are explicit failure cells.
+Use one source-identified joint training/evaluation target for every arm. No arm receives clean supervision for an unidentified or source-global-null coordinate. For the matched ambient-state comparison, embed the same partial target G_e z in the declared missing-state coordinates. Complementary entries are internal no-target placeholders, not clean-state labels. The unrestricted arm may perturb/evolve those entries as ancillary state; only the admitted component enters the training loss and proper score. No unknown clean complement is supplied to forward diffusion. Record the actual noise geometry and assess any additional emitted values separately as unsupported outputs. When every missing coordinate is admitted, r=0 and r=1 may coincide: that cell checks equivalence rather than supplying artificial restriction headroom. Diagnose effects on the same held-out groups.
 
-## E5 — reversible acquisition change and irreversible loss
+For a larger-is-better outcome S, report both simple effects and
 
-Use same-original-recording controls, formed after splitting: gain/known invertible sensor transforms, time grids, phase reference, bandwidth restriction and complete deletion of a task-relevant band. Separate fixed point count from fixed physical duration; anti-alias before downsampling. A finite-window damped sinusoid is not exactly band-limited, so measure filter response/leakage rather than assign physical nullity from the nominal Nyquist rate alone. Unknown sensor mixing, shifted machine dynamics and source–target conditional reversal are failure conditions, not mere nuisance metadata.
+$$
+\Delta_{{\rm int},e}=(S_{11,e}-S_{10,e})-(S_{01,e}-S_{00,e}).
+$$
 
-Measure source-common/target-missing role reassignment, posterior sensitivity, private-evidence drift, uncertainty and diagnosis. Ordinary latent versus Laplace dynamics comparisons use matched support/targets and include local modal residual or dynamics mismatch. Sparse excitation or spikes alone are not evidence for Laplace-distributed diffusion noise. Expected outcomes are not plotted; source/simulator controls can fail or produce no improvement.
+Use S=macro-F1 and S=minus Energy Score in separate analyses. Neither interaction nor either main effect is assumed positive. A joint-model win without these contrasts does not identify synergy; posterior improvement without a diagnosis gain is a posterior result only. DiEM/A-DPS/DiffEM comparisons belong in compatible known-operator corrupted-source settings, with their likelihood and training access matched, not as renamed off-the-shelf industrial baselines.
+
+## E3 — conditioner and supervision attribution
+
+Within a fixed eligible posterior process compare R, raw same-head H_A, statistical H_M, full-dimensional PCA/whitening/orthogonal coordinates and a matched nonlinear MLP. Use the same auxiliary-supervised source checkpoint when isolating the coordinate map; retain B1 without auxiliary training to isolate supervision. Transport the penalty when claiming affine equivalence. Record rank, scale, dtype, bytes, all learned parameters and covariance-factorization cost.
+
+In the known linear oracle compare full (b,J), diagonal and declared block statistics. Equalize operator side information: full (A,R_noise) can reveal J outside the tokens. Distinguish actual conditional compression loss from a misspecified Gaussian plug-in. These comparisons test the statistical anchor, not the entire posterior formulation.
+
+## E4 — identification and restriction boundaries
+
+Compare no restriction, source support alone, support plus identification under the complete condition, and no missing-state inference. Report unsupported emissions, forbidden-subspace energy, admitted coverage, same-target posterior score and whole-task diagnosis. Reject-all has no posterior score on an empty target and cannot win through zero emissions alone. A wrong or uncertain support map is an explicit sensitivity condition.
+
+Use the common-view binary witness: source A observes (C,P), source B observes (C,M), C is independent of a fair P, and M=P versus M=1-P. The two source observation laws coincide but p(M given C,P) differs. Neither alignment nor increasing the diffusion capacity distinguishes these worlds from those observations. A genuine joint source acquisition can distinguish them; alternatively an explicitly justified coupling narrows the model class. Record the extra information supplied by that intervention. A conditional-independence baseline is an assumption-dependent comparator, not a discovered physical fact.
+
+## E5 — acquisition and temporal boundaries
+
+Use post-split views of the same recording to compare known gain/invertible mixing, query grids, phase reference, bandwidth restriction and deletion of a task-relevant band. Separate fixed point count from fixed physical duration; anti-alias before downsampling. Finite-window damped signals are not exactly band-limited, so use filter response and leakage analysis rather than nominal Nyquist labels alone. Keep conditioning horizons equal: smoothing with later observations and history-only prediction solve different problems.
+
+Measure support reassignment, observed/private-evidence drift, posterior error, temporal residuals, uncertainty and diagnosis. Cross the temporal parameterization with restriction as in E2. Unknown sensor mixing, modal mismatch and source-to-target conditional reversal are failure conditions. Retain equal or worse LLapDiff outcomes and direct-classifier wins; no expected curves or reference acceptance numbers fill unrun cells.
