@@ -49,3 +49,27 @@ The real-export entry accepts `--arms B1_aux M head_affine`. Costs now distingui
 ## 5. Retained boundaries and missing results
 
 Earlier routing/fusion and independent-calibration CSVs retain static-fusion wins and target-order reversal. They are not new routing contributions. The speech experiment is a real reference/converter, not an HSE/M/LLapDiff/SOTA result. Four other raw converters, genuine source-trained feature/reference checkpoints, learned simple alternatives, direct industrial/general task heads and actual cost-matched M comparisons remain pending. MFPT belongs to the TII reference record, not a duplicated TPAMI method table. Equal or adverse results remain valid completed outcomes.
+
+## Additional replay of the real frozen reference — 2026-09-17
+
+The input is `predictions.csv` from PR11 Actions35230324773, artifact10500548685. It has3346 rows from seven models on54 validation,54 reserved-calibration and370 test utterances. This run does not redownload the raw archive, retrain classifiers, or add independent examples. The prediction-producing modules were unchanged by the subsequently inspected head50e8b1d.
+
+| Split | Utterances | Disagreements across7 models | Minimum common-label margin |
+|---|---:|---:|---:|
+|Validation|54|0|0.0147057173561|
+|Reserved calibration|54|0|0.0131882298621|
+|Official test|370|0|0.0007046712398|
+
+The margins are strictly positive on the stored float64 vectors. All hard selectors and convex score mixtures of this fixed bank therefore preserve its classifications on these examples. There is no corresponding population or arbitrary-new-model guarantee, and no iid interval is inferred from utterance IDs with unresolved session dependence.
+
+For a separate exploratory score comparison, fix the pair to ordinary and isotropically whitened ridge. Fit the convex mixture weight by onehot score MSE on validation only. Alpha=1 selects the whitened endpoint rather than a useful interior fusion. The original test results were visible before this replay; the new weight fit does not read calibration/test labels, but this is not a prospective confirmation.
+
+| Split | Ordinary score MSE | Selected-mixture score MSE | Macro-F1 of both |
+|---|---:|---:|---:|
+|Validation|0.0471501131682|0.0471264083435|0.8126984126984|
+|Reserved calibration|0.0479494092798|0.0480499432752|0.7856328856329|
+|Official test|0.0451129981094|0.0451666901505|0.8523978638389|
+
+Test score MSE increases by0.0000536920411. Both still classify318/370 test utterances correctly. Identical classifications do not imply identical scores, and none of these scores is described as a calibrated posterior. Nine summary rows and478 per-example agreement rows are retained/generated. Two figures read only the actual summary CSV.
+
+The result stops a classification gate experiment on this observed fixed bank, not the learned conditional-moment comparison. Industrial performance and generalization beyond these saved utterances are not inferred.
