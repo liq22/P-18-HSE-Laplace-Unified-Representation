@@ -26,6 +26,7 @@ PY
   fixed-policy-toy) python -m experiments.p19.toy_routing --output "$OUT/routing_controls.csv" "$@" ;;
   vowels-reference) python -m experiments.p19.japanese_vowels "$@" ;;
   reference-plot) python -m experiments.p19.plot_affine_reference "$@" ;;
+  prediction-check) python -m experiments.p19.prediction_agreement "$@" ;;
   statistics) python -m experiments.p19.policy_certificate "$@" ;;
   group-statistics) python -m experiments.p19.statistics "$@" ;;
   plot) python -m experiments.p19.plot_certified_selection "$@" ;;
@@ -50,9 +51,11 @@ PY
     bash paper_TPAMI/run.sh toy
     bash paper_TPAMI/run.sh plot --csv "$OUT/selection/selection_summary.csv" --output-dir "$OUT/figures" ;;
   help|--help|-h)
-    echo 'Usage: paper_TPAMI/run.sh setup|theory|toy|fixed-policy-toy|vowels-reference|reference-plot|statistics|plot|group-statistics|group-plot|external|native-pilot|sota|phm|ablation|all-cpu'
+    echo 'Usage: paper_TPAMI/run.sh setup|theory|toy|fixed-policy-toy|vowels-reference|reference-plot|prediction-check|statistics|plot|group-statistics|group-plot|external|native-pilot|sota|phm|ablation|all-cpu'
     echo 'vowels-reference --archive FILE --output-dir NEW_DIR: official native-length conversion + affine CPU reference.'
     echo 'reference-plot --csv FILE --output-dir DIR: actual reference CSV only.'
+    echo 'prediction-check --predictions CSV --output-dir NEW_DIR: paired-label agreement and validation-only static control.'
+    echo 'prediction-check --plot-only CSV --output-dir DIR: plots retained summary without refitting.'
     echo 'statistics: bounded independent-group certificate; group-statistics: additive group effects, with --expected-seeds for formal runs.'
     echo 'all-cpu runs existing mathematical studies, not automatic data downloads or learned models.' ;;
   *) echo 'Unknown mode; use --help' >&2; exit 2;;
