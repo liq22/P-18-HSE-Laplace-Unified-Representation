@@ -1,22 +1,17 @@
-# TII: source-supported posterior inference, industrial data only
+# Industrial TII manuscript
 
-Current manuscript: `main.md` (abstract/Introduction), `related_work.md`, `method.md`, `theory_main.md` with its finite Notebook, and `experiments.md`. The author-facing `introduction_outline.md`, `literature_matrix.md` and `contributions.md` record the scientific chain and evidence boundaries, not additional authorities or new results.
+The current manuscript is assembled in this order:
 
-## This revision
+- `main.md` and `related_work.md`: Introduction and its Related Work subsection.
+- `formulation.md`: Chapter 2, prior foundations, problem variables, gap and objective.
+- `method.md`: Chapter 3, source-target construction, conditioning, velocity training, restricted DDIM, coherent sampling and fixed-readout diagnosis.
 
-The main question is now cross-dataset partial-observation posterior inference. HSE plus support-restricted Latent Laplace Diffusion is the proposed mechanism; ordinary/affine/moment message comparisons remain mechanism ablations. Laplace denotes stable modal dynamics, not Laplace noise. Current source code implements those message controls and an unrestricted native component/pilot, **not** the newly proposed physical support-restricted generative path.
-
-The source-reference correspondence, conditional identifiability and the full projected native path are named prerequisites. Mathematical support projection, a source-global-null marker or an updated Introduction is not a learned-method validation. The prior coordinate results remain unchanged and retain their original scope. PHMFactory and `paper_TPAMI/` are not modified in this writing slice.
-
-## Reproduce this writing/theory slice
+`theory_main.md/.ipynb` hold supporting derivations and finite examples. `experiments.md` specifies E1–E5. `contributions.md` and `figures/README.md` map mechanism → equation → figure → algorithm → experiment. They are author material, not additional manuscript chapters.
 
 ```bash
-python -m pip install numpy nbformat nbclient ipykernel cairosvg
 bash paper/build_frontmatter.sh outputs/tii_support
 ```
 
-This executes the same-stem theoretical Notebook in a fresh kernel, writes an executed copy and finite-witness CSV, regenerates editable SVG/vector PDF/600-dpi PNG, and builds a cited manuscript preview with pandoc/XeLaTeX. No data download, neural training or synthetic replacement for real HSE features occurs. Missing pandoc/XeLaTeX is a build dependency, not an experiment failure.
+The retained entry now builds Chapters 1–3 as `tii_manuscript.pdf`, renders the problem and method figures, executes the same-stem Notebook, and checks citation resolution, editable SVGs and retained/new finite values. Source SVGs are tracked; PDF/600-dpi PNG are regenerated. The original 14-row support witness is preserved; the additional method witness tests conversion, non-diagonal support, the explicit oracle update and posterior dependence.
 
-## Next substantive implementation
-
-Use the existing source-only industrial data path and local GPU goal. First establish an interpretable source modal/latent reference and its acquisition support; then implement the declared eligibility projection in the actual native forward and reverse paths, testing observed-evidence preservation and empty eligibility. Only after a real paired-source batch passes should the E2 posterior comparison and E1 industrial LODO run. Keep R/head_affine/M as E3, with their original checkpoint and supervision contracts. The 8×4090 machine begins with one card; two-card training remains prohibited. This README does not claim those new method commands already exist.
+The accepted native pilot still provides conditioner comparisons, not the newly specified restricted posterior or fixed-readout industrial experiment. The next implementation uses a genuine source reference/paired batch, validates the induced support, and connects the declared velocity objective and basis update to the original native model. No second reader/trainer, guessed physical mask or target fitting is introduced. Industrial data/labels/splits remain owned by PHMFactory. General theory and nonindustrial experiments remain in `../paper_TPAMI/`.

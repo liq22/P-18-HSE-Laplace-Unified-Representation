@@ -1,18 +1,12 @@
-# Goal02 — source-supported posterior argument
+# Goal02 — formulation and explicit method
 
-## Scope and products
-
-Maintain the TII source-referenced four-role formulation, target–condition identification boundary and proposed support-restricted HSE–LLapDiff mechanism. Preserve same-head coordinate controls as E3. Products are current Introduction/Related Work/Method, proof and same-stem Notebook, Motivation SVG/source and the experiment-to-contribution map.
+Maintain Chapters 2 and 3 as separate scientific roles: prior foundations/problem/estimands, then the proposed source-qualified inference algorithm. Related Work stays within Introduction. The concept figure contains only problem variables; the overview figure maps mechanisms to Eqs. (6)–(14) and A1–A7.
 
 ```bash
 bash paper/build_frontmatter.sh outputs/tii_support
 bash experiments/p19/run.sh theory
 ```
 
-## Acceptance
+The first command builds the cited Chapters 1–3, executes the existing Notebook and regenerates both editable figures. Keep the 14 original support values and new method witness separate. Check velocity/clean loss weighting, non-diagonal intrinsic DDIM, score restriction versus marginalization, and coherent covariance. These validate finite mathematical statements, not trained industrial inference.
 
-Citations resolve and the recorded primary papers support actual prose. The theory checks source-common loss at a target, mixed-coordinate ambiguity, indistinguishable overlapping-source pair laws, correlated-prior null updates and eligible-only projected updates. The SVG is editable and regenerated from its source. No analytical check is described as source-restricted native-model training or an industrial gain. The restriction–dynamics interaction has a defined matched estimand, not an assumed favorable sign.
-
-## Failure handling
-
-Correct the statement or narrow its assumptions when a witness or primary source contradicts it. Do not restore a Laplace-noise narrative, assume mechanical labels for arbitrary latent coordinates, or infer the complete-input conditional from source union/common-view overlap. Existing Gaussian/coordinate tests remain valid within their own scopes. No new empirical result is claimed until E1/E2 actually run.
+Read experiments.md and contributions.md for the next real-data contrast. Use the existing native implementation rather than copying a denoiser. Source-reference calibration and the actual eligible-only native loss/update remain necessary before learned posterior or LODO claims. Do not reopen already resolved affine, unpaired-source or correlated-prior arguments without a new counterexample.
