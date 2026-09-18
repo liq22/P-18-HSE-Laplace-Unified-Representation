@@ -55,6 +55,25 @@ jobs:
         run: |
           bash paper_TPAMI/run.sh reference-plot --csv "$RUNNER_TEMP/vowels-reference/affine_summary.csv" --output-dir "$RUNNER_TEMP/vowels-reference/figures"
           bash paper_TPAMI/run.sh vowels-reference --help
+      - name: Replay fixed predictions and reject uninformative classification routing
+        run: |
+          bash paper_TPAMI/run.sh prediction-check --predictions "$RUNNER_TEMP/vowels-reference/predictions.csv" --output-dir "$RUNNER_TEMP/vowels-reference/prediction_check"
+          bash paper_TPAMI/run.sh prediction-check --plot-only "$RUNNER_TEMP/vowels-reference/prediction_check/agreement_summary.csv" --output-dir "$RUNNER_TEMP/vowels-reference/prediction_check/figures"
+          python - <<'PY'
+          import csv, os
+          from pathlib import Path
+          import numpy as np
+          actual_path=Path(os.environ['RUNNER_TEMP'])/'vowels-reference/prediction_check/agreement_summary.csv'
+          with actual_path.open() as f:actual=list(csv.DictReader(f))
+          with Path('paper_TPAMI/assets/prediction_agreement_summary.csv').open() as f:reference=list(csv.DictReader(f))
+          assert len(actual)==len(reference)==9
+          for left,right in zip(actual,reference):
+              for key in ('split','model','examples','bank_models','bank_disagreement_examples','strict_label_agreement'):
+                  assert left[key]==right[key], (key,left,right)
+              for key in ('static_alpha','accuracy','macro_f1','onehot_score_mse','minimum_bank_label_margin'):
+                  np.testing.assert_allclose(float(left[key]),float(right[key]),rtol=1e-8,atol=1e-10)
+          print('Nine replay rows agree; this remains a fixed-reference replay, not a learned HSE result.')
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -64,4 +83,5 @@ jobs:
             ${{ runner.temp }}/vowels-reference/acceptance.json
             ${{ runner.temp }}/vowels-reference/affine_reference.npz
             ${{ runner.temp }}/vowels-reference/figures/
+            ${{ runner.temp }}/vowels-reference/prediction_check/
           if-no-files-found: warn
