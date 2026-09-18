@@ -28,7 +28,7 @@ case "$MODE" in
   parameterization-figures)
     "$PYTHON" -m experiments.sampled_conditioning.parameterization_controls --plot-only "${2:?supply CSV}" --output-dir "${3:?supply figure directory}" ;;
   conditioner-tests)
-    "$PYTHON" -m unittest experiments.learned_conditioning.test_moment_conditioner experiments.learned_conditioning.test_feature_data -v ;;
+    "$PYTHON" -m unittest experiments.learned_conditioning.test_moment_conditioner experiments.learned_conditioning.test_feature_data experiments.learned_conditioning.test_head_affine -v ;;
   conditioner-probe)
     case "$PROFILE" in smoke) N=25;; full) N=600;; *) echo 'profile must be smoke or full' >&2; exit 2;; esac
     "$PYTHON" -m experiments.learned_conditioning.fit_moment_probe --synthetic --steps "$N" --output-dir "$OUT/conditioner-$PROFILE" ;;
@@ -42,7 +42,8 @@ case "$MODE" in
     bash paper/run.sh conditioner-tests
     bash paper/run.sh native-component
     bash paper/run.sh native-schedule --output "$OUT/native-component/schedule.csv" --prediction v --weight none --normalization none
-    bash paper/run.sh native-figures alignment "$OUT/native-component/native_loss_alignment.csv" "$OUT/native-component/figures" ;;
+    bash paper/run.sh native-figures alignment "$OUT/native-component/native_loss_alignment.csv" "$OUT/native-component/figures"
+    "$PYTHON" -m unittest experiments.learned_conditioning.test_native_pilot_controls -v ;;
   all) bash paper/run.sh theory
        bash paper/run.sh oracle "$PROFILE"
        bash paper/run.sh sampled "$PROFILE"
@@ -50,5 +51,6 @@ case "$MODE" in
   *) echo 'Usage: bash paper/run.sh setup|setup-neural|setup-native|theory|all [smoke|full]' >&2
      echo 'Experiments: oracle|sampled|parameterization|conditioner-probe [smoke|full]' >&2
      echo 'Native: native-acceptance|native-component|native-batch|native-schedule|native-pilot' >&2
+     echo 'Optional native pilot control: --arms B1_aux M head_affine' >&2
      echo 'Figures: figures|parameterization-figures CSV output; native-figures KIND CSV output' >&2; exit 2 ;;
 esac

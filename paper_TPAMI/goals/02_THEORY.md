@@ -1,13 +1,15 @@
-# Goal02 — general theoretical argument
+# Goal02 — method-specific controls
 
-**Scope:** target/consumer/budget profile, nested-message loss, hard selection versus fusion, independent finite-policy calibration. **Products:** main.md, notation.md, method.md, theory_main.md/ipynb, theory/policy_certificate.md/ipynb, and cited novelty boundaries.
+**Scope:** existing projection analysis plus the implemented affine mean head, exact R→T composition and transported ridge regularization. Keep policy/drift bounds secondary sensitivity tools. **Products:** update the existing theory_main.md and same-stem Notebook, Method and contribution boundary; no new theory folder or numbering.
 
 ```bash
 bash paper_TPAMI/run.sh theory
-python -m unittest discover -s tests -p 'test_policy_certificate.py' -v
-bash paper_TPAMI/run.sh toy --seeds 0 1 2 --calibration-groups 64 2048
+python -m unittest discover -s tests -p 'test_scientific_input_contract.py' -v
+python -m unittest discover -s tests -p 'test_affine_controls.py' -v
+# Installed torch is required; exercises the actual shared conditioner:
+bash paper/run.sh conditioner-tests
 ```
 
-**Acceptance:** statements include iid/boundedness/frozen-family/shift assumptions; finite examples distinguish valid source risk control from target reversal and static fusion from hard selection. Genuine task metrics are not silently clipped to fit the theorem. New proofs are not claimed as first general results over Learn then Test/V-information/MoE.
+**Acceptance:** malformed Gaussian means and common-seed omissions fail; full-q transported ridge predictions coincide; unchanged isotropic whitening is recognized as changed regularization. The actual frozen T composition equals M, and the mean-only affine consumer collapses to an R affine function. General identities do not imply a statistical-message advantage or macro-F1 guarantee.
 
-**Failure:** correct/narrow the offending statement and preserve counterexample. Do not add another theorem family or reinterpret a failed numerical witness as passed. Generic theory plus more datasets alone does not complete a TPAMI contribution.
+**Failure:** correct the offending input or narrow the scientific statement. Do not introduce a new theory family, relax a threshold to conceal an error, or infer novelty from a passing witness.

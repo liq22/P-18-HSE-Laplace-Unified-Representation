@@ -5,19 +5,25 @@ manuscripts:
     path: paper
     scope: industrial_data_only
     data_authority: PHMFactory
-    claim: statistically_anchored_industrial_conditioning
+    primary_task: recording_balanced_fault_diagnosis
     learned_method_supported: false
   TPAMI:
     path: paper_TPAMI
-    scope: general_target_consumer_budget_and_multidomain_study
+    scope: conditional_moment_specificity_across_targets_consumers_and_budgets
     external_domains: [physionet2012, uci_har, ushcn_monthly, ett, japanese_vowels]
     learned_method_supported: false
     novelty_requires_more_than_extra_datasets: true
 shared_experiments: experiments/p19
 phmfactory_revision: a0db97364e6d38a927c3ea30c643ebbb821d54d7
 phm_reference_acceptance: MFPT_three_seed_checkpoints_and_independent_metrics_passed
-real_HSE_reference_export: pending_local_checkpoint_and_extraction
-external_conversion_and_training: pending
+external_reference:
+  japanese_vowels: official_native_length_conversion_and_affine_CPU_reference_executed
+  physionet2012: conversion_pending
+  uci_har: conversion_pending
+  ushcn_monthly: conversion_pending
+  ett: conversion_pending
+real_HSE_reference_export: pending_source_trained_checkpoint_and_extraction
+learned_reparameterization_and_sota: not_executed
 formal_claim_supported: false
 flow_matching: future_work_only
 local_hardware: 8_RTX_4090

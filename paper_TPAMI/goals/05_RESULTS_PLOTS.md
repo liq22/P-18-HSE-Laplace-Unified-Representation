@@ -1,16 +1,34 @@
-# Goal05 — paired results and independent vector plots
+# Goal05 — actual predictions, explicit contrasts and CSV plots
 
-**Scope:** bounded group-policy certification is different from empirical native Energy Score or nonlinear macro-F1. **Products:** exact decision JSON, observed CSV summaries, source/test separation, SVG/PDF/PNG with editable text and actual negative outcomes.
+## Scope and products
+
+Use actual retained scores/predictions, not expected curves. Affine class-score tables, native Energy Score and bounded policy certificates are different estimands. Preserve source/test provenance and independent-unit limits. Outputs are numerical CSVs and editable SVG/PDF/PNG, with no model execution inside a plot command.
+
+## Commands
 
 ```bash
-bash paper_TPAMI/run.sh statistics \
- --input outputs/tpami/selection/complementary_n2048_seed0_group_scores.csv \
- --reference static_reference --margin .01 --output outputs/tpami/selection/decision.json
-bash paper_TPAMI/run.sh plot --csv paper_TPAMI/assets/selection_summary.csv --output-dir outputs/tpami/figures
-# Existing additive event CSVs use the shared empirical, not certificate, route:
-bash paper_TPAMI/run.sh group-statistics --input /absolute/event_scores.csv --reference B1-aux --output outputs/tpami/effects.csv
+bash paper_TPAMI/run.sh reference-plot --csv paper_TPAMI/assets/vowels_affine_reference.csv --output-dir outputs/tpami/affine_figures
+bash paper/run.sh native-figures comparison outputs/tpami/native_control_01/event_scores.csv outputs/tpami/native_control_01/M_vs_R --reference B1_aux --candidate M
+bash paper/run.sh native-figures comparison outputs/tpami/native_control_01/event_scores.csv outputs/tpami/native_control_01/M_vs_head --reference head_affine --candidate M
+bash paper_TPAMI/run.sh group-statistics --input /absolute/additive_group_scores.csv --reference R --expected-seeds 0 1 2 --output outputs/tpami/group_effects.csv
 ```
 
-**Acceptance:** no target data select a policy; duplicates/incomplete pairs fail; costs are declared versus measured; all24 finite-study rows are plotted with seeds shown descriptively. Raw Energy Score is never called bounded by normalization after the fact. Figures never trigger training/simulation.
+## Acceptance
 
-**Failure:** incomplete data or unsupported loss blocks certification. Keep empirical results with their real limitations rather than invent intervals or clip inputs. With one group no population interval is asserted. For nonlinear classification recompute the metric from predictions, not average per-window F1.
+Original groups and predeclared seeds are matched. Multi-arm native files require explicit candidate/reference; selecting a pair does not delete the other source rows. Check common posterior draws/sampler steps and actual cost before interpretation. Recompute class metrics from all fixed-ontology predictions; ridge scores are not probabilities. No iid certificate or population interval is inferred from Japanese Vowels utterance IDs. Preserve whitening's unchanged classification outcome.
+
+## Failure handling
+
+Duplicate, missing or inconsistent paired rows/budgets fail rather than being silently joined. A score outside the certificate assumptions stays an empirical score; it is not clipped. Unknown confidence intervals are not filled. Plot only executed results, and retain null/negative effects.
+
+## Current complementary CPU slice: prediction agreement
+
+Scope: replay the actual seven-model score bank; no raw-data conversion, model retraining or new gate. Products:9-row summary,478-row per-example checks, two CSV-only vector/raster figures and the matching Results subsection.
+
+```bash
+python -m unittest discover -s tests -p 'test_prediction_agreement.py' -v
+bash paper_TPAMI/run.sh prediction-check --predictions /absolute/PR11_artifact/predictions.csv --output-dir outputs/tpami/prediction_check
+bash paper_TPAMI/run.sh prediction-check --plot-only outputs/tpami/prediction_check/agreement_summary.csv --output-dir outputs/tpami/prediction_check/figures
+```
+
+Acceptance: exact model/group/truth pairing, no duplicate or ignored split, strictly positive common-label margins where asserted, and mixture fitting restricted to validation. This is post-hoc replay, not independent replication. Missing/malformed data stop the calculation; no probabilities or confidence intervals are fabricated. Keep `head_affine` as the single native raw-head implementation. GPU work and unresolved genuine feature/checkpoint dependencies remain in the existing Goal06, with one initial GPU on the8×4090 machine and no two-GPU training.

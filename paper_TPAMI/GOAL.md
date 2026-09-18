@@ -1,7 +1,9 @@
-# IEEE TPAMI candidate: execute the general study
+# TPAMI execution entry
 
-Start at [goals/README.md](goals/README.md). `paper/` remains industrial-only TII; general policy analysis and external empirical evidence belong here. Keep one shared codebase, one shared bibliography and the accepted PHMFactory dependency.
+Use `goals/README.md` as the sole task index. Scientific protocol is `experiments.md`; observed numerical state is `results.md`. TII remains industrial-only in `../paper/`.
 
-Order: scope/sync → theory/finite checks → genuine external preparation/features → smallest target/consumer comparison → source-frozen single/static/dynamic policy evaluation → group statistics/plots. Local hardware is8×4090, first run on one GPU, no two-GPU training.
+Current completed boundary: Gaussian/seed semantics corrected in PR10; UCI128 native-length data plus solved affine reference; full-message inverse and actual same-head raw control; native component and three-arm fixture loop. These are not learned HSE method results.
 
-A candidate general contribution must exceed the TII message applied to more datasets. The current certificate is classical support; the multi-domain learned result is pending. Do not force a route to win, replace a test domain, or count inherited industrial results twice. Normal dev PR merge only after the actual tests/entrypoints/doc references pass. No master changes, force-push, other branch deletion or PHMFactory core edits.
+Next genuine experiment compares R, same-head H_A and M under one selected checkpoint, then strong generic transforms/direct task heads. The declared `--arms B1_aux M head_affine` path and explicit pair plots are in Goal06. No additional generic routing theory or renamed research direction is needed. Retain all negative outcomes.
+
+Four external converters, real source-trained HSE/reference checkpoints and task-specific training remain named prerequisites, not just GPU time. Shared code/bibliography are not duplicated; PHMFactory core is untouched. Work through normal tested dev PRs, no master/force-push/branch deletion. Local8×4090 begins with one GPU and never world-size2.

@@ -1,0 +1,3 @@
+scope,dtype,q,message_bytes,prefix_rank,covariance_floor,raw_first_diagonal_case0,raw_first_diagonal_case1,raw_head_max_gap,statistical_message_max_gap
+actual_conditioner_function_fixture,float32,32,128,5,0.0001,-14,-15,1.0,0.0
+actual_conditioner_function_fixture,float64,32,256,5,0.0001,-14,-15,1.0,2.9893162598049194e-11

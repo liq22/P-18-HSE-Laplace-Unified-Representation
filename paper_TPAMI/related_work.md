@@ -1,30 +1,29 @@
-# Primary-source comparison and reading scope
+# Closest work and inspected scope
 
-## Direct general predecessors
+## Conditional representations and exact coordinate maps
 
-**Predictive V-information, ICLR 2020** [@xu2020usable]: full paper Definitions 1–3 and Proposition 1 inspected. Restricted observer families can make computation useful despite Shannon data processing. Our risk profiles therefore cannot be advertised as the first notion of finite-model usable information.
+HSE supplies the industrial interface; the inherited global conditional-moment readout shares its supervision with an ordinary code. The inspected Real NVP full paper (ICLR2017), Sections3.2–3.3 and the inverse in Section3.3, is a direct antecedent for invertible partial-coordinate transformations: https://arxiv.org/pdf/1605.08803 . The present analysis identifies an inverse of the existing statistical message and a same-head affine control; it is not a new normalizing-flow principle, density-training algorithm or Flow Matching method.
 
-**Multi-expert deferral, ICML 2024/2025** [@mao2024regression; @mao2025routing]: official PMLR records and the 2025 full Section 2 distinguish fixed and jointly learned experts, costs and learning guarantees. Our fixed-arm headroom and plug-in inequality are simpler supporting tools. They do not give H-consistency for our neural architecture.
+The exact map differs from its finite-precision implementation. `head_affine` keeps raw head coordinates, while M applies softplus and a covariance floor before Cholesky. A public-floor float32 fixture now demonstrates a collision even with full-rank replaced-coordinate weights. This is a method-specific numerical boundary, not a statement that all trained messages lose information or that invertibility implies better generalization.
 
-**Learn then Test** [@angelopoulos2025ltt]: inspected arXiv:2110.01052 Sections 2.1–2.3 and Theorem 1, including simultaneous testing and calibration. Final publication is Annals of Applied Statistics (2025), DOI 10.1214/24-AOAS1998. The paired Hoeffding/Bonferroni rule here is a transparent specialization, not a new generic risk-control framework. No raw unbounded proper score is silently inserted into a bounded-loss theorem.
+V-information [@xu2020usable], inspected Definitions1–3/Proposition1, already formalizes observer-family-dependent usable information. Affine-consumer inclusion and transported ridge penalties are classical facts. Kornblith et al., ICML2019 (https://proceedings.mlr.press/v97/kornblith19a.html), is a representation-comparison reference; only its official record was revisited in this update, not its full proofs. We do not infer a novel gap from those uninspected sections.
 
-**Moirai-MoE, ICML 2025** [@liu2025moiraimoe]: official PMLR 267:38940–38962 verifies the final venue. The accessible full arXiv v1 Sections 3.1–3.2 describes single input projection, decoder-only processing, sparse experts and cluster-informed gating. This reading is distinguished from the inaccessible final PDF, not substituted for an audit of all final-paper claims. It is a direct forecasting/routing baseline where data and compute access can be matched.
+## Statistical and generative antecedents
 
-**AME-TS, 2026 preprint** [@wang2026amets]: full HTML Sections 3.1–3.4 inspected. A separately trained regime predictor supplies forecastability, seasonality, trend and sparsity; a training-time KL prior aligns expert usage, and inference uses the learned router. Consequently, explicitly supervised structural routing is already a close idea. Our global posterior-moment semantics, fixed-policy comparison and independent certification differ in objective and execution, but a small toy certificate does not establish an empirical advantage. The preprint says code will be released upon publication; do not report an executed reproduction without an actual implementation.
+Alsing, Spantini and Oko are direct compression/target-posterior/sufficiency predecessors [@alsing2018compression; @spantini2015lowrank; @spantini2017goal; @oko2025sufficiency]. The previously recorded Oko sections remain antecedents; the full HTML retrieval failed again, so this update draws no new negative scope claim from its abstract or unavailable text.
 
-## Representation and conditional generation
+The full LLapDiff v2 Section5.1 explicitly conditions on observed values, finite-difference proxies and timestamp/gap/mask information; Sections5.2–5.3 and Appendices E–H define latent targets and native denoising: https://arxiv.org/html/2605.19805v2 . New methods must not gain access to timing or side information denied to the original baseline. Direct physical-time evaluation is not single-step diffusion sampling. The generator is inherited, not part of a first-Laplace-generation claim.
 
-MOMENT/UniTS, Neural CDE, t-PatchGNN, Hi-Patch/HyperIMTS establish strong multi-task and irregular-time references. Neural Laplace, CSDI and LLapDiff supply model/target precedents. LLapDiff full v2 Sections 3–5 and Appendices E–H distinguish latent targets, modal prediction and iterative generation; we retain this distinction. Alsing, Spantini, Oko, Gneiting and Seitzer remain mandatory statistical antecedents even when outside the requested venue majority.
+Gaussian proper scoring and neural optimization are separate questions [@gneiting2007proper; @seitzer2022pitfalls]. The full Seitzer paper Section3 and Appendix D.5 were inspected: its beta-NLL uses a **detached** variance weight (https://arxiv.org/pdf/2203.09168). It is not silently interchangeable with ordinary Gaussian scoring and its population interpretation. M/head_affine comparisons retain the same trained score checkpoint rather than changing the loss to favor one arm.
 
-The companion industrial manuscript is an internal predecessor, not an unseen competing dataset. Its method or results will not be reintroduced as independent TPAMI contributions. The general manuscript needs target/consumer/budget analysis and genuinely additional cross-domain evidence; five datasets alone do not establish that distinction.
+## Strong temporal and routing neighbors
 
-## Verified reading locations
+Neural CDE, t-PatchGNN, Hi-Patch/HyperIMTS, MOMENT and UniTS remain task-compatible reference families [@kidger2020cde; @zhang2024tpatchgnn; @luo2025hipatch; @li2025hyperimts; @goswami2024moment; @gao2024units]. Moirai-MoE's official ICML2025 record and previously inspected methodology establish sparse specialization [@liu2025moiraimoe]. AME-TS's inspected preprint method already uses structure-supervised expert organization [@wang2026amets]; unavailable final code is not evidence of an absent idea.
 
-- https://arxiv.org/pdf/2002.10689 — V-information definitions/properties.
-- https://proceedings.mlr.press/v267/mao25c.html and https://arxiv.org/pdf/2506.20650 — fixed/joint expert setting.
-- https://arxiv.org/pdf/2110.01052 — risk-control testing framework.
-- https://proceedings.mlr.press/v267/liu25an.html and https://arxiv.org/pdf/2410.10469 — final bibliographic record plus inspected preprint methodology.
-- https://arxiv.org/html/2605.25166v1 — AME-TS methodology and release status.
-- https://arxiv.org/html/2605.19805v2 — LLapDiff full methodology/appendices.
+Multi-expert regression/deferral and Learn then Test precede the secondary policy study [@mao2024regression; @mao2025routing; @angelopoulos2025ltt]. Unknown target drift remains a sensitivity allowance rather than an observable deployment guarantee. No router is promoted before it exceeds source-selected best single and static predictive fusion under actual cost.
 
-No missing abstract, missing code or inaccessible final text is treated as proof that a work omits a mechanism. Empirical SOTA status is not inferred from a paper's own abstract.
+## Industrial boundary and originality
+
+FISHER's full technical-report SectionsII-A/II-B describe fixed-duration STFT sub-bands and concatenated representations (https://arxiv.org/html/2507.16696v2). It is a close industrial competitor, not background decoration. That inspected technical version is distinguished from a final TII article not inspected here. Industrial experiments and method claims belong to `paper/`; TPAMI needs additional target/consumer/budget findings across more than one encoder and consumer family, not duplicate ownership of the industrial intervention.
+
+The current gap under test is whether nonlinear conditional-moment coordinates improve an actual finite consumer beyond the complete ordinary code, the same trained affine head and strong generic transformations. Neither a classical exact-map proof nor seven equal affine reference scores establishes that advantage.

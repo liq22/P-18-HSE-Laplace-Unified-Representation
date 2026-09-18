@@ -1,16 +1,15 @@
-# Goal03 — five general domains, actual data before model claims
+# Goal03 — genuine data, not a feature-file placeholder
 
-**Scope:** PhysioNet2012, UCI HAR, USHCN monthly, ETTh1 and Japanese Vowels, per `../experiments/DATA_DOWNLOAD_SOP.md`. Optional PHM evidence uses the TII-owned PHMFactory path. **Products:** local official raw files, literal license/version note, parsed batches, original-unit split and genuine source-trained feature/target exports.
+**Scope/products:** retain the five official sources in `../experiments/DATA_DOWNLOAD_SOP.md`. UCI Japanese Vowels now has a real reader, masks/frame units, original labels, 162/54/54 source split and untouched370 test utterances. The other four converters remain pending. Raw sequence exports are not HSE/reference-VAE features.
 
 ```bash
-# Execute the exact official per-domain download commands in the SOP.
-# After implementing and checking that domain's converter and real encoder export:
-python -m experiments.learned_conditioning.native_forward \
-  --batch /absolute/exports/train.npz \
-  --data-note /absolute/exports/export_note.md \
-  --output-dir outputs/tpami/native-batch
+mkdir -p data/manual/japanese_vowels
+curl -fL 'https://archive.ics.uci.edu/static/public/128/japanese%2Bvowels.zip' -o data/manual/japanese_vowels/vowels.zip
+bash paper_TPAMI/run.sh vowels-reference --archive data/manual/japanese_vowels/vowels.zip --output-dir outputs/tpami/vowels-reference-01
+# Only after genuine source-trained feature/reference extraction:
+bash paper/run.sh native-batch --batch /absolute/exports/train.npz --data-note /absolute/exports/export_note.md
 ```
 
-**Acceptance:** real masks/time units/side names, raw group separation, target definition and source-only scaling verified. UCI HAR is inertial series, USHCN is explicitly monthly, Japanese Vowels is features and not leave-speaker-out. Native generation requires its reference target; classifier labels do not automatically provide one. Downloading is not integration.
+**Acceptance:** official speaker blocks/270+370 counts, native lengths and12 channels verified; 6.4ms feature-frame timing is not10kHz audio timing. No target selection. Saved affine model restores actual metrics. Patient/subject/station/session independence must be checked for each other source; unique IDs alone do not establish iid calibration. PHM uses PHMFactory exclusively in the TII-owned path.
 
-**Failure:** missing license permission/archive/converter/checkpoint is an explicit unfinished prerequisite; don't call it merely a GPU limitation. Do not replace with synthetic features. Calibration group independence must be justified separately from file-ID uniqueness.
+**Failure:** missing archive, permission, converter or checkpoint is named. The other four data sources are not marked integrated from their URLs. Do not fill native fields with random features or classify all missing prerequisites as GPU work.

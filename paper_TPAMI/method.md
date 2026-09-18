@@ -1,42 +1,49 @@
-# Method: compare representations, then compare complete policies
+# Method: conditional-moment specificity before routing
 
-## 1. Target and consumer are part of the problem
+## 1. Scientific object and primary task
 
-For each task, declare its observation O, inference-available metadata a, target U (or reference latent Z0), grouping unit and evaluation law. Let F=E(O,a) be one frozen encoder. The general study uses at least two encoder families, initially HSE and a strong ordinary patch/Conv1D encoder, and at least two consumer families. A linear/small nonlinear classifier or regressor and the native LLapDiff provide different finite consumers; they are not scored on incompatible tasks in one table.
+Freeze observation O, deployment side information a, target U, original groups and the primary task. R is a complete ordinary code obtained through a source-trained frozen encoder and shared statistical supervision. M=T(R) is a deterministic reparameterization. A comparison specifies consumer family, q, dtype, train/validation protocol and full cost. In the full-rank exact-map case M is information-equivalent to R, not intrinsically lossy. Finite-precision behavior and actual checkpoint rank are checked separately.
 
-Compare message dimensions q under actual parameter/update/inference budgets. A gain at larger q or with extra pretraining is not attributed to statistical structure. Pretraining-data overlap and target access are reported for foundation-model baselines.
+Classification starts with direct label heads. Forecasting/imputation uses real targets or a fixed source reference latent, with Gaussian/mixture heads as controls. LLapDiff is one consumer, not a necessary component of all tasks. Native squared loss does not imply improved macro-F1.
 
-## 2. Inherited controlled message construction
+## 2. Global conditional-moment message
 
-The initial concrete instance is the companion TII's global readout. A shared trunk outputs R. One global head computes m(R),S(R) and receives the declared Gaussian conditional score. That score updates the same R path later consumed by B1-aux. Select one checkpoint on source validation, freeze the feature/preprocessing/trunk/head path, and pack M=T(R) as statistical prefix plus retained ordinary coordinates at the same q.
+Use the shared MatchedConditioner: frozen features plus explicit input mask/side → trainable trunk R → Linear global head h. The Gaussian score updates this exact R path, not a detached head. The mean is affine in R; raw covariance coordinates pass through softplus and declared covariance-floor/Cholesky operations. The resulting fields estimate conditional moments, not a full posterior by definition.
 
-This construction is inherited, not independently new in TPAMI. Gaussian scoring targets moments conditional on the actual input and function class; it neither identifies the complete distribution nor assures target calibration. Input masks/time/side fields are explicitly consumed. Global output summaries have an explicitly all-valid output mask, not fictitious patch-local timestamp semantics. No duplicate unpriced statistical channel bypasses the message.
+Choose the checkpoint on source validation and freeze preprocessing, feature extractor, buffers, trunk and head. M replaces s=d+d(d+1)/2 coordinates with mean and triangular covariance factor and retains the tail. Both outputs are dense global summaries with an explicitly all-valid output mask. Original history masks are consumed upstream. Statistics are checked at the raw readout; downstream transformations need not retain units. No unpriced parallel moment message is supplied.
 
-## 3. Representation utility profile
+## 3. Same-head affine control: the first nonlinear-specific comparison
 
-For a fixed trained consumer, record conditional evaluation risk rho(a;target,consumer,q,cost) for ordinary, statistically supervised ordinary, moment-only, and mixed messages. Estimate differences on identical original groups, targets and randomization. Under a common square target the nested-message decomposition attributes a possible gain to finite-model error reduction exceeding the information penalty. For other proper scores use their measured risk; do not relabel all differences as the squared projection term or mutual information.
+The implemented `head_affine` arm transmits H_A=[h(R),R_tail] using the same selected parameters, targets, supervision, q and dtype. No separate fitting occurs. Only the covariance-coordinate nonlinear map differs from M. Raw covariance coordinates of H_A are not assigned moment semantics.
 
-The profile is a collection of well-defined comparisons, not a universal scalar ranking. Changing target or consumer can reverse the preferred message. A source target-defined projection must not be selected from the test task's labels. Statistical supervision and inference-side metadata are matched across arms.
+The proof in `theory_main.md` gives M=Φ(H_A) and an inverse of Φ on its exact attainable image; W_p need not be full rank for this equivalence. An affine consumer after H_A collapses into an affine function of R. Thus three contrasts have distinct roles:
 
-## 4. Frozen policy family
+| Contrast | What it tests |
+|---|---|
+| M versus B1-aux/R | complete coordinate intervention under shared supervision |
+| H_A versus R | access to the same trained affine head coordinates |
+| M versus H_A | nonlinear statistical covariance coordinates for the chosen finite consumer |
 
-Train and select components before policy calibration. Include:
+A win only over R does not establish statistical specificity. Equality with H_A supports the simpler transformation. Even a gain over H_A still needs generic nonlinear and cost controls; it is not automatically a full-posterior effect.
 
-- source-selected best single representation/consumer;
-- a source-selected constant prediction mixture;
-- a source-fitted acquisition-only hard selector over the same fixed arms;
-- a separately declared soft-fusion policy only when trained as its own arm.
+## 4. Other required simple alternatives and budgets
 
-Point prediction fusion is a convex combination of points. Class fusion combines normalized probabilities. Distribution fusion is an actual mixture with a fixed total posterior-draw budget, not an average of unrelated generated trajectories. Charge all evaluated arms and gate costs. Hard-selection headroom says nothing by itself about beating static or soft fusion.
+Retain source-fitted full-q PCA, orthogonal coordinates, and whitening with both isotropic and coordinate-transported ridge penalties. Truncation/flooring changes the declared experiment. R→same frozen T→same consumer is an identity check. Same-supervision learned linear/small-MLP alternatives, mean-only and shuffled mean/covariance/target messages are subsequent controlled arms; the CPU affine reference does not claim to train them.
 
-## 5. Independent certification where assumptions permit
+Freeze loss-weight grid, HPO count, normalization, checkpoint metric/patience, consumer capacity, updates, source split and seeds before test results. Record q, dtype/bytes, coordinate rank/condition/scales and all parameters. `costs.csv` now distinguishes whether the affine head and statistical factorization were evaluated, and records head/trunk/denoiser parameter counts plus actual training/sampling time. It does not claim FLOPs or stable inference-latency/memory measurements not obtained. Equal q is not total cost equality.
 
-Set aside original calibration groups not used to choose the policy family, target, model checkpoints, reference policy or loss. Evaluate all policies on those same groups. The bounded-loss routine takes one score per group and computes simultaneous paired lower bounds against the frozen reference. It selects a candidate only when the lower net-gain bound exceeds a declared practical margin; otherwise it returns the reference as an explicit statistical decision.
+## 5. Statistical semantics and diagnosis
 
-The proof is `theory/policy_certificate.md`. It is a classical finite-family specialization. Cost differences must be fixed utility penalties or separately justified bounds; measured latency is separately reported. An assumed shift allowance is not estimated from target-test labels. No certificate is claimed for raw Energy Score, unbounded Gaussian NLL, macro-F1, correlated rolling windows or arbitrary target shift. Those comparisons retain empirical intervals with their actual uncertainty unit.
+Keep score/logdet/Mahalanobis/eigenvalue diagnostics. Mean-MSE and beta-NLL are later loss controls; the original beta-NLL uses a detached variance weight and changes the optimization rule. Without oracle moments report held-out scores and residuals, not a fabricated posterior-mean RMSE. Source supervision does not establish unseen-acquisition calibration. The primary task determines the claimed endpoint; native generation and direct classification are not substituted for one another.
 
-## 6. Minimal implementation and stopping
+## 6. Secondary policies and execution
 
-Reuse `experiments/learned_conditioning/` for the concrete message and native two-arm pilot. `experiments/p19/` contains the fixed-policy simulator, paired statistics and new certificate, without PHMFactory imports. No second trainer/registry is created in this folder. Raw external converters and actual encoder checkpoints are named prerequisites; the native feature launcher does not implement them.
+Only after representation specificity is tested compare source-selected best single, strong static predictive fusion and optional fixed-arm acquisition routing. Hard headroom does not guarantee superiority over fusion. Unknown target drift remains a sensitivity parameter. A bounded-loss iid certificate is not applied to raw Energy Score or correlated utterances/time windows.
 
-First complete one real ordinary-vs-statistical comparison with matched auxiliary supervision. Extend to multiple consumers/targets and static/dynamic policies only if scientifically informative, retaining adverse results. A generic risk-control corollary plus extra datasets is insufficient to establish a second paper beyond TII.
+`run_native_pilot.py` preserves the original two-arm default; `--arms B1_aux M head_affine` explicitly runs the new comparison on supplied genuine frozen exports. Its native CI test uses four synthetic fixture events per split and one optimizer update: an integration test, not learned task evidence. CSV plots require an explicit reference/candidate when multiple arms exist; no unmentioned rows vanish.
+
+The Japanese Vowels real reader/reference remains mean-LPC/closed-form ridge, with restored coefficients and the original test set. It is not HSE, a moment model or calibrated probability prediction. Four other external raw converters and genuine multi-domain HSE/reference checkpoints remain missing prerequisites. TII remains industrial-only through PHMFactory, with all code shared rather than copied.
+
+## Fixed-prediction stopping check
+
+Before fitting a classification selector for already evaluated fixed predictors, check whether their unique argmax decisions differ on the saved examples. Complete strict agreement eliminates classification-label improvement by hard selection or convex score fusion on those examples. It does not eliminate probability/score improvement or the value of a new/retrained model. The current affine reference bank satisfies this condition; no classifier gate is trained for that bank. The strong same-head control remains `head_affine` in the existing implementation; no parallel A_raw arm is introduced.

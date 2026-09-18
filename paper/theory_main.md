@@ -1,25 +1,26 @@
-# Applied theoretical statement for the industrial conditioner
+# Applied analysis of the industrial conditioner
 
-The general fixed-policy and routing analysis has moved to `../paper_TPAMI/theory_main.md`. TII retains only the statement needed to interpret its actual industrial intervention. The shared detailed derivations are in `../theory/09_conditioning_information_loss.md` and `../theory/10_conditioning_denoising_projection.md`; they are classical analytical support, not newly claimed general inventions.
+The full coordinate/inverse proofs and their numerical witnesses are in `../paper_TPAMI/theory_main.md` and its Notebook; they are shared supporting analysis, not independent discoveries in both papers. TII retains the consequences needed by its actual diagnostic experiment.
 
-## Industrial setup
+## Defined variables and interpretation
 
-Freeze source-trained HSE, the reference encoder, shared auxiliary trunk and global moment head. Let R be the complete ordinary code and M=T(R) its deterministic statistical-prefix message. Both arms receive the same actual side information. Let X include the noisy reference latent, diffusion time, acquisition condition A and common masks/side inputs. V is one common square-integrable native regression target, with the same weighting/reduction. An unweighted proof is not silently applied to a different batch-normalized objective.
+Freeze HSE, reference target, preprocessing and the source-selected shared trunk/head. X includes acquisition A, native noisy target/time and all common consumed side information. R is the complete code, h=WR+b the raw head, H_A=(h,R_tail) the same-head affine control, and M=Φ(H_A) its statistical-coordinate version.
 
-Write $f_R=\mathbb E[V\mid X,R]$ and $f_M=\mathbb E[V\mid X,M]$. For fixed fitted consumers $d_R,d_M$, define their square risks and excess errors conditional on A. Almost surely in a,
+An affine consumer after H_A is affine in R by composition. M and H_A determine one another on the exact attainable image of the mathematical softplus/Cholesky map, with known covariance floor. Recover C from M, obtain L=chol(CCᵀ−λI), invert diagonal softplus, and recover h; the tail is unchanged. No rank condition on W is needed for this H_A/M equivalence. Recovering all R additionally requires a nonsingular replaced-coordinate block W_p. These facts do not assure statistical calibration or floating-point inversion.
+
+## Finite square-risk decomposition
+
+For a common square-integrable native target V, let f_R=E[V|X,R], f_M=E[V|X,M], and fixed fitted consumers d_j. Then for almost every acquisition condition,
 
 $$
 \rho_M(a)-\rho_R(a)
-=\underbrace{\mathbb E[\|f_R-f_M\|^2\mid A=a]}_{\Gamma(a)\ge0}
-+\mathcal E_M(a)-\mathcal E_R(a).
+=\mathbb E[\|f_R-f_M\|^2\mid A=a]+\mathcal E_M(a)-\mathcal E_R(a).
 $$
 
-## Derivation
+**Proof.** The conditional information sets are nested because M is deterministic in R. Expand V−f_M into V−f_R plus f_R−f_M; conditional orthogonality removes the cross term. Expand V−d_j about f_j similarly and subtract. A belongs to X, so the conditional argument applies at each supported acquisition stratum. ∎
 
-Since M is a function of R, the corresponding conditional sigma-algebras are nested. Expand $V-f_M=(V-f_R)+(f_R-f_M)$; the conditional expectation of the cross term is zero. For each fitted consumer expand $V-d_j=(V-f_j)+(f_j-d_j)$ and eliminate that cross term in the same manner. Subtract the two identities. Including A in X permits conditioning the orthogonality relation on the declared acquisition stratum.
+In the exact full-rank case M/R has zero Bayes penalty. M/H_A has zero penalty on its exact attainable image regardless of W_p rank. Its finite-consumer difference then reflects approximation, optimization or regularization rather than new observations. An unmatched native batch-normalized objective needs its actual weighting, not an unweighted substitution.
 
-## Meaning and boundaries
+## What the analysis does not claim
 
-M cannot add Bayes information beyond R. It helps only when finite-model error decreases more than the possible information penalty. This is not a guarantee about classification macro-F1, Energy Score, finite-step sampling, or target-domain calibration. The Gaussian auxiliary score concerns conditional moments at its actual global readout; it does not identify an entire non-Gaussian posterior, and finite optimization need not reach its population optimum.
-
-The matching Notebook gives a finite numerical witness, not industrial performance. Real industrial acceptance and learned-conditioner performance remain different evidence levels. All TII empirical method tables use industrial recordings through PHMFactory; generic routing examples are no longer a TII Results table.
+This is not a macro-F1, Energy Score, finite reverse-sampling or target-calibration guarantee. A conditional-moment score identifies only the declared moments at a population optimum under its model assumptions; finite optimization and partial observations remain empirical. Direct industrial heads and strong generic reparameterizations, not additional routing theory, determine the method's value. Mathematical witnesses remain supporting tests; TII empirical datasets are industrial only.
