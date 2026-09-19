@@ -26,3 +26,5 @@ Purpose: separate source-only target construction from deployment, and expose ex
 | restriction/temporal labels | intervention (r,l,c), Eq.5 | 2.3/3.5 | A4–A7 | E2 factorial |
 
 Both figures have section-specific captions and prose explanations. The full manuscript build renders them from this file; PDFs and PNGs are build products, not extra tracked drawing sources.
+
+The 2026-09-19 label revision retains both layouts. Figure 1 writes equality of the complete source-observation laws explicitly; the actual conditionals still differ. Figure 2 places the constructive `Q_e null(A_e Q_e)` basis at target qualification and names the trainable generator versus fixed readouts. The ordinary/Laplace block remains inherited and refers to physical time, not a different perturbation distribution. “Conditional draw” describes the factorized sampling construction, not verified agreement with the true joint law. No new performance figure is introduced.

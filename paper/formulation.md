@@ -42,7 +42,7 @@ Conditional score training and missing-value diffusion are established mechanism
 
 ### 2.3 Mathematical formulation
 
-A candidate missing target is a subspace $\mathcal I_e\subseteq\mathcal M_e$, together with the conditioning information used to infer it. Let $z_o$ denote the observed-subspace reference state and $w_0$ coordinates of the missing target. The population object is $p(z_o,w_0\mid C_F)$. A compressed condition $C_T=\mathcal T(C_F)$ is part of the model specification, not an additional observation. Coherent observed/missing samples require the joint law; knowing its separate marginals is insufficient.
+A candidate missing target is a subspace $\mathcal I_e\subseteq\mathcal M_e$, together with the conditioning information used to infer it. Let $z_o$ denote the observed-subspace reference state and $w_0$ coordinates of the missing target. Fix the source mixture weights, reference map and observation design. They induce a joint reference law $P_s^{\rm ref}(z_o,w_0,C_F,a)$. For an explicit physical model this law factorizes into a state prior and acquisition likelihood; for paired reference features it is the pushforward law of the paired records. Its regular conditional $p_s^{\rm ref}(z_o,w_0\mid C_F,a)$ is the population inference target. We call a fitted $q$ a *conditional latent distribution approximation*, or a *posterior approximation under this reference law*. A learned conditional density need not be obtained by an explicit Bayes division, but it must name the joint law it approximates. A compressed condition $C_T=\mathcal T(C_F)$ is part of the model specification, not an additional observation. Jointly distributed observed/missing samples require the joint law; knowing its separate marginals is insufficient. Compression changes the optimal conditional: the missing factor targets $p_s^{\rm ref}(w_0\mid z_o,C_T)$, which need not equal $p_s^{\rm ref}(w_0\mid z_o,C_F)$. Equality requires conditional sufficiency of $C_T$ for this target [@oko2025sufficiency].
 
 Let $\mathcal X$ collect the fixed source groups/splits, reference, admitted target, allowed information, observation horizon, model-selection rule, diagnostic readout and resource budget. The intervention is $\iota=(r,\ell,c)$: restriction $r$, temporal parameterization $\ell$, and conditioner coordinates $c$. The fitted generator is allowed to change under $\iota$; its source data and fitting rule are controlled. For training/sampling randomness $\xi$, write
 
@@ -61,9 +61,20 @@ $$
 
 The same contrasts apply separately to negative Energy Score. Neither sign is assumed favorable.
 
+**Transfer scope.** Let $\mu_s$ and $\mu_t$ be the source and target laws of the complete deployment-visible condition (including $a$). Conditional reuse is justified on a declared region $\Omega$ only under a common reference meaning, overlap and conditional transport:
+
+$$
+\mu_t(\cdot\mid\Omega)\ll\mu_s,
+\qquad
+P_t^{\rm ref}(z_o,w_0\mid C_F=c)
+ =P_s^{\rm ref}(z_o,w_0\mid C_F=c),\quad \mu_t\text{-a.e. }c\in\Omega.
+$$
+
+Overlap concerns where a conditional is evaluated; it does not identify its values. Likewise, geometric source visibility is not joint statistical identification. These assumptions are not certified by a low source-validation loss or by matching acquisition descriptors. The label mechanism may shift even when the state conditional transports [@zhao2019invariant]. We therefore test acquisition/conditional mismatch and diagnostic transfer separately. No finite unlabeled target batch is used to prove these population equalities or to tune the source model.
+
 ### 2.4 Existing limitation and research gap
 
-Figure 1 separates observation support from conditional identification. Let $C,P$ be independent fair bits, with source A observing $(C,P)$ and source B observing $(C,M)$. The two joint worlds $M=P$ and $M=1-P$ induce identical source pair distributions. They agree on $p(M\mid C)$ but disagree on $p(M\mid C,P)$. Thus, observing every component somewhere, even with a shared component, does not determine the conditional used after adding private evidence. The source model needs additional joint information or a justified coupling assumption.
+Figure 1 separates observation support from conditional identification. Let $C,P$ be independent fair bits, with source A observing $(C,P)$ and source B observing $(C,M)$. Let $O_{\rm src}$ denote the source-indexed experiment observing either $(C,P)$ or $(C,M)$, never the full triple. The two joint worlds $M=P$ and $M=1-P$ induce identical laws of $O_{\rm src}$. They agree on $p(M\mid C)$ but disagree on $p(M\mid C,P)$. Thus, observing every component somewhere, even with a shared component, does not determine the conditional used after adding private evidence. The source model needs additional joint information or a justified coupling assumption.
 
 ![**Observation support and conditional ambiguity.** (a) An aligned reference separates four source-relative roles; rows denote observation configurations, not paired events across datasets. (b) Two binary worlds produce identical observed source pair laws and opposite conditionals after private evidence is included. The final relation states the unidentified population object. The figure defines the problem; it contains no proposed encoder, generator or decision module.](figures/motivation.pdf){width=100%}
 
@@ -71,4 +82,4 @@ Missing-view models, constrained diffusion and corrupted-data learning supply re
 
 ### 2.5 Research objective
 
-This work investigates whether a source-identified partial posterior improves source-only cross-dataset industrial diagnosis, and how its value depends on support restriction, temporal parameterization and conditioning. The target, visible information and scored population are fixed for each mechanism contrast. Identification is examined using source-compatible counterexamples and known reference designs; posterior quality and diagnostic utility are evaluated separately. Section 3 specifies the inference procedure that instantiates these interventions.
+The primary question is whether partial latent inference restricted to a jointly source-qualified target can improve source-only cross-dataset industrial diagnosis. Laplace temporal parameterization, statistical coordinates and conditional uncertainty coupling are subordinate mechanism questions under fixed target and information access. The target, visible information and scored population are fixed for each mechanism contrast. Identification is examined using source-compatible counterexamples and known reference designs; posterior quality and diagnostic utility are evaluated separately. Section 3 specifies the inference procedure that instantiates these interventions.
