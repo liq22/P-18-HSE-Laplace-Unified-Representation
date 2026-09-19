@@ -76,7 +76,7 @@ The oracle update uses known truth to check equations, not a trained denoiser. T
 
 ## Real source-batch implementation — 2026-09-19
 
-The reference-feature intrinsic path executed in PR #15 at head `b8799fcb2fd0093526554c8016f0c275ce833fe9`, run `35417176562`, job `105827965644`. The original PHMFactory reference ran unchanged before the new batch. The new command opened only train/validation exports; the preceding reference acceptance still performs its original test evaluation.
+The reference-feature intrinsic path was re-executed on the final PR #15 head `fae3d14e465843a75ed671cd4d80ee1f61024232`, run `35417589090`, job `105829101497`. The original PHMFactory reference ran unchanged before the new batch. The new command opened only train/validation exports; the preceding reference acceptance still performs its original test evaluation.
 
 ```bash
 python -m experiments.learned_conditioning.run_source_batch \
@@ -94,8 +94,9 @@ The reference is the first four orthonormal block-DCT coordinates, 64 samples pe
 | Source diagnostic head updates, each of two separately trained heads | 60 |
 | Native generator updates | 1 |
 | Velocity training loss | 1.1280386447906494 |
-| Velocity/weighted-clean loss absolute difference | 1.1920928955078125e-07 |
-| Native gradient L1 sum | 66.99440597356407 |
+| Weighted clean loss | 1.1280384063720703 |
+| Velocity/weighted-clean loss absolute difference | 2.384185791015625e-07 |
+| Native gradient L1 sum | 66.99439791825814 |
 | Maximum native parameter change | 0.001000046730041504 |
 | Basis orthogonality / acquisition-null errors | 0 / 0 |
 | Posterior draws per validation representative | 4 |
@@ -106,7 +107,7 @@ The reference is the first four orthonormal block-DCT coordinates, 64 samples pe
 
 The job retained `source_batch.csv` (source IDs/rates and dimensions), `native_trace.csv` (20 draw-step summaries), `diagnostic_outputs.csv` (four validation-record probabilities) and `source_batch_summary.json` inside the existing `mfpt-acceptance` artifact. Native checkpoints and terminal draws were produced inside the run but not uploaded, as they include derived reference values. No macro-F1 gain is inferred from this one-update/four-record diagnostic exercise.
 
-The initial `native-conditioner` job at this head failed two newly introduced assertions even though the real batch succeeded. Investigation found that the native Laplace synthesis uses spectral normalization, whose training-mode forwards update power-iteration vectors. The hidden-target isolation test now compares a fixed evaluation state, then separately tests a training update. The loss-identity diagnostic now retains both losses and absolute/relative errors, using the relative scale for float32 comparison. These changes do not alter the velocity objective, sampling rule, data or reference. Current-head rerun outcomes belong to the PR validation comment rather than being inferred from the first successful real batch.
+An earlier PR #15 head failed two newly introduced native-conditioner assertions even though its real batch succeeded. Investigation found that the native Laplace synthesis uses spectral normalization, whose training-mode forwards update power-iteration vectors. The hidden-target isolation test now compares a fixed evaluation state, then separately tests a training update. The loss-identity diagnostic now retains both losses and absolute/relative errors, using the relative scale for float32 comparison. These changes do not alter the velocity objective, sampling rule, data or reference. The final-head native-conditioner and real-batch reruns both succeeded; the values above come from the final-head real-batch log rather than being inferred from the earlier execution.
 
 The current source-slice command `bash paper/build_frontmatter.sh outputs/tii_revision` produces a 12-page Chapters 1–3 preview and the same two editable diagrams. Four manuscript checks passed locally; the original 14 support and 13 method values were preserved, not expanded. Local source-slice validation does not include an installation of PHMFactory/LLapDiff; the native model and real-data execution above took place in GitHub CI.
 
