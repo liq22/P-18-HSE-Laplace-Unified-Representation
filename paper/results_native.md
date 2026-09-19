@@ -46,9 +46,9 @@ At that revision, `bash paper/build_frontmatter.sh outputs/tii_support` built a 
 
 These are analytical witnesses from the explicit models in `theory_main.md`, not measurements on learned industrial latent states. `assets/support_witness.csv` retains the original 14 values. Unknown source coordinate correspondence, uncertain operators and finite-window leakage remain scientific prerequisites.
 
-## Current Chapters 1–3 build and method witnesses — PR #13
+## Historical Chapters 1–3 build and method witnesses — PR #13
 
-The current build command is:
+The chapter-revision build command was:
 
 ```bash
 bash paper/build_frontmatter.sh outputs/tii_chapters
@@ -74,6 +74,44 @@ All 11 local preview pages and both diagrams were visually inspected; four focus
 
 The oracle update uses known truth to check equations, not a trained denoiser. The 0.36/1 comparison is between fixed-noise score-implied densities, not variances measured from a finite DDIM sampler. None of these 27 finite values is a learned industrial performance result.
 
-## New mechanism still to implement and evaluate
+## Real source-batch implementation — 2026-09-19
 
-The current native `run_native_pilot.py` does not implement source-qualified modal blocks, an identified joint missing target or support-projected reverse updates. The new formulation therefore requires source-reference validation and a real native restriction before an E1/E2 method result exists. Existing unrestricted native/synthetic tests cannot be renamed as that validation. Future tables separate same-target posterior quality, eligible coverage and unsupported emissions, and per-target original-group diagnostic performance. Reject-all and wrong-support controls prevent perfect structural rejection from being mistaken for useful inference. A Gaussian/mixture or ordinary latent diffusion matching LLapDiff is retained as a decisive negative result.
+The reference-feature intrinsic path executed in PR #15 at head `b8799fcb2fd0093526554c8016f0c275ce833fe9`, run `35417176562`, job `105827965644`. The original PHMFactory reference ran unchanged before the new batch. The new command opened only train/validation exports; the preceding reference acceptance still performs its original test evaluation.
+
+```bash
+python -m experiments.learned_conditioning.run_source_batch \
+  --exports "$RUNNER_TEMP/p18-mfpt-acceptance" \
+  --output "$RUNNER_TEMP/p18-mfpt-intrinsic"
+```
+
+The reference is the first four orthonormal block-DCT coordinates, 64 samples per block and 32 blocks per window, normalized from source training values. The acquisition observes the first two coordinates, and same-recording full references jointly supply the other two. The condition is lossless observed-reference tokens, not HSE. Observed-reference uncertainty is a point mass because there is no added observation noise. All missing coordinates are admitted, with zero source-global-null dimension. This is a real-input/native-model implementation experiment, not a restriction-benefit experiment, learned HSE, physical modal recovery, calibrated posterior or LODO.
+
+| Quantity from the actual batch log | Value |
+|---|---:|
+| Available train / validation windows | 160 / 64 |
+| Predetermined representative train / validation recordings | 10 / 4 |
+| Native generator parameters | 13,011 |
+| Source diagnostic head updates, each of two separately trained heads | 60 |
+| Native generator updates | 1 |
+| Velocity training loss | 1.1280386447906494 |
+| Velocity/weighted-clean loss absolute difference | 1.1920928955078125e-07 |
+| Native gradient L1 sum | 66.99440597356407 |
+| Maximum native parameter change | 0.001000046730041504 |
+| Basis orthogonality / acquisition-null errors | 0 / 0 |
+| Posterior draws per validation representative | 4 |
+| Reverse levels | 63, 47, 31, 15, 1 |
+| Maximum forbidden coordinate / observed-coordinate drift | 0 / 0 |
+| Fixed-head diagnostic probability rows | 4 |
+| Fixed diagnostic head unchanged | true |
+
+The job retained `source_batch.csv` (source IDs/rates and dimensions), `native_trace.csv` (20 draw-step summaries), `diagnostic_outputs.csv` (four validation-record probabilities) and `source_batch_summary.json` inside the existing `mfpt-acceptance` artifact. Native checkpoints and terminal draws were produced inside the run but not uploaded, as they include derived reference values. No macro-F1 gain is inferred from this one-update/four-record diagnostic exercise.
+
+The initial `native-conditioner` job at this head failed two newly introduced assertions even though the real batch succeeded. Investigation found that the native Laplace synthesis uses spectral normalization, whose training-mode forwards update power-iteration vectors. The hidden-target isolation test now compares a fixed evaluation state, then separately tests a training update. The loss-identity diagnostic now retains both losses and absolute/relative errors, using the relative scale for float32 comparison. These changes do not alter the velocity objective, sampling rule, data or reference. Current-head rerun outcomes belong to the PR validation comment rather than being inferred from the first successful real batch.
+
+The current source-slice command `bash paper/build_frontmatter.sh outputs/tii_revision` produces a 12-page Chapters 1–3 preview and the same two editable diagrams. Four manuscript checks passed locally; the original 14 support and 13 method values were preserved, not expanded. Local source-slice validation does not include an installation of PHMFactory/LLapDiff; the native model and real-data execution above took place in GitHub CI.
+
+## Remaining full-method evidence
+
+`intrinsic_native.py` now implements the eligible geometry, original-model velocity objective and original-scheduler reverse loop. The old `run_native_pilot.py` remains an E3 conditioner control; it is not renamed. The real DCT-reference batch removes the previously missing intrinsic execution link but does not supply a learned HSE/reference checkpoint, nondegenerate observed-state uncertainty, a nontrivial jointly unidentified complement, or cross-dataset coordinate calibration. Those inputs and their defined comparisons remain necessary before E1/E2 effect claims.
+
+Next use these functions with genuine source-trained HSE/reference inputs, then complete the restriction-by-physical-time factorial, conditioner and conditional-dependence controls, and industrial LODO. Report simple/interaction effects, proper scores, admitted coverage, original-group diagnosis and cost separately. Preserve Gaussian/mixture or ordinary-diffusion ties/wins and all earlier negative results. No support-only zero, data-path reference score or one-batch execution is substituted for method efficacy.
