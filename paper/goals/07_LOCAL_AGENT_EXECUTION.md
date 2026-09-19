@@ -40,7 +40,7 @@ git -C external/phmfactory rev-parse HEAD
 Inspect active PRs in both repos. Preserve unrelated changes; no stash/reset/clean/force-push.
 
 Local data:
-export PHM_DATA_ROOT=/home/user/data/PHMbenchdata/PHM-Vibench
+set PHM_DATA_ROOT to the user-supplied absolute local path (do not commit that path).
 Use existing PHMFactory Data Factory and public config entry only. Do not write a private HDF5/Pandas loader, download a substitute dataset, or change upstream splits/labels to make the study work.
 
 Execute automatically in this order.
