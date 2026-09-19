@@ -48,7 +48,7 @@ Geometric support is not conditional identification. A deterministic DCT/HSE tra
 Use the user-supplied local PHMFactory data root, metadata and HDF5 files through the existing PHMFactory Data Factory only. Machine paths belong in a local config or shell variable; do not commit them to the repository.
 
 ```bash
-export PHM_DATA_ROOT=/home/user/data/PHMbenchdata/PHM-Vibench
+export PHM_DATA_ROOT=/absolute/local/PHM-Vibench
 ```
 
 Read `metadata.xlsx` and the local data README through the existing maintained data path. Do not create another Pandas/HDF5 loader merely for P18.
