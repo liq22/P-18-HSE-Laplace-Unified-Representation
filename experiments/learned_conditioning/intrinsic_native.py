@@ -46,8 +46,14 @@ def intrinsic_velocity_loss(model, reference: Tensor, basis: Tensor, condition: 
     loss = (prediction - velocity).square().mean()
     clean = model.scheduler.to_x0(state, levels, prediction, param_type='v')
     weighted_clean_loss = ((clean - target) / sigma).square().mean()
+    # The identity is algebraic; compare float32 reductions at their actual scale.
+    # Retain both values and the absolute error rather than hiding rounding drift.
+    absolute_error = (loss - weighted_clean_loss).detach().abs()
+    magnitude = torch.maximum(loss.detach().abs(), weighted_clean_loss.detach().abs())
     return loss, {'velocity_loss': float(loss.detach()),
-                  'clean_weight_identity_error': float((loss - weighted_clean_loss).detach().abs())}
+                  'weighted_clean_loss': float(weighted_clean_loss.detach()),
+                  'clean_weight_identity_error': float(absolute_error),
+                  'clean_weight_identity_relative_error': float(absolute_error / magnitude.clamp_min(1e-12))}
 
 
 @torch.no_grad()

@@ -48,17 +48,22 @@ class NativePathTests(unittest.TestCase):
                                 target_mask=torch.ones(2, 6, dtype=torch.bool),
                                 reuse_xt_eps=(xt, noise))
         torch.testing.assert_close(loss, native, atol=2e-6, rtol=1e-6)
-        self.assertLess(details['clean_weight_identity_error'], 2e-6)
+        self.assertLess(details['clean_weight_identity_relative_error'], 2e-6)
 
     def test_restricted_gradient_sampling_and_no_hidden_target(self):
         operator = torch.eye(4)[:2]
         basis = eligible_basis(operator, torch.eye(4))
         noise = torch.randn(2, 6, 2)
+        # Spectral-normalization power vectors update on training forwards.
+        # Fixed-state functional isolation must compare evaluation-mode calls.
+        self.model.eval()
         loss, _ = intrinsic_velocity_loss(self.model, self.z, basis, self.c, self.time, self.t, noise)
         changed_complement = self.z.clone(); changed_complement[..., :2] += 100
         alternate, _ = intrinsic_velocity_loss(self.model, changed_complement, basis,
                                                self.c, self.time, self.t, noise)
         torch.testing.assert_close(loss, alternate, rtol=0, atol=0)
+        self.model.train()
+        loss, _ = intrinsic_velocity_loss(self.model, self.z, basis, self.c, self.time, self.t, noise)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=.001)
         optimizer.zero_grad(set_to_none=True); loss.backward()
         self.assertGreater(sum(float(p.grad.abs().sum()) for p in self.model.parameters() if p.grad is not None), 0)

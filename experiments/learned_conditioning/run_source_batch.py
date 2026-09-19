@@ -184,7 +184,7 @@ def main() -> None:
                'diagnostic_rows': len(output_rows), 'diagnostic_head_unchanged': True}
     if summary['max_forbidden_abs'] > 1e-6 or summary['max_observed_drift_abs'] > 1e-6:
         raise AssertionError('native sampling changed forbidden or observed coordinates')
-    if summary['clean_weight_identity_error'] > 1e-5:
+    if summary['clean_weight_identity_relative_error'] > 2e-6:
         raise AssertionError('velocity/weighted clean loss identity failed')
     write_csv(args.output / 'source_batch.csv', records)
     write_csv(args.output / 'native_trace.csv', traces)
