@@ -1,32 +1,75 @@
-# Goal06 — local support-qualified HSE–LLapDiff on 8×4090
+# Goal 06 — local execution on 8×4090, one GPU per run
 
-## Scope and prerequisites
+## Hard rule
 
-Industrial data only. First run uses GPU0 and seeds0/1/2 sequentially. Two-GPU/world-size2 execution is prohibited. Genuine source-trained HSE/reference checkpoints, original-recording splits and compatible mechanical/latent coordinates are prerequisites; the MFPT reference does not supply them.
+A single training run uses one GPU. No DDP/world-size=2 workaround is allowed for this study. The first Gate-1 and Gate-2 executions use GPU0 only. After Gate 2 freezes the protocol, independent folds/seeds may run concurrently across different cards, one process per GPU.
 
-The new main method needs an actual source-qualified missing target and restricted reverse process. The existing native pilot is an available E3 conditioner ablation, not that new model. Complete Goal04's source-reference, identification and projected-batch implementation before starting E2's generator comparison or E1's industrial LODO.
+## Stage order
 
-## Existing command, with its limited scope
-
-```bash
-bash paper/run.sh setup
-bash paper/run.sh setup-neural
-export LLAPDIFF_ROOT=/absolute/LLapDiffusion
-bash paper/run.sh setup-native
-bash paper/run.sh native-acceptance
-CUDA_VISIBLE_DEVICES=0 bash paper/run.sh native-pilot \
- --train /absolute/exports/train.npz --validation /absolute/exports/validation.npz \
- --test /absolute/exports/test.npz --data-note /absolute/exports/export_note.md \
- --device cuda:0 --seeds 0 1 2 --arms B1_aux M head_affine \
- --anchor-steps 150 --diffusion-steps 200 --draws 8 --sampler-steps 16 \
- --output-dir outputs/tii/conditioner_control_01
-bash paper/run.sh native-figures comparison outputs/tii/conditioner_control_01/event_scores.csv outputs/tii/conditioner_control_01/M_vs_head --reference head_affine --candidate M
+```text
+Gate 0  data/task qualification                  CPU / no effect claims
+Gate 1  one real source batch                    GPU0
+Gate 2  one LODO target × one seed × key cells   GPU0
+freeze protocol/config/HPO
+Gate 3  independent folds/seeds                  GPU0..GPU7, one job/card
+analysis/cost/figures                             no retraining unless declared
 ```
 
-## Products and acceptance
+Do not launch full three-fold × multi-seed training before Gate 2 proves the cells are non-degenerate and artifacts are complete.
 
-For the new restricted path, retain actual source-frozen support/eligibility descriptors, validated coordinate correspondence, projected native forward/backward/reverse checks and observed-evidence preservation. Then use the same admitted target and condition for point/Gaussian/mixture/ordinary diffusion/LLapDiff. Use source-only training and original-group target evaluation. Posterior scores do not replace diagnosis; unsupported emission rate is paired with eligible coverage and utility. Record all parameters, dtype/bytes, total cost and posterior draws.
+## Local data
 
-## Failure handling
+The agent receives the actual local root out of band. Put machine paths in an untracked local YAML or CLI override, never in committed research configs.
 
-Missing identification, physical support correspondence, native code or data is named as a prerequisite, not silently filled by a mask or random feature. Unknown target conditional shift precludes a transfer guarantee. OOM changes must be declared and matched, with no two-card workaround. If LLapDiff or the full posterior does not improve the defined outcome, preserve that result and simplify. No automatic submission, master edits, force-push, branch deletion or PHMFactory core changes.
+Example shell binding:
+
+```bash
+export PHM_DATA_ROOT=/home/user/data/PHMbenchdata/PHM-Vibench
+```
+
+Use PHMFactory's public config path and existing Data Factory; do not directly open HDF5 from a P18 training script.
+
+## Gate-1 command contract
+
+The exact config path must come from the implemented PHMFactory P18 config index:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 phmfactory preflight --config "$REAL_CONFIG" \
+  --override data.data_dir="$PHM_DATA_ROOT" \
+  --override data.metadata_file=metadata.xlsx \
+  --override trainer.device=cuda \
+  --override trainer.devices=1
+
+CUDA_VISIBLE_DEVICES=0 phmfactory --config "$REAL_CONFIG" \
+  --override data.data_dir="$PHM_DATA_ROOT" \
+  --override data.metadata_file=metadata.xlsx \
+  --override trainer.device=cuda \
+  --override trainer.devices=1
+```
+
+`REAL_CONFIG` must exist and pass preflight. Do not pass a design YAML or a nonexistent future config.
+
+## Gate-2 freeze checks
+
+Before expansion verify:
+
+- source-only fit/selection and no outer-target exposure;
+- actual common ontology/shared LODO readout;
+- checkpoint reload reproduces predictions;
+- all key E1/E2 cells run once;
+- S/C equivalence check is understood;
+- A process is fully specified and does not consume complement truth;
+- posterior score target is available where reported;
+- group IDs/statistical units are not windows;
+- runtime and peak memory fit one 4090;
+- failure artifacts are retained.
+
+Any adjustment after Gate 2 is recorded as a new frozen protocol revision before Gate 3. The target score must not decide the adjustment.
+
+## Gate-3 scheduling
+
+After freeze, assign each `(fold, seed, method/config)` to exactly one card. Keep deterministic run identity in the output directory/config; GPU index is not a scientific factor. Failed jobs are retained and may be rerun only to correct an identified execution failure, never merely to seek a favorable metric.
+
+## OOM / runtime failure
+
+A memory change is allowed only as an explicit matched protocol revision (e.g. batch size with unchanged statistical objective). Record before/after cost. Do not silently shorten windows, reduce posterior targets, change model width or add multi-GPU training for one arm only.
