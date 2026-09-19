@@ -24,7 +24,7 @@ The agent receives the actual local root out of band. Put machine paths in an un
 Example shell binding:
 
 ```bash
-export PHM_DATA_ROOT=/home/user/data/PHMbenchdata/PHM-Vibench
+export PHM_DATA_ROOT=/absolute/local/PHM-Vibench
 ```
 
 Use PHMFactory's public config path and existing Data Factory; do not directly open HDF5 from a P18 training script.
