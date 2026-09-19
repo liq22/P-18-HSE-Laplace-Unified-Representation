@@ -22,7 +22,7 @@ The original 14 support witnesses and earlier negative results remain intact. Th
 
 ## Review disposition and instantiated slice — 2026-09-19
 
-The primary question is jointly source-qualified partial latent inference. Laplace structure, moment coordinates and uncertainty coupling are component hypotheses. Accepted: explicit reference joint law; source–target overlap/conditional transport; operational basis construction; separate coupled-draw evaluation; a real source-batch implementation experiment. Corrected rather than adopted: overlap alone is not identification; a conditional approximation can be a posterior approximation under a specified reference joint law without an explicit generative Bayes computation; the original LLapDiff name does not require Laplace noise. Its physical-time parameterization is inherited, not a new diffusion-level kernel.
+The primary question is jointly source-qualified partial latent inference. Laplace structure, moment coordinates and uncertainty coupling are component hypotheses. Review changes incorporated: explicit reference joint law; source–target overlap/conditional transport; operational basis construction; separate coupled-draw evaluation; and a real source-batch implementation witness. Corrected rather than adopted: overlap alone is not identification; a conditional approximation can be a posterior approximation under a specified reference joint law without an explicit generative Bayes computation; the original LLapDiff name does not require Laplace noise. Its physical-time parameterization is inherited, not a new diffusion-level kernel.
 
 | Mechanism | Formula / figure | Algorithm / implementation | Direct measurement |
 |---|---|---|---|
