@@ -6,6 +6,45 @@ All industrial data, labels, original-group identities and initial splits come f
 
 The target–condition pair, source-frozen reference, noise model, query horizon, side inputs and numerical support tolerance are fixed before comparing methods. Source tuples are constructed by Eq. (6) after original-group splitting. Score a reference-feature posterior as such; do not call its target a noise-free mechanical state without calibration. Posterior scores require held-out jointly available reference targets. Where those targets are unavailable, report diagnosis and measured-evidence checks without inventing latent truth. Known synthetic laws support identification/error analysis; they do not enter industrial performance tables. Sampled windows, optimizer seeds and posterior draws do not increase the number of independent recordings or datasets.
 
+## Execution gates and registered estimands
+
+Do not expand directly from the Stage-I implementation witness to the full LODO matrix. The execution order is:
+
+```text
+Gate 0: data/task qualification and GO/PARTIAL/NO-GO by contribution
+Gate 1: one real source-only batch through the final PHMFactory learned path
+Gate 2: one predeclared LODO target × one seed × all decisive cells
+Gate 3: freeze the protocol, then run qualified folds × preregistered seeds
+```
+
+Gate 0 must establish the common label ontology, highest reliable independent unit, reference origin, observed/reference pairing, joint qualification evidence, eligible/ineligible target status, evaluation truth and observed-state uncertainty. File existence or geometric visibility is not enough. If natural data do not provide known nontrivial qualification truth, use natural datasets for industrial utility and a predeclared same-recording controlled acquisition for qualification evidence; do not relabel deterministic reference features as physical states.
+
+For target utility $U$ (group-balanced macro-F1), preregister:
+
+$
+\Delta_{net,e}=U_e(S\!\!\!-\!L)-U_e(B_{obs}^{*}),
+$
+
+$
+\Delta_{support}=\tfrac12[(U_{S,T}-U_{A,T})+(U_{S,L}-U_{A,L})],
+$
+
+$
+\Delta_{Laplace}=\tfrac12[(U_{A,L}-U_{A,T})+(U_{S,L}-U_{S,T})],
+$
+
+$
+\Delta_{int}=(U_{S,L}-U_{A,L})-(U_{S,T}-U_{A,T}).
+$
+
+Compute the mechanism effects separately for diagnostic utility and $U_{ES}=-ES$; the raw posterior table reports Energy Score in its natural lower-is-better direction. Conditioner specificity is
+
+$
+\Delta_{coord}=U(H_M)-\max\{U(H_A),U(\operatorname{MLP}_{budget}(H_A))\}.
+$
+
+Seed repetitions measure optimization variability, not additional target environments. Report within-target original-group bootstrap uncertainty separately from seed variation; do not infer a target-population significance statement from three datasets multiplied by seeds.
+
 ## Stage I — real source-batch implementation experiment
 
 Before an effect experiment, run the native intrinsic loss and reverse loop on the existing PHMFactory train/validation waveform exports. Use one predetermined first window per original recording for the batch, all training windows for the fixed source readouts, and no test-file access. A four-coordinate block-DCT reference gives an exact feature acquisition: observe coordinates 1–2, infer coordinates 3–4 from their same-recording joint targets. Normalize using source training values only. All missing coordinates are admitted and there is no source-global-null coordinate in this example; this cannot establish a restriction advantage. The observed feature conditional is a point mass because no additional observation noise is introduced. Do not label it a calibrated mechanical state or an HSE representation.
@@ -22,6 +61,8 @@ Primary endpoint: recording-balanced pooled-confusion macro-F1 for each target, 
 
 Fix the same observed code R, observed-state readout q_o and source-trained diagnostic head h_psi in the primary mechanism comparison; fit them once on source reference tuples. End-to-end head refitting is a separate secondary experiment. First hold the same admitted target, observed condition and source supervision fixed and compare point prediction, Gaussian, finite mixture, ordinary latent diffusion and LLapDiff. The primary sample-based posterior endpoint is joint Energy Score on the common admitted target. Report uncertainty coverage, sharpness and joint dependence diagnostics separately. Exact KL/NLL is used only when its density and reference law are available. Do not compare an approximate diffusion likelihood with exact Gaussian NLL without matching conventions; a point predictor has a Dirac scoring interpretation, not a finite continuous-density NLL.
 
+Before the factorial, add an **ambient-clamped control C** that keeps the ambient tensor/backbone and parameterization while deterministically clamping the complementary state at every step. This is an equivalence/fairness check, not a third claimed mechanism. If C and S are numerically equivalent under the declared mapping, record that equivalence instead of generating a redundant performance curve. The ambient A process must not receive complementary clean truth or arbitrary high-variance nuisance noise, and its auxiliary state evolution must be specified before target results are observed.
+
 Then cross two interventions, rather than removing them together:
 
 | Reverse-process restriction r | Ordinary temporal denoiser l=0 | Laplace temporal denoiser l=1 |
@@ -33,23 +74,21 @@ All four arms receive identical support/eligibility descriptors, source groups, 
 
 Use one source-identified joint training/evaluation target for every arm. For each posterior draw, sample z_o once and retain it through the complete conditional reverse path. Compare this conditionally coupled procedure with independent marginal draws in a known-law dependence control; unchanged marginal coverage does not establish a correct joint law. No arm receives clean supervision for an unidentified or source-global-null coordinate. For the matched ambient-state comparison, embed the same partial target G_e z in the declared missing-state coordinates. Complementary entries are internal no-target placeholders, not clean-state labels. The unrestricted arm may perturb/evolve those entries as independent ancillary state; only the admitted component enters the training loss and proper score. No unknown clean complement is supplied to forward diffusion. Record the actual noise geometry and assess any additional emitted values separately as unsupported outputs. Independent nuisance noise cannot improve the Bayes denoising target; restriction tests finite-model fitting, sampling and resource effects, not an information gain. When every missing coordinate is admitted, r=0 and r=1 may coincide: that cell checks equivalence rather than supplying artificial restriction headroom. Diagnose effects on the same held-out groups.
 
-For a larger-is-better outcome S, report both simple effects and
-
-$$
-\Delta_{{\rm int},e}=(S_{11,e}-S_{10,e})-(S_{01,e}-S_{00,e}).
-$$
-
-Use S=macro-F1 and S=minus Energy Score in separate analyses. Neither interaction nor either main effect is assumed positive. A joint-model win without these contrasts does not identify synergy; posterior improvement without a diagnosis gain is a posterior result only. DiEM/A-DPS/DiffEM comparisons belong in compatible known-operator corrupted-source settings, with their likelihood and training access matched, not as renamed off-the-shelf industrial baselines.
+Use the preregistered support, Laplace and interaction estimands above and retain the four simple cell contrasts. Neither interaction nor either main effect is assumed positive. A joint-model win without these contrasts does not identify synergy; posterior improvement without a diagnosis gain is a posterior result only. DiEM/A-DPS/DiffEM comparisons belong in compatible known-operator corrupted-source settings, with their likelihood and training access matched, not as renamed off-the-shelf industrial baselines.
 
 ## E3 — conditioner and supervision attribution
 
 Within a fixed eligible posterior process compare R, raw same-head H_A, statistical H_M, full-dimensional PCA/whitening/orthogonal coordinates and a matched nonlinear MLP. Keep the observed/diagnostic R bypass, q_o and h_psi fixed; change only the conditioner received by the generator. Use the same auxiliary-supervised source checkpoint when isolating the coordinate map; retain B1 without auxiliary training to isolate supervision. Transport the penalty when claiming affine equivalence. Record rank, scale, dtype, bytes, all learned parameters and covariance-factorization cost.
+
+The statistics-specific performance claim requires $H_M$ to improve over both the affine head output and a parameter/compute-matched generic nonlinearity. Report $\Delta_{coord}$ from the registered estimands. If $H_M$ and the budget-matched MLP are equivalent within the evaluated uncertainty, retain only a generic nonlinear-conditioning conclusion rather than a statistics-coordinate specificity claim.
 
 In the known linear oracle compare full (b,J), diagonal and declared block statistics. Equalize operator side information: full (A,R_noise) can reveal J outside the tokens. Distinguish actual conditional compression loss from a misspecified Gaussian plug-in. These comparisons test the statistical anchor, not the entire posterior formulation.
 
 ## E4 — identification and restriction boundaries
 
 Compare no restriction, source support alone, support plus identification under the complete condition, and no missing-state inference. Report unsupported emissions, forbidden-subspace energy, admitted coverage, same-target posterior score and whole-task diagnosis. Reject-all has no posterior score on an empty target and cannot win through zero emissions alone. A wrong or uncertain support map is an explicit sensitivity condition.
+
+Where qualification truth is known, parameterize wrong qualification by a predeclared overlap error (for example fixed Jaccard-distance levels) rather than an arbitrary random mask. Report coverage, qualified-target risk, overall diagnostic utility and unsupported-emission rate jointly. Empty/reject is therefore a coverage endpoint, not a structural win. Natural datasets without qualification truth do not establish qualification correctness by themselves.
 
 Use the common-view binary witness: source A observes (C,P), source B observes (C,M), C is independent of a fair P, and M=P versus M=1-P. The two source observation laws coincide but p(M given C,P) differs. Neither alignment nor increasing the diffusion capacity distinguishes these worlds from those observations. A genuine joint source acquisition can distinguish them; alternatively an explicitly justified coupling narrows the model class. Record the extra information supplied by that intervention. A conditional-independence baseline is an assumption-dependent comparator, not a discovered physical fact.
 
@@ -60,6 +99,8 @@ In a separate fixed-noise Gaussian control, compare the marginal score with the 
 Use post-split views of the same recording to compare known gain/invertible mixing, query grids, phase reference, bandwidth restriction and deletion of a task-relevant band. Separate fixed point count from fixed physical duration; anti-alias before downsampling. Finite-window damped signals are not exactly band-limited, so use filter response and leakage analysis rather than nominal Nyquist labels alone. Keep conditioning horizons equal: smoothing with later observations and history-only prediction solve different problems.
 
 Measure support reassignment, observed/private-evidence drift, posterior error, temporal residuals, uncertainty and diagnosis. Cross the temporal parameterization with restriction as in E2. Unknown sensor mixing, modal mismatch and source-to-target conditional reversal are failure conditions. Retain equal or worse LLapDiff outcomes and direct-classifier wins; no expected curves or reference acceptance numbers fill unrun cells.
+
+This experiment is necessary to justify the inherited Laplace-domain physical-time branch for industrial diagnosis. Include irregular timestamps and long-gap/long-missing views, not only regular short windows. If the Laplace branch shows benefit only in irregular/long-gap acquisition, restrict the empirical claim to robustness in that regime instead of presenting it as a universal cross-dataset advantage.
 
 ## Mechanism controls selected from the review
 

@@ -1,38 +1,71 @@
-# Goal 01 — synchronize and qualify the dependency
+# Goal 01 — PHMFactory child-first implementation and synchronization
 
-## Scope
+## Purpose
 
-Read the parent branch/PR and upstream `main` before editing. The initially reviewed parent had no PHMFactory gitlink, so recording the accepted revision is an **initial submodule addition**, not a claimed fast-forward of an existing pointer. Preserve other branches and master.
+The paper repository owns scientific formulation, basic closed-form/interface checks, manuscript mappings and the PHMFactory gitlink. The executable learned method, data adapters/configurations, training, evaluation and experiment artifacts belong to `external/phmfactory` (`PHMbench/PHM-Vibench`). Do not create a second reader, trainer or experiment runtime in the paper repository.
 
-## Products
+## Current boundary
 
-`external/phmfactory` at the exact accepted revision, `.gitmodules`, the public acceptance command, numerical reference CSV and dependency scope in Results. No upstream core patch.
+The parent `dev` pins `external/phmfactory` to an accepted historical revision. A newer PHMFactory `dev` or open PR is not automatically accepted for this paper. Research implementation must be validated at an exact child commit before the parent gitlink moves.
 
-## Commands
+## Synchronization order
+
+```text
+paper formulation / basic witness
+→ child PHMFactory research branch
+→ child focused tests + exact config + real source batch
+→ child PR → PHMFactory dev
+→ re-run the paper-specific acceptance at that exact child commit
+→ parent gitlink + paper evidence mapping PR
+→ parent dev
+```
+
+Never move the parent gitlink first and repair the child later.
+
+## Read-only start
 
 ```bash
 git status --short
-git fetch origin
-git submodule update --init external/phmfactory
+git branch --show-current
+git rev-parse HEAD
+git submodule status external/phmfactory
 git -C external/phmfactory status --short
-git -C external/phmfactory fetch origin main
-git -C external/phmfactory log -1 --oneline origin/main
-# For a later update, require the current pointer to be an ancestor of origin/main.
-git -C external/phmfactory merge-base --is-ancestor HEAD origin/main
-# In an isolated installed PHMFactory environment:
-phmfactory doctor
-phmfactory preflight --config smoke
-phmfactory demo
-bash experiments/p19/run.sh phm-prepare --output /absolute/data/mfpt
-bash experiments/p19/run.sh phm --data /absolute/data/mfpt --output /absolute/runs/mfpt-check
+git -C external/phmfactory branch --show-current
+git -C external/phmfactory rev-parse HEAD
+git -C external/phmfactory remote -v
 ```
 
-Do not advance a later pointer before rerunning acceptance at that candidate revision. Run in a temporary/detached candidate checkout if the current parent pointer must remain unchanged during testing.
+Check active PRs in both repositories. Preserve unrelated dirty files. Do not stash, reset, clean, force-push or delete branches.
 
-## Acceptance
+## Child implementation rule
 
-Current accepted revision is `a0db97364e6d38a927c3ea30c643ebbb821d54d7`. Run 34765060233 restored three selected checkpoints and independently matched accuracy/F1 within 1e-6; 20 files and disjoint 10/4/6 train/val/test groups were checked. This qualifies only the exact MFPT reference path, not all upstream releases/configurations.
+Use PHMFactory's maintained public path:
+
+```text
+resolved config
+→ Data Factory
+→ Model Factory
+→ Task Factory
+→ Trainer Factory
+→ selected checkpoint
+→ evaluation artifacts
+```
+
+A P18 model must enter through the existing `Model(args_model, metadata)` resolution; objectives/metrics belong to Task Factory; data remain owned by Data Factory. Fix a real owner defect at its boundary rather than bypassing it from the paper repository.
+
+## Acceptance before parent sync
+
+The candidate child commit must have:
+
+1. focused component tests for the changed model/task/data owner;
+2. `phmfactory preflight` on each retained P18 config family;
+3. at least one real source-batch execution using the local PHM data path;
+4. checkpoint reload producing the same evaluation prediction within declared tolerance;
+5. no target-data fitting, silent task/model substitution or sample dropping;
+6. actual config, seed, dependency and failure records retained.
+
+Only after that exact commit is remotely available may the parent gitlink advance. The parent PR records the child commit and the evidence scope; it does not relabel a child smoke as a paper result.
 
 ## Failure handling
 
-Dirty worktree or non-descendant upstream: stop synchronization, keep the changes, do not reset/stash/force. Config/reader/split/checkpoint/metric failure: keep the existing pointer and report the actual failing command. A docs-only upstream change still receives the acceptance run before a new pointer is published.
+If child `dev` contains unrelated or incompatible changes, create a bounded P18 branch from the intended accepted base and merge normally after review. If a required dataset/task contract is invalid, stop that scientific path; do not edit upstream data/splits to manufacture eligibility. A negative method result is not a synchronization failure.
