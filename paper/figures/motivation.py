@@ -23,13 +23,13 @@ def draw(output: Path, name: str) -> None:
                              {k.replace('_', '-'): str(v) for k, v in attrs.items()})
 
     node('title').text = ('Observation overlap and conditional identification' if name == 'motivation'
-                          else 'Source-qualified temporal posterior inference')
+                          else 'Source-qualified conditional latent inference')
     node('desc').text = ('Problem-only source support and two indistinguishable binary worlds.'
                          if name == 'motivation' else
                          'Source preparation, measured evidence, observed uncertainty, restricted reverse updates and diagnosis.')
     node('style').text = ('text{font-family:DejaVu Sans,sans-serif;fill:#243345;font-size:27px}'
                          '.title{font-size:37px;font-weight:700}.head{font-size:30px;font-weight:700}'
-                         '.small{font-size:24px}.label{font-size:25px;font-weight:700}')
+                         '.small{font-size:24px}.role{font-size:21px}.label{font-size:25px;font-weight:700}')
     defs = node('defs')
     marker = node('marker', parent=defs, id='arrow', markerWidth=12, markerHeight=12,
                   refX=10, refY=6, orient='auto', markerUnits='userSpaceOnUse')
@@ -74,14 +74,14 @@ def draw(output: Path, name: str) -> None:
                 box(f'support-{i}-{j}', xs[j] - 27, y, 54, 43, new=bool(value))
                 text(f'value-{i}-{j}', xs[j], y + 32, [str(value)], anchor='middle')
         for j, (x, role) in enumerate(zip(xs, ['common', 'private', 'missing', 'global-null'])):
-            text(f'role-{j}', x, 490, [role], 'small', anchor='middle')
+            text(f'role-{j}', x, 490, [role], 'role', anchor='middle')
         text('ambiguity-heading', 930, 152, ['b  Identical source laws, opposite answers'], 'head')
         text('bit-assumptions', 930, 198, ['C and P are independent fair bits'], 'small')
         box('world-plus', 935, 223, 350, 76)
         box('world-minus', 1320, 223, 415, 76)
         text('plus-law', 1110, 270, ['World +: M = P'], anchor='middle')
         text('minus-law', 1527, 270, ['World −: M = 1 − P'], anchor='middle')
-        text('equal-source-laws', 935, 346, ['Same p(C,P) and p(C,M) in both worlds',
+        text('equal-source-laws', 935, 346, ['p₊(O_src) = p₋(O_src)',
                                          'Same common-view conditional p(M | C)'], 'small', gap=38)
         text('different-full-conditionals', 935, 440,
              ['p₊(M=1 | C=1,P=1) = 1', 'p₋(M=1 | C=1,P=1) = 0'], gap=38)
@@ -90,7 +90,7 @@ def draw(output: Path, name: str) -> None:
         text('concept-boundary', 35, 622,
              ['Support is a geometric property. Conditional identification depends on the source observation law.'], 'small')
     else:
-        text('overview-title', 35, 55, ['Source-qualified temporal posterior inference'], 'title')
+        text('overview-title', 35, 55, ['Source-qualified conditional latent inference'], 'title')
         box('legend-inherited', 1155, 25, 34, 28)
         text('legend-inherited-text', 1203, 49, ['Inherited'], 'small')
         box('legend-proposed', 1385, 25, 34, 28, new=True)
@@ -104,12 +104,12 @@ def draw(output: Path, name: str) -> None:
         box('qualified-target', 595, 145, 600, 157, new=True, dashed=True)
         text('qualified-target-title', 620, 187, ['Joint target + actual condition'], 'label')
         text('qualified-target-content', 620, 227,
-             ['Paired source tuple (C_F,zₒ,w₀)', 'Source-defined Bₑ and Gₑ = BₑBₑᵀ'], 'small')
+             ['Joint source tuple (C_F,zₒ,w₀)', 'Bₑ = Qₑ null(AₑQₑ); Gₑ = BₑBₑᵀ'], 'small')
         arrow('target-to-source-fit', 'M1195,224 L1248,224', dashed=True)
         box('source-fit', 1265, 145, 500, 157, dashed=True)
         text('source-fit-title', 1290, 187, ['Fit and freeze on sources'], 'label')
         text('source-fit-content', 1290, 227,
-             ['Anchor, observed readout, head', 'Generator fits admitted targets'], 'small')
+             ['Anchor, observed readout, head', 'Trainable generator; fixed readouts'], 'small')
         text('deployment-heading', 35, 380, ['b  Deployment: no reference target or target labels'], 'head')
         box('measured-input', 35, 425, 350, 135)
         text('measured-title', 60, 466, ['Measured record C_F'], 'label')
@@ -126,8 +126,8 @@ def draw(output: Path, name: str) -> None:
         text('state-content', 900, 612, ['Bₑw_k'], 'small')
         arrow('state-to-denoiser', 'M1120,592 L1155,592')
         box('temporal-denoiser', 1170, 535, 270, 115)
-        text('denoiser-title', 1190, 573, ['Temporal denoiser'], 'label')
-        text('denoiser-content', 1190, 610, ['Ordinary / Laplace', 'Predict velocity v̂'], 'small', gap=30)
+        text('denoiser-title', 1190, 573, ['Time denoiser'], 'label')
+        text('denoiser-content', 1190, 610, ['Physical time t', 'Ordinary / Laplace'], 'small', gap=30)
         arrow('denoiser-to-conversion', 'M1440,592 L1470,592')
         box('velocity-conversion', 1485, 535, 250, 115)
         text('conversion-title', 1505, 573, ['Convert v̂'], 'label')
@@ -148,7 +148,7 @@ def draw(output: Path, name: str) -> None:
         arrow('observed-draw-to-sampler', 'M385,724 L837,724')
         text('observed-edge-label', 454, 707, ['Same zₒ in every reverse step'], 'small')
         box('coherent-tuple', 450, 960, 470, 151)
-        text('tuple-title', 475, 1004, ['Coherent partial-state draw'], 'label')
+        text('tuple-title', 475, 1004, ['Conditional partial-state draw'], 'label')
         text('tuple-content', 475, 1043, ['(zₒ, Bₑw₀) + support status', 'No value for unestimated entries'], 'small')
         arrow('observed-draw-to-tuple', 'M210,807 L210,1034 L435,1034')
         arrow('generated-draw-to-tuple', 'M1468,855 L1468,900 L685,900 L685,946')
